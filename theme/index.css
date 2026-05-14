@@ -1,0 +1,94 @@
+/* Golden Rose Theme - Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@400;500;600&display=swap');
+
+/* ========================================
+   Light Mode (Default) - Ivory & Antique Gold
+   ======================================== */
+:root {
+  /* Golden Rose Palette - Light */
+  --color-bg: #faf7f2;
+  --color-bg-soft: #f5f1ea;
+  --color-bg-muted: #ebe6dc;
+
+  --color-gold-primary: #a08050;
+  --color-gold-light: #c9a86c;
+  --color-gold-dark: #7a6040;
+  --color-gold-muted: rgba(160, 128, 80, 0.6);
+  --color-gold-tint: rgba(160, 128, 80, 0.12);
+
+  --color-text: #2a2520;
+  --color-text-muted: rgba(42, 37, 32, 0.7);
+
+  /* Typography */
+  --font-title: 'Cormorant Garamond', Georgia, serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+
+  /* Rspress brand overrides */
+  --rp-c-brand: var(--color-gold-primary);
+  --rp-c-brand-dark: var(--color-gold-dark);
+  --rp-c-brand-light: var(--color-gold-light);
+  --rp-c-brand-tint: var(--color-gold-tint);
+
+  /* Background overrides */
+  --rp-c-bg: var(--color-bg);
+  --rp-c-bg-soft: var(--color-bg-soft);
+  --rp-c-bg-muted: var(--color-bg-muted);
+
+  /* Text overrides */
+  --rp-c-text-1: var(--color-text);
+  --rp-c-text-2: var(--color-text-muted);
+
+  /* Divider */
+  --rp-c-divider: rgba(160, 128, 80, 0.2);
+  --rp-c-divider-light: rgba(160, 128, 80, 0.1);
+}
+
+/* ========================================
+   Dark Mode - Black & Gold
+   ======================================== */
+.dark, html.dark {
+  --color-bg: #0a0a08;
+  --color-bg-soft: #12120f;
+  --color-bg-muted: #1a1a16;
+
+  --color-gold-primary: #d4af37;
+  --color-gold-light: #e6c866;
+  --color-gold-dark: #b8960b;
+  --color-gold-muted: rgba(212, 175, 55, 0.6);
+  --color-gold-tint: rgba(212, 175, 55, 0.12);
+
+  --color-text: #f5f0e6;
+  --color-text-muted: rgba(245, 240, 230, 0.7);
+
+  /* Rspress brand overrides - dark */
+  --rp-c-brand: var(--color-gold-primary);
+  --rp-c-brand-dark: var(--color-gold-dark);
+  --rp-c-brand-light: var(--color-gold-light);
+  --rp-c-brand-tint: var(--color-gold-tint);
+
+  /* Background overrides - dark */
+  --rp-c-bg: var(--color-bg);
+  --rp-c-bg-soft: var(--color-bg-soft);
+  --rp-c-bg-muted: var(--color-bg-muted);
+
+  /* Text overrides - dark */
+  --rp-c-text-1: var(--color-text);
+  --rp-c-text-2: var(--color-text-muted);
+
+  /* Divider - dark */
+  --rp-c-divider: rgba(212, 175, 55, 0.2);
+  --rp-c-divider-light: rgba(212, 175, 55, 0.1);
+}
+
+/* ========================================
+   Global Styles
+   ======================================== */
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+}
