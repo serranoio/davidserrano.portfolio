@@ -17,20 +17,21 @@ describe('Rose Truth Statement', () => {
     });
   });
 
-  it('is anchored above the rose center in world space', () => {
+  it('is anchored below the rose center so user scrolls down to advance', () => {
     cy.window().then((win) => {
       const api = (win as any).__ROSE_TEST_API__;
       const pos = api.getTruthTextWorldPosition();
-      // Bloom center sits near y≈1.3 after the model load + scale; the text
-      // offset lifts it well above that.
-      expect(pos.y).to.be.greaterThan(1.5);
+      // Bloom center sits near y≈1.3 after the model load + scale; the first
+      // paragraph is intentionally placed below it so subsequent paragraphs
+      // come up into the focal region as the user scrolls.
+      expect(pos.y).to.be.lessThan(1.0);
     });
   });
 
   it('fades out while a section is open', () => {
     cy.window().then((win) => {
       const api = (win as any).__ROSE_TEST_API__;
-      api.clickPetal(0);
+      api.clickPetalBySection('about');
       cy.wait(1500).then(() => {
         expect(api.getState()).to.equal('open');
         expect(api.getTruthTextOpacity()).to.be.lessThan(0.05);
@@ -41,7 +42,7 @@ describe('Rose Truth Statement', () => {
   it('returns to full opacity after closing a section', () => {
     cy.window().then((win) => {
       const api = (win as any).__ROSE_TEST_API__;
-      api.clickPetal(0);
+      api.clickPetalBySection('about');
       cy.wait(1500).then(() => {
         api.closeContent();
         cy.wait(1500).then(() => {

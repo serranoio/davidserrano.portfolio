@@ -1,22 +1,32 @@
 import * as path from 'node:path';
 import { defineConfig } from '@rspress/core';
+import { TAG_ORDER, TAG_LABELS, postsByTag } from './theme/blog-posts';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
-  title: 'My Site',
-  icon: '/rspress-icon.png',
-  logo: {
-    light: '/rspress-light-logo.png',
-    dark: '/rspress-dark-logo.png',
-  },
+  title: 'David Serrano',
+  icon: '/serrano-heart.png',
+  logo: '/serrano-heart.png',
+  logoText: 'David Serrano',
   themeConfig: {
     socialLinks: [
       {
         icon: 'github',
         mode: 'link',
-        content: 'https://github.com/web-infra-dev/rspress',
+        content: 'https://github.com/serranoio/davidserrano.portfolio',
       },
     ],
+    sidebar: {
+      '/blog/': TAG_ORDER.map((tag) => ({
+        text: TAG_LABELS[tag],
+        collapsible: true,
+        collapsed: tag !== 'spiritual',
+        items: postsByTag(tag).map((p) => ({
+          text: p.title,
+          link: `/blog/${p.slug}`,
+        })),
+      })),
+    },
   },
   builderConfig: {
     tools: {

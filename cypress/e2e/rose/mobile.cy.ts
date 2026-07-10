@@ -31,7 +31,7 @@ describe('Rose Mobile Experience', () => {
     it('supports tap to open section', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -58,7 +58,7 @@ describe('Rose Mobile Experience', () => {
     it('shows content panel on mobile', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -73,7 +73,7 @@ describe('Rose Mobile Experience', () => {
     it('content is readable on mobile viewport', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -94,7 +94,7 @@ describe('Rose Mobile Experience', () => {
     it('close button is touch-friendly', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -148,7 +148,7 @@ describe('Rose Mobile Experience', () => {
     it('maintains animation performance on mobile', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);

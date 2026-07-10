@@ -22,7 +22,7 @@ describe('Rose Bloom Animation', () => {
         };
 
         checkState(); // Initial state
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
 
         // Check state during animation
         cy.wait(50).then(checkState);
@@ -38,7 +38,7 @@ describe('Rose Bloom Animation', () => {
     it('completes bloom animation and reaches open state', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
 
         // Wait for animation to complete
         cy.wait(1500).then(() => {
@@ -54,7 +54,7 @@ describe('Rose Bloom Animation', () => {
         // Get initial petal positions
         const initialPositions = api.getPetalPositions();
 
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
 
         // Wait for animation
         cy.wait(1000).then(() => {
@@ -93,7 +93,7 @@ describe('Rose Bloom Animation', () => {
         const api = (win as any).__ROSE_TEST_API__;
 
         // Open first
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
         cy.wait(1500).then(() => {
           expect(api.getState()).to.equal('open');
 
@@ -115,7 +115,7 @@ describe('Rose Bloom Animation', () => {
         const originalPositions = api.getPetalPositions();
 
         // Open and close
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
         cy.wait(1500).then(() => {
           api.closeContent();
           cy.wait(1500).then(() => {
@@ -135,7 +135,7 @@ describe('Rose Bloom Animation', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
 
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
         cy.wait(1500).then(() => {
           expect(api.getActiveSection()).to.equal('about');
 

@@ -14,7 +14,7 @@ describe('Rose Content Container', () => {
     it('shows content container when rose is open', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       // Wait for bloom animation
@@ -38,7 +38,7 @@ describe('Rose Content Container', () => {
     it('displays section title in content', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -52,7 +52,7 @@ describe('Rose Content Container', () => {
     it('shows close button in content container', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -66,7 +66,7 @@ describe('Rose Content Container', () => {
     it('close button closes content and returns to idle', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -91,7 +91,7 @@ describe('Rose Content Container', () => {
     it('content container has proper styling', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -106,7 +106,7 @@ describe('Rose Content Container', () => {
     it('content is scrollable if content exceeds container', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -122,7 +122,7 @@ describe('Rose Content Container', () => {
     it('shows About section content', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -133,24 +133,10 @@ describe('Rose Content Container', () => {
         .should('contain.text', 'About');
     });
 
-    it('shows Case Studies section content', () => {
-      cy.window().then((win) => {
-        const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(3);
-      });
-
-      cy.wait(1500);
-
-      cy.get('golden-rose')
-        .shadow()
-        .find('#content-root')
-        .should('contain.text', 'Case Studies');
-    });
-
     it('shows Poetry section content', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(6);
+        api.clickPetalBySection('poetry');
       });
 
       cy.wait(1500);
@@ -168,7 +154,7 @@ describe('Rose Content Container', () => {
         const api = (win as any).__ROSE_TEST_API__;
 
         // Open About
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -178,7 +164,7 @@ describe('Rose Content Container', () => {
         .find('#content-root')
         .should('contain.text', 'About');
 
-      // Close and open Case Studies
+      // Close and open Poetry
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
         api.closeContent();
@@ -188,7 +174,7 @@ describe('Rose Content Container', () => {
 
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(3);
+        api.clickPetalBySection('poetry');
       });
 
       cy.wait(1500);
@@ -196,7 +182,7 @@ describe('Rose Content Container', () => {
       cy.get('golden-rose')
         .shadow()
         .find('#content-root')
-        .should('contain.text', 'Case Studies');
+        .should('contain.text', 'Poetry');
     });
   });
 });

@@ -14,7 +14,7 @@ describe('Rose MDX Content Loading', () => {
     it('loads About section content', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -25,24 +25,10 @@ describe('Rose MDX Content Loading', () => {
         .should('contain.text', 'About Me');
     });
 
-    it('loads Case Studies section content', () => {
-      cy.window().then((win) => {
-        const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(3);
-      });
-
-      cy.wait(1500);
-
-      cy.get('golden-rose')
-        .shadow()
-        .find('#content-root')
-        .should('contain.text', 'Case Studies');
-    });
-
     it('loads Poetry section content', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(6);
+        api.clickPetalBySection('poetry');
       });
 
       cy.wait(1500);
@@ -56,7 +42,7 @@ describe('Rose MDX Content Loading', () => {
     it('content includes section-specific details', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -74,7 +60,7 @@ describe('Rose MDX Content Loading', () => {
     it('content is readable with proper contrast', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -88,7 +74,7 @@ describe('Rose MDX Content Loading', () => {
     it('headings are properly styled', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);

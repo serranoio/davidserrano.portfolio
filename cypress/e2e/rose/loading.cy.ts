@@ -23,6 +23,13 @@ describe('Rose Loading', () => {
 
   // Slice 2: Loading Shimmer (US-3)
   it('shows loading shimmer initially (US-3)', () => {
+    // Slow the GLB so the shimmer is unambiguously present when we query it
+    // — otherwise a cached/fast load can race the assertion.
+    cy.intercept('GET', '**/models/rose_separated.glb', (req) => {
+      return new Promise((resolve) => setTimeout(resolve, 1500)).then(() =>
+        req.continue()
+      );
+    });
     cy.visit('/');
     cy.get('golden-rose')
       .shadow()

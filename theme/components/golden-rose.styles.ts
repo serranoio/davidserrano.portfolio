@@ -5,9 +5,14 @@ export default css`
     display: block;
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
+    scroll-snap-align: start;
     position: relative;
     overflow: hidden;
-    background-color: var(--color-bg, #0a0a08);
+    /* Hardcoded dark — rspress sets --color-bg to a light cream in its
+       light theme, which would win over a var() fallback and leave the
+       night sky behind the rose looking like a blank cream rectangle. */
+    background-color: #0a0a08;
   }
 
   canvas {
@@ -200,5 +205,94 @@ export default css`
   .content-body strong {
     color: #f4d77b;
     font-weight: 600;
+  }
+
+  .attribution {
+    position: absolute;
+    /* Sits above the body-level music player (48 px button at bottom: 1rem) */
+    bottom: 4rem;
+    right: 1rem;
+    z-index: 5;
+    pointer-events: none;
+    font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+  }
+
+  .attribution a {
+    pointer-events: auto;
+    color: var(--color-gold-primary, #d4af37);
+    opacity: 0.55;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .attribution a:hover,
+  .attribution a:focus-visible {
+    opacity: 1;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    outline: none;
+  }
+
+  @media (max-width: 480px) {
+    .attribution {
+      font-size: 0.65rem;
+      /* Still above the player on mobile (same 48 px button + ~1 rem gap) */
+      bottom: 4rem;
+      right: 0.6rem;
+    }
+  }
+
+  .truth-nav {
+    display: none;
+  }
+
+  .truth-nav.coarse {
+    position: fixed;
+    right: calc(1rem + env(safe-area-inset-right));
+    /* Music player is fixed at bottom: 1rem with a 48px button; sit just above it. */
+    bottom: calc(4.75rem + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 49;
+  }
+
+  .truth-nav-button {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    line-height: 1;
+    color: var(--color-gold-primary, #d4af37);
+    background: rgba(8, 8, 6, 0.7);
+    border: 1px solid rgba(244, 215, 123, 0.45);
+    border-radius: 999px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .truth-nav-button:active {
+    background: rgba(244, 215, 123, 0.14);
+    border-color: rgba(244, 215, 123, 0.75);
+  }
+
+  .truth-nav-button:focus-visible {
+    outline: 2px solid var(--color-gold-primary, #d4af37);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .truth-nav {
+      transition: none;
+    }
   }
 `;

@@ -44,19 +44,31 @@ describe('Rose Interaction', () => {
       });
     });
 
-    it('allows zoom via scroll wheel', () => {
+    it('does NOT zoom on wheel — wheel is repurposed for text scroll', () => {
+      cy.window().then((win) => {
+        const api = (win as any).__ROSE_TEST_API__;
+        cy.waitUntil(() => api.getTruthParagraphCount() > 0, { timeout: 5000 });
+      });
+
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
         const initialZoom = api.getCameraPosition().z;
 
-        cy.get('golden-rose')
-          .shadow()
-          .find('canvas[data-testid="rose-canvas"]')
-          .trigger('wheel', { deltaY: -100 });
+        // Dispatch a real WheelEvent on the window (handler lives there now,
+        // not on canvas). cy.trigger('wheel') sends a synthetic Event that
+        // doesn't reliably reach { passive: false } listeners.
+        win.dispatchEvent(
+          new WheelEvent('wheel', {
+            bubbles: true,
+            cancelable: true,
+            deltaY: 200,
+          })
+        );
 
-        cy.wait(100).then(() => {
-          const newZoom = api.getCameraPosition().z;
-          expect(newZoom).to.not.equal(initialZoom);
+        cy.wait(50).then(() => {
+          // OrbitControls.enableZoom is disabled — camera distance unchanged
+          // regardless of which scroll-hijack mode the rose is in.
+          expect(api.getCameraPosition().z).to.equal(initialZoom);
         });
       });
     });
@@ -142,10 +154,10 @@ describe('Rose Interaction', () => {
         .find('canvas[data-testid="rose-canvas"]')
         .should('exist');
 
-      // Check that cursor changes on hover (handled by CSS or JS)
+      // Active petal count is whatever the PETAL_SECTIONS registry holds.
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        expect(api.getActivePetalIndices()).to.have.length(3);
+        expect(api.getActivePetalIndices().length).to.be.greaterThan(0);
       });
     });
 
@@ -153,10 +165,12 @@ describe('Rose Interaction', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
         const activePetals = api.getActivePetalIndices();
-
-        // Should have exactly 3 active petals
-        expect(activePetals).to.have.length(3);
-        expect(activePetals).to.deep.equal([0, 3, 6]);
+        // Registry-driven — about + poetry land on whichever physical petals
+        // PETAL_SECTIONS points at. We just check both registered sections
+        // resolved to real petal slots.
+        expect(activePetals.length).to.equal(2);
+        expect(api.getPetalIndexForSection('about')).to.not.be.null;
+        expect(api.getPetalIndexForSection('poetry')).to.not.be.null;
       });
     });
   });

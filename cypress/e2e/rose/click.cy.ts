@@ -18,7 +18,7 @@ describe('Rose Click Detection', () => {
         expect(api.getState()).to.equal('idle');
 
         // Programmatically click an active petal
-        api.clickPetal(0); // First active petal (About)
+        api.clickPetalBySection('about'); // First active petal (About)
 
         cy.wait(50).then(() => {
           const state = api.getState();
@@ -33,7 +33,7 @@ describe('Rose Click Detection', () => {
         expect(api.getActiveSection()).to.be.null;
 
         // Click the first active petal
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
 
         cy.wait(50).then(() => {
           expect(api.getActiveSection()).to.equal('about');
@@ -41,25 +41,12 @@ describe('Rose Click Detection', () => {
       });
     });
 
-    it('clicking second active petal sets case-studies section', () => {
+    it('clicking second active petal sets poetry section', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
 
-        // Click the second active petal (index 3)
-        api.clickPetal(3);
-
-        cy.wait(50).then(() => {
-          expect(api.getActiveSection()).to.equal('case-studies');
-        });
-      });
-    });
-
-    it('clicking third active petal sets poetry section', () => {
-      cy.window().then((win) => {
-        const api = (win as any).__ROSE_TEST_API__;
-
-        // Click the third active petal (index 6)
-        api.clickPetal(6);
+        // Click the second active petal (index 6)
+        api.clickPetalBySection('poetry');
 
         cy.wait(50).then(() => {
           expect(api.getActiveSection()).to.equal('poetry');
@@ -96,7 +83,7 @@ describe('Rose Click Detection', () => {
 
         cy.window().then((win) => {
           const api = (win as any).__ROSE_TEST_API__;
-          api.clickPetal(0);
+          api.clickPetalBySection('about');
         });
 
         cy.wrap(eventPromise).should('deep.equal', { section: 'about' });
@@ -120,7 +107,7 @@ describe('Rose Click Detection', () => {
         const api = (win as any).__ROSE_TEST_API__;
         expect(api.getState()).to.equal('idle');
 
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
 
         cy.wait(50).then(() => {
           const state = api.getState();

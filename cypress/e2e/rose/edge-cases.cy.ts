@@ -16,7 +16,7 @@ describe('Rose Edge Cases', () => {
         const api = (win as any).__ROSE_TEST_API__;
 
         // Start blooming
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
 
         // Try to click another petal during animation
         cy.wait(50).then(() => {
@@ -37,7 +37,7 @@ describe('Rose Edge Cases', () => {
         const api = (win as any).__ROSE_TEST_API__;
 
         // Open first
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -84,7 +84,7 @@ describe('Rose Edge Cases', () => {
     it('handles resize during animation', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       // Resize mid-animation
@@ -105,7 +105,7 @@ describe('Rose Edge Cases', () => {
     it('handles very long content scrolling', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -120,7 +120,7 @@ describe('Rose Edge Cases', () => {
     it('close button remains accessible when scrolled', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -140,7 +140,7 @@ describe('Rose Edge Cases', () => {
         const api = (win as any).__ROSE_TEST_API__;
 
         // Open, close, open different section
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
       });
 
       cy.wait(1500);
@@ -154,7 +154,7 @@ describe('Rose Edge Cases', () => {
 
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetal(3);
+        api.clickPetalBySection('poetry');
       });
 
       cy.wait(1500);
@@ -162,7 +162,7 @@ describe('Rose Edge Cases', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
         expect(api.getState()).to.equal('open');
-        expect(api.getActiveSection()).to.equal('case-studies');
+        expect(api.getActiveSection()).to.equal('poetry');
       });
     });
 
@@ -171,7 +171,7 @@ describe('Rose Edge Cases', () => {
         const api = (win as any).__ROSE_TEST_API__;
         const originalPositions = api.getPetalPositions();
 
-        api.clickPetal(0);
+        api.clickPetalBySection('about');
 
         cy.wait(1500).then(() => {
           api.closeContent();
