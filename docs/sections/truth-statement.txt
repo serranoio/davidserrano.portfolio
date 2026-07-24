@@ -4,11 +4,21 @@ By David Serrano
 
 Preface
 
-This has been created as a way to discover the truth. I would rather be wrong and discover the truth than right and have chosen a fantasy. What is bad makes space for what is good, and when you accept being wrong, you make space for the truth. That is a gorgeous truth of reality.
+It was 8:11 am in a Summer in San Francisco in 2023. I had downloaded a personal project vacuum made by my mentor, quobix, onto my goland IDE. After browsing for a 'lil, I remember standing away from my desk in absolute awe of what I had just seen. I think this was the second epiphany moment of my lifetime. I saw a code **forged** into art.
+ It was the equivalent of the Stormbreaker forged by a star in Avengers: Infinity War. 
+
+ Every strike of the hammer, every drop of sweat, my mentor's +20 years of experience, of failing & learning from this mistakes, his entire soul had been poured into this codebase. You can't just harness the power of a star out of nowhere. This has to be cultivated, learned. 
+ The root word for passion is patio, which means to struggle in Latin. I could feel the passion in the code. There is no reason why someone would build such a beautiful masterpiece if it didn't have passion behind it.
+
+ The power of a star can only be contained thru the mastery of hammer forging.
+
+
+Honestly, the stormbreaker is a perfect analogy for it. The axe is vacuum, it's purpose being to cut. Every part of the axe was consequentially made. The handle was created by Groot, which gives it an organic feel to it. This is the UX, the CLI, organic in its nature. 
+
+
+There is more to coding than just creating the solution, it is actually the other way around; the solution already exists, and we are here to discover the solution. I would rather be wrong and discover the truth than right and have chosen a fantasy. What is bad makes space for what is good, and when you accept being wrong, you make space for the truth. That is a gorgeous truth of reality.
 
 Just as how every petal of the rose contributes to the whole to make it so beautiful and so full of life, every day of your life contributes to the whole to make it so beautiful and full of life.
-
-The golden ratio represents Truth. Nature had to let go of the ego in order to discover this formula.
 
 Find and click a petal that is bouncy to read a poem!
 
