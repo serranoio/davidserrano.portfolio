@@ -2,7 +2,7 @@
 slug: the-lifelong-conflict
 title: The Lifelong Conflict
 date: 10/27/2024
-tags: [spiritual, yoga]
+tags: [spiritual, yoga, self-mastery]
 ---
 
 Yes, this is titled the life long conflict, but this is mainly about why you should quit drinking.

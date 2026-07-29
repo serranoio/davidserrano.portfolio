@@ -2,7 +2,7 @@
 slug: daily-affirmation
 title: Daily Affirmation
 date: 11/05/2025
-tags: [spiritual]
+tags: [spiritual, meditation]
 ---
 
 > This is my daily affirmation as of November 5th, 2025

@@ -2,7 +2,7 @@
 slug: the-shield-of-aeneas
 title: The Shield of Aeneas
 date: 11/01/2025
-tags: [spiritual]
+tags: [spiritual, poetry, myth]
 ---
 
 ![The Shield of Aeneas](/img/the-shield.jpg)

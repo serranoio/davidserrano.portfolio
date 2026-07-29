@@ -2,7 +2,7 @@
 slug: how-to-celebrate-your-birthday
 title: How To Celebrate Your Birthday
 date: 12/31/2024
-tags: [spiritual]
+tags: [spiritual, gratitude]
 ---
 
 On the day that you were born, the celestial body that we know of as Earth was barreling through space at 67k mph as it orbited the Sun. Since then, every full rotation around the Sun marked the day that you were born; the day that Earth passed through the same(ish) space that you inhabited at your birth. How incredible is that?

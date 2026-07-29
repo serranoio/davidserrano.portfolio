@@ -2,7 +2,7 @@
 slug: flow
 title: The Flow State
 date: 12/15/2024
-tags: [spiritual, yoga]
+tags: [spiritual, meditation, yoga]
 ---
 
 # You Can Live in The Flow State For 100% of Your Conscious Existence

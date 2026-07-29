@@ -155,6 +155,11 @@ export class RoseText {
     );
   }
 
+  jumpToBoundary(boundary: 'start' | 'end') {
+    this.targetScrollOffset = boundary === 'start' ? 0 : this.maxScrollOffset;
+    this.currentScrollOffset = this.targetScrollOffset;
+  }
+
   setMobileLayout(enabled: boolean) {
     this.heightOffset = enabled ? MOBILE_HEIGHT_OFFSET : TEXT_OFFSET.y;
     this.radialDistance = enabled ? MOBILE_RADIAL_DISTANCE : Math.abs(TEXT_OFFSET.z);

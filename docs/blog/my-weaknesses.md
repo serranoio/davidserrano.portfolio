@@ -2,7 +2,7 @@
 slug: my-weaknesses
 title: My Weaknesses
 date: 04/01/2025
-tags: [spiritual]
+tags: [spiritual, personal, self-mastery]
 ---
 
 To truly become one with nature, you have to confront your weaknesses head on, all of them. Doing so will allow you to become the best version of yourself. The process is truly beautiful.

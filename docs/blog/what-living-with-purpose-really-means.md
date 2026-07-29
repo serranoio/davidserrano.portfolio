@@ -2,7 +2,7 @@
 slug: what-living-with-purpose-really-means
 title: What Living with Purpose Really Means
 date: 01/15/2025
-tags: [spiritual, yoga]
+tags: [spiritual, yoga, self-mastery]
 ---
 
 > Hey man, "let loose!", "you need a beer!".

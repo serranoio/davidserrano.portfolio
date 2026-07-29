@@ -2,7 +2,7 @@
 slug: intro-to-bachata
 title: Intro To Bachata
 date: 06/12/25
-tags: [spiritual, dance]
+tags: [dance]
 ---
 
 

@@ -111,6 +111,16 @@ export default css`
     transition: transform 0.05s linear;
   }
 
+  .intro {
+    max-width: 34rem;
+    margin: 0.25rem 0 0;
+    color: rgba(250, 243, 223, 0.78);
+    font-size: clamp(1rem, 1.35vw, 1.18rem);
+    line-height: 1.65;
+    letter-spacing: 0;
+    text-wrap: balance;
+  }
+
   .photo-col {
     display: flex;
     justify-content: center;
@@ -160,6 +170,11 @@ export default css`
       order: 2;
       align-items: center;
       text-align: center;
+    }
+    .intro {
+      max-width: min(32rem, 88vw);
+      font-size: 1rem;
+      line-height: 1.55;
     }
     .photo-col {
       order: 1;

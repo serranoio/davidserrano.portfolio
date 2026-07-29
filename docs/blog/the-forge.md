@@ -2,7 +2,7 @@
 slug: the-forge
 title: The Forge
 date: 05/31/25
-tags: [spiritual]
+tags: [spiritual, self-mastery]
 ---
 
 The stress sometimes makes it feel like you're being chipped away from the inside out.

@@ -2,7 +2,7 @@
 slug: imagine-a-world
 title: Imagine A World
 date: 09/14/2025
-tags: [spiritual]
+tags: [spiritual, poetry]
 ---
 
 _The following is a poem about how your relationship with life could be. I hope you enjoy_

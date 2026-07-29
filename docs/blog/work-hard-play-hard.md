@@ -2,7 +2,7 @@
 slug: work-hard-play-hard
 title: Work Hard Play Hard Sucks A**
 date: 02/26/2025
-tags: [spiritual, tech]
+tags: [spiritual, tech, work]
 ---
 
 Work hard play hard is one of the worst philosophies that Western culture has indoctrinated into us. Here is the alternative that will explain why.

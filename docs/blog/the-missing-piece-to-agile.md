@@ -2,7 +2,7 @@
 slug: the-missing-piece-to-agile
 title: The Missing Piece to Agile
 date: 11/21/2024
-tags: [tech]
+tags: [tech, strategy]
 ---
 
 Yes, let's be agile! Let's "_Welcome changing requirements, even late in development. Agile processes harness change for the customers competitive advantage._", as stated in [The Agile Manifesto](https://agilemanifesto.org/).

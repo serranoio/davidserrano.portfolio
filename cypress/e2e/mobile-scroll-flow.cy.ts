@@ -82,7 +82,7 @@ function expectTruthNavVisible() {
 
 function expectActiveTruthTextVisible() {
   cy.window().then((win) => {
-    roseApi().then((api) => {
+    roseApi().should((api) => {
       const bounds = api.getTruthActiveParagraphScreenBounds();
       expect(bounds, 'active truth paragraph bounds').to.not.equal(null);
       expect(bounds!.left, 'truth text left').to.be.greaterThan(6);

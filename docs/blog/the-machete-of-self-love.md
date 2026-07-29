@@ -1,7 +1,7 @@
 ---
 slug: the-machete-of-self-love
 title: The Machete of Self Love
-tags: [spiritual]
+tags: [spiritual, self-love]
 ---
 
 The secret to accomplishing goals with a high success rate is through self love. Do not ever tie your goals externally. [The External Trap](#the-external-trap) explains why tying your goals externally is almost always a trap. [The Cure](#the-cure) explains how self love is the cure.

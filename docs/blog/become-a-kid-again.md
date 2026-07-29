@@ -1,7 +1,7 @@
 ---
 slug: become-a-kid-again
 title: Become a Kid Again
-tags: [spiritual]
+tags: [spiritual, self-love]
 ---
 
 _Take your kid to a really nice restaurant, and they'll embarrass you by playing with their food._

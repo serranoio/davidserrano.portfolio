@@ -1,7 +1,7 @@
 ---
 slug: your-career-is-a-song
 title: Your Career Is a Song
-tags: [spiritual, tech]
+tags: [spiritual, tech, work]
 ---
 
 _Every single human being is a creation; therefore we are all creative._

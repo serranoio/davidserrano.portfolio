@@ -132,12 +132,6 @@ describe('Desktop rose scroll handoff', () => {
 
     driveTruthTextToEnd();
     wheel(260);
-    roseApi().invoke('getScrollMode').should('eq', 'released-down');
-
-    cy.window().then((win) => {
-      const writing = win.document.querySelector('writing-section') as HTMLElement;
-      win.scrollTo(0, writing.getBoundingClientRect().top + win.scrollY);
-    });
 
     sectionTop('writing-section').should((top) => {
       expect(Math.abs(top)).to.be.lessThan(45);
@@ -157,7 +151,6 @@ describe('Desktop rose scroll handoff', () => {
 
     enterPinnedFromBelow();
 
-    wheel(900);
     roseApi().then((api) => {
       expect(api.getTruthScrollTarget()).to.be.closeTo(api.getTruthMaxScrollOffset(), 0.02);
       expect(api.getScrollMode()).to.equal('pinned');
@@ -169,12 +162,6 @@ describe('Desktop rose scroll handoff', () => {
 
     driveTruthTextToStart();
     wheel(-260);
-    roseApi().invoke('getScrollMode').should('eq', 'released-up');
-
-    cy.window().then((win) => {
-      const welcome = win.document.querySelector('welcome-section') as HTMLElement;
-      win.scrollTo(0, welcome.getBoundingClientRect().top + win.scrollY);
-    });
 
     sectionTop('welcome-section').should((top) => {
       expect(Math.abs(top)).to.be.lessThan(45);

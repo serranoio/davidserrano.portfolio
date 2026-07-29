@@ -1,7 +1,7 @@
 ---
 slug: everything-in-moderation-is-unsufficient
 title: Everything In Moderation is a False Notion
-tags: [spiritual]
+tags: [spiritual, self-mastery]
 ---
 
 > Hey, as long as I drink max once a week, I'm doing good

@@ -486,12 +486,14 @@ export class GoldenRoseElement extends LitElement {
   //   free → wheel-down while rose's top is in upper SNAP_TRIGGER_FRACTION
   //     → snapping (smooth-scroll page so rose top hits viewport top)
   //     → pinned (wheel drives truth-text scroll + rose yaw)
-  //     → truth text saturates → released-down (page scroll resumes)
+  //     → truth text saturates → released-down (scroll to writing)
   //     → rose has scrolled past viewport top by RELEASE_EXIT_FRACTION → free.
   //
-  // Reverse symmetry applies for scrolling back up. The pinned state
-  // forwards wheel events to roseText.scrollBy at TEXT_SCROLL_SENSITIVITY
-  // so the user gets through the statement in a handful of swipes.
+  // Reverse symmetry applies for scrolling back up: entering from writing
+  // starts the text at the end, wheel-up moves through it, then releases to
+  // welcome. The pinned state forwards wheel events to roseText.scrollBy at
+  // TEXT_SCROLL_SENSITIVITY so the user gets through the statement in a
+  // handful of swipes.
   private handleWheel = (event: WheelEvent) => {
     // Panel open/animating: eat the wheel entirely so the page can't scroll
     // out from under the user while they're reading a section.
@@ -532,11 +534,15 @@ export class GoldenRoseElement extends LitElement {
       // End of truth text + scrolling down → release into writing.
       if (dy > 0 && target >= max - 0.001) {
         this.scrollMode = 'released-down';
+        event.preventDefault();
+        this.scrollToHomeSection('writing-section');
         return;
       }
       // Top of truth text + scrolling up → release back into welcome.
       if (dy < 0 && target <= 0.001) {
         this.scrollMode = 'released-up';
+        event.preventDefault();
+        this.scrollToHomeSection('welcome-section');
         return;
       }
       event.preventDefault();
@@ -548,20 +554,21 @@ export class GoldenRoseElement extends LitElement {
     // mode === 'free' — consider whether to snap onto the rose.
     const trigger = viewportH * this.SNAP_TRIGGER_FRACTION;
     if (dy > 0 && hostRect.top > 0 && hostRect.top < trigger) {
-      this.beginSnap();
+      this.beginSnap('start');
       event.preventDefault();
       return;
     }
     if (dy < 0 && hostRect.top < 0 && hostRect.top > -trigger) {
-      this.beginSnap();
+      this.beginSnap('end');
       event.preventDefault();
       return;
     }
     // Otherwise: no interception, page scrolls naturally.
   };
 
-  private beginSnap() {
+  private beginSnap(textBoundary: 'start' | 'end') {
     this.scrollMode = 'snapping';
+    this.roseText?.jumpToBoundary(textBoundary);
     const roseTopDoc = this.getBoundingClientRect().top + window.scrollY;
     window.scrollTo({ top: roseTopDoc, behavior: 'smooth' });
     if (this.snapEndTimeoutId !== null) clearTimeout(this.snapEndTimeoutId);

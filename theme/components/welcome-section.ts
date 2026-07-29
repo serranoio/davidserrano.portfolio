@@ -12,7 +12,9 @@ export class WelcomeSectionElement extends LitElement {
 
   firstUpdated(_changed: PropertyValues) {
     super.firstUpdated(_changed);
-    const canvas = this.renderRoot.querySelector('.stars-canvas') as HTMLCanvasElement | null;
+    const canvas = this.renderRoot.querySelector(
+      '.stars-canvas'
+    ) as HTMLCanvasElement | null;
     if (canvas) {
       this.starsRenderer = new ShootingStarsCanvas(canvas);
       this.starsRenderer.start();
@@ -59,7 +61,14 @@ export class WelcomeSectionElement extends LitElement {
             >
               <!-- Handle -->
               <rect x="52" y="16" width="56" height="8" rx="2" fill="#5a3f17" />
-              <rect x="52" y="16" width="56" height="3" rx="1.5" fill="#7a5a2a" />
+              <rect
+                x="52"
+                y="16"
+                width="56"
+                height="3"
+                rx="1.5"
+                fill="#7a5a2a"
+              />
               <!-- Ferrule (gold band) -->
               <rect x="40" y="13" width="14" height="14" fill="#d4af37" />
               <rect x="40" y="13" width="14" height="3" fill="#f4d77b" />
@@ -75,6 +84,15 @@ export class WelcomeSectionElement extends LitElement {
             </svg>
           </div>
           <p class="subline" data-testid="welcome-subline">Welcome</p>
+          <p class="intro" data-testid="welcome-intro">
+            I believe that every day of your life matters, where each day is
+            another step in your life's dance. The good steps, the bad steps and
+            everything in between are what make your life beautiful. Each hobby,
+            career, activity, is a different act within your life's dance.
+            Living this way makes you feel like you are a rose and each day is a
+            petal where all petals contribute to make the rose of your life so
+            beautiful. My goal is to show the world that your life is art.
+          </p>
         </div>
         <div class="photo-col">
           <img

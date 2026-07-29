@@ -2,7 +2,7 @@
 slug: disruptive-strategic-design
 title: Disruptive Strategic Design
 date: 01/02/2025
-tags: [tech]
+tags: [tech, strategy]
 ---
 
 > Hey there 👋. Do you want to make a breakthrough? Do you want to be disruptive? Need to find a problem for your next hackathon? This is for you.
