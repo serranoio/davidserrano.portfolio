@@ -38,13 +38,10 @@ export class RoseText {
   private heightOffset: number;
   private radialDistance: number;
 
-  // Scroll state. `target` is set by wheel events; `current` lerps toward
-  // it each frame for smoothness.
-  private targetScrollOffset = 0;
-  private currentScrollOffset = 0;
+  // Document progress is the sole source of the rendered paragraph position.
+  private scrollOffset = 0;
   private maxScrollOffset: number;
   private paragraphSpacing = PARAGRAPH_SPACING;
-  private readonly SCROLL_LERP = 0.15;
 
   // Mirror the opacity we *intend* to render at. Reading back from
   // mesh.material.opacity on a Troika Text mesh isn't reliable (Troika wraps
@@ -111,16 +108,12 @@ export class RoseText {
   // apply the scrolled Y offset to translate the stack through the focal
   // region.
   update(camera: THREE.Camera, opacity: number) {
-    // Lerp scroll toward target for smooth motion.
-    this.currentScrollOffset +=
-      (this.targetScrollOffset - this.currentScrollOffset) * this.SCROLL_LERP;
-
     const dx = camera.position.x - this.bloomCenter.x;
     const dz = camera.position.z - this.bloomCenter.z;
     const len = Math.hypot(dx, dz) || 1;
     this.group.position.set(
       this.bloomCenter.x - (dx / len) * this.radialDistance,
-      this.bloomCenter.y + this.heightOffset + this.currentScrollOffset,
+      this.bloomCenter.y + this.heightOffset + this.scrollOffset,
       this.bloomCenter.z - (dz / len) * this.radialDistance
     );
 
@@ -138,26 +131,8 @@ export class RoseText {
     this.lastOpacity = opacity;
   }
 
-  // Advance scroll by a pixel delta (positive deltaY = wheel-down = advance
-  // forward through paragraphs, content reads "down" through the stack —
-  // matches standard webpage scroll semantics).
-  scrollBy(deltaY: number, sensitivity = 0.003) {
-    this.targetScrollOffset = Math.max(
-      0,
-      Math.min(this.maxScrollOffset, this.targetScrollOffset + deltaY * sensitivity)
-    );
-  }
-
-  scrollByParagraph(direction: 1 | -1) {
-    this.targetScrollOffset = Math.max(
-      0,
-      Math.min(this.maxScrollOffset, this.targetScrollOffset + direction * this.paragraphSpacing)
-    );
-  }
-
-  jumpToBoundary(boundary: 'start' | 'end') {
-    this.targetScrollOffset = boundary === 'start' ? 0 : this.maxScrollOffset;
-    this.currentScrollOffset = this.targetScrollOffset;
+  setScrollProgress(progress: number) {
+    this.scrollOffset = THREE.MathUtils.clamp(progress, 0, 1) * this.maxScrollOffset;
   }
 
   setMobileLayout(enabled: boolean) {
@@ -165,8 +140,7 @@ export class RoseText {
     this.radialDistance = enabled ? MOBILE_RADIAL_DISTANCE : Math.abs(TEXT_OFFSET.z);
     this.paragraphSpacing = enabled ? MOBILE_PARAGRAPH_SPACING : PARAGRAPH_SPACING;
     this.maxScrollOffset = Math.max(0, (this.meshes.length - 1) * this.paragraphSpacing);
-    this.targetScrollOffset = Math.max(0, Math.min(this.maxScrollOffset, this.targetScrollOffset));
-    this.currentScrollOffset = Math.max(0, Math.min(this.maxScrollOffset, this.currentScrollOffset));
+    this.scrollOffset = Math.max(0, Math.min(this.maxScrollOffset, this.scrollOffset));
 
     this.meshes.forEach((mesh, index) => {
       mesh.fontSize = enabled ? MOBILE_TEXT_FONT_SIZE : TEXT_FONT_SIZE;
@@ -178,17 +152,15 @@ export class RoseText {
   }
 
   getScrollOffset(): number {
-    return this.currentScrollOffset;
+    return this.scrollOffset;
   }
 
   getMaxScrollOffset(): number {
     return this.maxScrollOffset;
   }
 
-  // Where the scroll *target* is, which is what determines whether we've
-  // saturated. The lerped current value can sit just under max indefinitely.
   getScrollTarget(): number {
-    return this.targetScrollOffset;
+    return this.scrollOffset;
   }
 
   getParagraphCount(): number {
@@ -199,7 +171,7 @@ export class RoseText {
     if (this.paragraphSpacing <= 0) return 0;
     return Math.max(
       0,
-      Math.min(this.meshes.length - 1, Math.round(this.targetScrollOffset / this.paragraphSpacing))
+      Math.min(this.meshes.length - 1, Math.round(this.scrollOffset / this.paragraphSpacing))
     );
   }
 
@@ -256,7 +228,7 @@ export class RoseText {
     if (this.group.parent) this.group.parent.remove(this.group);
   }
 
-  private static parseParagraphs(body: string): string[] {
+  static parseParagraphs(body: string): string[] {
     return body
       .split(/\n\s*\n+/)
       .map((p) => p.trim())

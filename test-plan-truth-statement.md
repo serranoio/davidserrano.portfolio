@@ -3,8 +3,8 @@
 ## Setup
 
 1. From repo root: `bun install`
-2. Start dev server: `bun run dev`
-3. Open the home page in Chrome
+2. Start dev server: `bun run dev --port 3002`
+3. Open `http://localhost:3002/` in Chrome
 
 ---
 
@@ -13,12 +13,12 @@
 **Steps:**
 1. Hard-refresh the home page
 2. Observe the shimmer, then the rose
-3. Look for the gold text above the rose
+3. Scroll to the rose and look for the gold text behind it
 
 **Expected:**
 - During shimmer, no text mesh in the scene
-- After load, gold text appears in the scene, above the rose
-- Text begins with: "I seek for the truth."
+- After load, gold text appears behind and below the rose
+- Text begins with: "The Ballad of Programata"
 - Text is rendered crisply (no pixelation), lit by the same lights as the rose
 - Text does NOT rotate with the rose's idle spin (it lives in world space)
 
@@ -66,7 +66,7 @@
 ## TC-5 — User can edit the prose
 
 **Steps:**
-1. Open `docs/sections/truth-statement.md`
+1. Open `docs/sections/truth-statement.txt`
 2. Change one word (e.g. "Truth" → "TRUTH")
 3. Save the file
 4. Reload (HMR if it kicks in; otherwise hard refresh)
@@ -84,9 +84,9 @@
 2. Reload
 
 **Expected:**
-- Text is visible above the rose
+- Text is visible behind the rose
 - Text fits in the viewport horizontally (no clipping at edges)
-- Touch-drag on the canvas still orbits — text Y-billboards
+- One-finger vertical swipes scroll the page and advance/reverse the poem; mouse drag still orbits
 - Tap an active petal — text fades, panel opens — TC-3 behavior holds on mobile
 
 ---
@@ -102,5 +102,26 @@
   - opacity > 0.9 after load
   - opacity → 0 when a section is open
   - opacity returns after close
-  - world position above the rose center
+  - initial world position below the rose center
   - mobile viewport renders
+
+
+---
+
+## TC-8 — Continuous section scrolling
+
+**Steps:**
+1. Slowly scroll from the hero into the rose, through the poem, and into “I write too.”
+2. Reverse direction while reading and halfway across each section boundary.
+3. Repeat with quick wheel movements, a scrollbar drag, Page Up/Page Down, and one-finger mobile swipes.
+4. Reload halfway through the poem, and test a delayed model load.
+5. On mobile, use the paragraph arrows in both directions, including with reduced motion enabled.
+
+**Expected:**
+- The rose remains pinned while the poem advances with page position.
+- Entry and exit follow the same continuous movement; there is no automatic snap, whole-section jump, or input lockout.
+- Reversing retraces the poem without resetting it.
+- Model loading does not move the writing section; reload restores the poem at the restored page position.
+- Paragraph buttons scroll the same page timeline, respect reduced motion, and leave the screen with the rose.
+
+**Automated coverage:** `cypress/e2e/desktop-scroll-flow.cy.ts` and `cypress/e2e/mobile-scroll-flow.cy.ts`.

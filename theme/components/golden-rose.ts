@@ -22,7 +22,7 @@ interface RoseTestAPI {
   getCameraPosition: () => { x: number; y: number; z: number };
   getHoveredPetal: () => number | null;
   getActivePetalIndices: () => number[];
-  getControlsConfig: () => { minDistance: number; maxDistance: number; enablePan: boolean; touchesOne: number; enabled: boolean };
+  getControlsConfig: () => { minDistance: number; maxDistance: number; enablePan: boolean; touchesOne: number | null; enabled: boolean };
   orbitCamera: (azimuth: number, polar: number) => void;
   clickPetal: (index: number) => void;
   clickPetalBySection: (sectionId: string) => void;
@@ -37,7 +37,6 @@ interface RoseTestAPI {
   getTruthScrollTarget: () => number;
   getTruthMaxScrollOffset: () => number;
   getTruthActiveParagraphScreenBounds: () => { left: number; right: number; top: number; bottom: number } | null;
-  getScrollMode: () => string;
   projectPetalToScreen: (index: number) => { x: number; y: number } | null;
   raycastAtCanvas: (x: number, y: number) => { index: number; isActive: boolean; section: string | null } | null;
   setAutoRotate: (enabled: boolean) => void;
@@ -50,7 +49,6 @@ export class GoldenRoseElement extends LitElement {
     loading: { type: Boolean, state: true },
     roseState: { type: String, state: true },
     activeSection: { type: String, state: true },
-    pillVisible: { type: Boolean, state: true },
     coarsePointer: { type: Boolean, state: true },
   };
 
@@ -104,7 +102,7 @@ export class GoldenRoseElement extends LitElement {
   // time the bloom is 40% complete, so the panel never lands on top of text.
   private readonly TRUTH_FADE_RATIO = 0.4;
 
-  // Scroll-driven rose rotation: wheel events inject a yaw impulse that decays
+  // Scroll-driven rose rotation: page movement adds a yaw impulse that decays
   // each frame, giving a momentum feel on top of the idle auto-spin.
   private scrollDeltaYaw = 0;
   private readonly SCROLL_YAW_DECAY = 0.88;
@@ -119,37 +117,15 @@ export class GoldenRoseElement extends LitElement {
   private meteorField: MeteorField | null = null;
   private prevFrameTime = 0;
 
-  // Touch-vs-mouse signal. On coarse-pointer devices we disable single-finger
-  // orbit so native page scroll passes through the canvas — without this, a
-  // swipe rotates the camera and the user is trapped in the rose section.
-  // Re-evaluated on `change` so convertibles that swap pointer type at runtime
-  // get the right config.
+  // Pointer type selects text layout and paragraph-button visibility.
+  // Re-evaluate on change for convertible devices; one-finger scrolling
+  // remains native regardless of the primary pointer type.
   private coarseQuery: MediaQueryList | null = null;
 
-  // The mobile-only "↓" pill needs to disappear once the rose isn't the
-  // snapped section anymore; otherwise it overlays the writing grid.
-  private pillObserver: IntersectionObserver | null = null;
-  private _pillVisible = false;
-
-  // Desktop wheel-pin state machine: drives the truth text on wheel and
-  // releases when it saturates so the page can scroll through to writing.
-  // Touch is gated out via coarseQuery.matches — mobile gets clean native
-  // scroll instead.
-  private scrollMode: 'free' | 'snapping' | 'pinned' | 'released-down' | 'released-up' = 'free';
-  private snapEndTimeoutId: number | null = null;
-  // Trigger snap when rose top is within this fraction of viewport-height
-  // above/below the viewport top. 0.7 = "snap once ~30% of the rose is in view".
-  private readonly SNAP_TRIGGER_FRACTION = 0.7;
-  // After release, don't re-snap until rose has scrolled more than this
-  // fraction past the viewport top in the released direction.
-  private readonly RELEASE_EXIT_FRACTION = 0.5;
-  private readonly SNAP_DURATION_MS = 700;
-  // The truth statement grew from one paragraph to ten+; the old sensitivity
-  // (0.003) meant ~40 wheel ticks to saturate, which felt like a trap. Bump
-  // to 0.03 so 3–5 trackpad swipes get the user through the text and onto
-  // the writing section. Test in mobile-scroll-flow.cy.ts asserts the page
-  // does reach writing after a bounded number of wheels.
-  private readonly TEXT_SCROLL_SENSITIVITY = 0.03;
+  private sceneViewport: HTMLElement | null = null;
+  private viewportObserver: ResizeObserver | null = null;
+  private reducedMotionQuery: MediaQueryList | null = null;
+  private previousScrollProgress: number | null = null;
 
   // Each petal's geometry is baked in world-space coords with pivot at origin
   // (Blender's "Separate by Loose Parts" doesn't relocate per-piece origins).
@@ -188,15 +164,6 @@ export class GoldenRoseElement extends LitElement {
     this.requestUpdate('activeSection', oldVal);
   }
 
-  get pillVisible() {
-    return this._pillVisible;
-  }
-  set pillVisible(val: boolean) {
-    const oldVal = this._pillVisible;
-    this._pillVisible = val;
-    this.requestUpdate('pillVisible', oldVal);
-  }
-
   get coarsePointer() {
     return this._coarsePointer;
   }
@@ -208,6 +175,11 @@ export class GoldenRoseElement extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    // Reserve the reading distance before the model loads so loading cannot
+    // move the writing section. Stable viewport units avoid toolbar-driven
+    // changes to the poem's scroll distance on mobile.
+    const steps = Math.max(0, RoseText.parseParagraphs(truthStatement).length - 1);
+    this.style.setProperty('--poem-scroll-distance', `${steps * 40}svh`);
     // Expose test API
     (window as any).__ROSE_TEST_API__ = this.createTestAPI();
   }
@@ -241,7 +213,7 @@ export class GoldenRoseElement extends LitElement {
         minDistance: this.controls?.minDistance ?? 0,
         maxDistance: this.controls?.maxDistance ?? 0,
         enablePan: this.controls?.enablePan ?? false,
-        touchesOne: (this.controls?.touches?.ONE ?? THREE.TOUCH.ROTATE) as number,
+        touchesOne: this.controls?.touches.ONE ?? null,
         enabled: this.controls?.enabled ?? false,
       }),
       orbitCamera: (azimuthDelta: number, polarDelta: number) => {
@@ -296,7 +268,6 @@ export class GoldenRoseElement extends LitElement {
           width: window.innerWidth,
           height: window.innerHeight,
         }) ?? null,
-      getScrollMode: () => this.scrollMode,
       projectPetalToScreen: (index: number) => {
         const petal = this.petals[index];
         if (!petal || !this.camera || !this.renderer) return null;
@@ -343,6 +314,7 @@ export class GoldenRoseElement extends LitElement {
 
   firstUpdated(_changedProperties: PropertyValues) {
     super.firstUpdated(_changedProperties);
+    this.sceneViewport = this.renderRoot.querySelector('.scene-viewport');
     const canvas = this.renderRoot.querySelector('canvas') as HTMLCanvasElement;
     if (canvas) {
       this.initThreeJS(canvas);
@@ -354,18 +326,9 @@ export class GoldenRoseElement extends LitElement {
       this._reactRoot = createRoot(mount);
       this._reactRoot.render(createElement(PoemPanel, { section: this.activeSection }));
     }
-    // Hide the "↓" pill once the rose host stops being mostly visible. The
-    // pill only renders under (pointer: coarse), but the observer is cheap
-    // and runs on every device; the CSS gate handles the visibility cut.
-    if (typeof IntersectionObserver !== 'undefined') {
-      this.pillObserver = new IntersectionObserver(
-        (entries) => {
-          const entry = entries[0];
-          if (entry) this.pillVisible = entry.intersectionRatio >= 0.5;
-        },
-        { threshold: [0.5] }
-      );
-      this.pillObserver.observe(this as unknown as Element);
+    if (this.sceneViewport) {
+      this.viewportObserver = new ResizeObserver(this.handleResize);
+      this.viewportObserver.observe(this.sceneViewport);
     }
   }
 
@@ -384,7 +347,7 @@ export class GoldenRoseElement extends LitElement {
     // Camera - positioned for a nice view of the rose
     this.camera = new THREE.PerspectiveCamera(
       50,
-      window.innerWidth / window.innerHeight,
+      (this.sceneViewport?.clientWidth || 1) / (this.sceneViewport?.clientHeight || 1),
       0.1,
       1000
     );
@@ -397,7 +360,7 @@ export class GoldenRoseElement extends LitElement {
       antialias: true,
       alpha: false,
     });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.handleResize();
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.2;
@@ -421,7 +384,7 @@ export class GoldenRoseElement extends LitElement {
     this.controls.minDistance = 1.4;
     this.controls.maxDistance = 8;
     this.controls.enablePan = false;
-    // Wheel is repurposed to scroll the background paragraphs, not zoom.
+    // Wheel input belongs to the page; it must never zoom or trap scrolling.
     this.controls.enableZoom = false;
     this.controls.autoRotate = false;
     this.controls.target.set(0, 1.3, 0);
@@ -431,151 +394,49 @@ export class GoldenRoseElement extends LitElement {
     this.meteorField = new MeteorField();
     this.scene.add(this.meteorField.group);
 
-    // Coarse-pointer gating: disable single-finger orbit on touch so native
-    // page scroll passes through the 100vh canvas. Two-finger orbit stays.
+    // Adapt text and navigation to the pointer while preserving native scroll.
     this.coarseQuery = window.matchMedia('(pointer: coarse)');
+    this.reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     this.applyTouchConfig();
     this.coarseQuery.addEventListener('change', this.handleCoarseChange);
-
-    // Handle resize. iOS Safari URL-bar transitions don't always fire
-    // window.resize, but they do fire visualViewport.resize — listen to
-    // both so the canvas tracks the visual viewport instead of clipping.
-    window.addEventListener('resize', this.handleResize);
-    window.visualViewport?.addEventListener('resize', this.handleResize);
 
     // Handle mouse move for hover detection
     canvas.addEventListener('mousemove', this.handleMouseMove);
 
     // Handle click/tap for petal selection
     canvas.addEventListener('click', this.handleCanvasClick);
-
-    // Wheel listener is on `window`, not the canvas — we need to intercept
-    // wheels before the cursor sits over the rose so we can snap-to-center
-    // as the user is scrolling in from above or below.
-    window.addEventListener('wheel', this.handleWheel, { passive: false });
   }
 
-  // Touch devices use the canvas as the scene interaction surface:
-  // one-finger drag orbits the rose. Background text movement lives in
-  // explicit UI buttons so drag never has to choose between scene control and
-  // prose scrolling.
   private applyTouchConfig = () => {
     if (!this.controls || !this.coarseQuery) return;
     const isCoarse = this.coarseQuery.matches;
     this.coarsePointer = isCoarse;
-    this.controls.enabled = true;
-    this.controls.touches.ONE = THREE.TOUCH.ROTATE;
-    this.controls.touches.TWO = THREE.TOUCH.ROTATE;
+    // One finger scrolls the page, including on hybrid devices. Mouse drag
+    // still orbits; two-finger rotation is available when the browser allows it.
+    this.controls.touches.ONE = null;
+    this.controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
     this.roseText?.setMobileLayout(isCoarse);
-    if (this.renderer?.domElement) {
-      this.renderer.domElement.style.touchAction = isCoarse ? 'none' : 'none';
-    }
+    this.renderer.domElement.style.touchAction = 'pan-y pinch-zoom';
   };
 
   private handleCoarseChange = () => {
     this.applyTouchConfig();
   };
 
-  // Desktop scroll-hijack state machine.
-  //
-  // Mobile (coarseQuery.matches): early-return, native scroll always wins.
-  // Mobile users also have CSS scroll-snap on <html> doing the section
-  // snapping for them — see theme/index.tsx.
-  //
-  // Desktop flow downward:
-  //   free → wheel-down while rose's top is in upper SNAP_TRIGGER_FRACTION
-  //     → snapping (smooth-scroll page so rose top hits viewport top)
-  //     → pinned (wheel drives truth-text scroll + rose yaw)
-  //     → truth text saturates → released-down (scroll to writing)
-  //     → rose has scrolled past viewport top by RELEASE_EXIT_FRACTION → free.
-  //
-  // Reverse symmetry applies for scrolling back up: entering from writing
-  // starts the text at the end, wheel-up moves through it, then releases to
-  // welcome. The pinned state forwards wheel events to roseText.scrollBy at
-  // TEXT_SCROLL_SENSITIVITY so the user gets through the statement in a
-  // handful of swipes.
-  private handleWheel = (event: WheelEvent) => {
-    // Panel open/animating: eat the wheel entirely so the page can't scroll
-    // out from under the user while they're reading a section.
-    if (this.roseState !== 'idle') {
-      event.preventDefault();
-      return;
+  // CSS owns pinning. The same document position always renders the same
+  // paragraph position, including when reversing, restoring scroll, or using
+  // the keyboard/scrollbar. No wheel interception or boundary resets.
+  private updateScrollProgress() {
+    if (!this.roseText || !this.sceneViewport) return;
+    const rect = this.getBoundingClientRect();
+    const distance = Math.max(0, rect.height - this.sceneViewport.clientHeight);
+    const progress = distance > 0 ? THREE.MathUtils.clamp(-rect.top / distance, 0, 1) : 0;
+    this.roseText.setScrollProgress(progress);
+    if (this.previousScrollProgress !== null && !this.reducedMotionQuery?.matches) {
+      const delta = (progress - this.previousScrollProgress) * distance;
+      this.scrollDeltaYaw += THREE.MathUtils.clamp(delta, -100, 100) * this.SCROLL_YAW_SENSITIVITY;
     }
-    // Touch devices: never pin. Native scroll + CSS snap own the flow.
-    if (this.coarseQuery?.matches) return;
-    if (!this.roseText) return;
-
-    const hostRect = this.getBoundingClientRect();
-    const viewportH = window.innerHeight;
-    const dy = event.deltaY;
-
-    if (this.scrollMode === 'snapping') {
-      event.preventDefault();
-      return;
-    }
-
-    if (this.scrollMode === 'released-down') {
-      if (hostRect.top < -viewportH * this.RELEASE_EXIT_FRACTION) {
-        this.scrollMode = 'free';
-      }
-      return;
-    }
-
-    if (this.scrollMode === 'released-up') {
-      if (hostRect.top > viewportH * this.RELEASE_EXIT_FRACTION) {
-        this.scrollMode = 'free';
-      }
-      return;
-    }
-
-    if (this.scrollMode === 'pinned') {
-      const target = this.roseText.getScrollTarget();
-      const max = this.roseText.getMaxScrollOffset();
-      // End of truth text + scrolling down → release into writing.
-      if (dy > 0 && target >= max - 0.001) {
-        this.scrollMode = 'released-down';
-        event.preventDefault();
-        this.scrollToHomeSection('writing-section');
-        return;
-      }
-      // Top of truth text + scrolling up → release back into welcome.
-      if (dy < 0 && target <= 0.001) {
-        this.scrollMode = 'released-up';
-        event.preventDefault();
-        this.scrollToHomeSection('welcome-section');
-        return;
-      }
-      event.preventDefault();
-      this.roseText.scrollBy(dy, this.TEXT_SCROLL_SENSITIVITY);
-      this.scrollDeltaYaw += dy * this.SCROLL_YAW_SENSITIVITY;
-      return;
-    }
-
-    // mode === 'free' — consider whether to snap onto the rose.
-    const trigger = viewportH * this.SNAP_TRIGGER_FRACTION;
-    if (dy > 0 && hostRect.top > 0 && hostRect.top < trigger) {
-      this.beginSnap('start');
-      event.preventDefault();
-      return;
-    }
-    if (dy < 0 && hostRect.top < 0 && hostRect.top > -trigger) {
-      this.beginSnap('end');
-      event.preventDefault();
-      return;
-    }
-    // Otherwise: no interception, page scrolls naturally.
-  };
-
-  private beginSnap(textBoundary: 'start' | 'end') {
-    this.scrollMode = 'snapping';
-    this.roseText?.jumpToBoundary(textBoundary);
-    const roseTopDoc = this.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo({ top: roseTopDoc, behavior: 'smooth' });
-    if (this.snapEndTimeoutId !== null) clearTimeout(this.snapEndTimeoutId);
-    this.snapEndTimeoutId = window.setTimeout(() => {
-      if (this.scrollMode === 'snapping') this.scrollMode = 'pinned';
-      this.snapEndTimeoutId = null;
-    }, this.SNAP_DURATION_MS);
+    this.previousScrollProgress = progress;
   }
 
   private handleMouseMove = (event: MouseEvent) => {
@@ -735,35 +596,26 @@ export class GoldenRoseElement extends LitElement {
   };
 
   private handleTruthNav(direction: 1 | -1) {
-    if (!this.roseText || this.roseState !== 'idle') return;
-    const target = this.roseText.getScrollTarget();
-    const max = this.roseText.getMaxScrollOffset();
-    const atEnd = target >= max - 0.001;
-    const atStart = target <= 0.001;
-
-    if (direction > 0 && atEnd) {
-      this.scrollToHomeSection('writing-section');
-      return;
+    if (!this.roseText || !this.sceneViewport || this.roseState !== 'idle') return;
+    const rect = this.getBoundingClientRect();
+    const start = rect.top + window.scrollY;
+    const distance = Math.max(0, rect.height - this.sceneViewport.clientHeight);
+    const steps = Math.max(1, this.roseText.getParagraphCount() - 1);
+    const paragraph = THREE.MathUtils.clamp(-rect.top / (distance || 1), 0, 1) * steps;
+    // Round in the travel direction so reversing halfway through a button
+    // transition returns to the preceding paragraph immediately.
+    const next = direction > 0 ? Math.floor(paragraph + 0.01) + 1 : Math.ceil(paragraph - 0.01) - 1;
+    let top = start + (next / steps) * distance;
+    if (next < 0 || next > steps) {
+      const section = document.querySelector(next < 0 ? 'welcome-section' : 'writing-section');
+      if (!section) return;
+      top = section.getBoundingClientRect().top + window.scrollY;
     }
-
-    if (direction < 0 && atStart) {
-      this.scrollToHomeSection('welcome-section');
-      return;
-    }
-
-    this.roseText.scrollByParagraph(direction);
-    this.scrollDeltaYaw += direction * 0.08;
+    window.scrollTo({ top, behavior: this.reducedMotionQuery?.matches ? 'instant' : 'smooth' });
   }
 
   private handleTruthPrev = () => this.handleTruthNav(-1);
   private handleTruthNext = () => this.handleTruthNav(1);
-
-  private scrollToHomeSection(selector: 'welcome-section' | 'writing-section') {
-    const section = document.querySelector(selector) as HTMLElement | null;
-    if (!section) return;
-    const top = section.getBoundingClientRect().top + window.scrollY;
-    window.scrollTo({ top, behavior: 'auto' });
-  }
 
   private createRose() {
     this.roseGroup = new THREE.Group();
@@ -890,11 +742,12 @@ export class GoldenRoseElement extends LitElement {
   }
 
   private handleResize = () => {
-    if (!this.camera || !this.renderer) return;
-
-    this.camera.aspect = window.innerWidth / window.innerHeight;
+    if (!this.camera || !this.renderer || !this.sceneViewport) return;
+    const { clientWidth: width, clientHeight: height } = this.sceneViewport;
+    if (!width || !height) return;
+    this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setSize(width, height, false);
   };
 
   private animationLoop = () => {
@@ -913,6 +766,8 @@ export class GoldenRoseElement extends LitElement {
     // very first frame; cap to 0.05s so a tab-switch doesn't teleport meteors.
     const dt = this.prevFrameTime > 0 ? Math.min(0.05, (now - this.prevFrameTime) / 1000) : 0.016;
     this.prevFrameTime = now;
+
+    this.updateScrollProgress();
 
     // Update controls
     this.controls?.update();
@@ -947,7 +802,7 @@ export class GoldenRoseElement extends LitElement {
 
     // Gentle auto-spin + scroll-driven yaw impulse (decays each frame).
     if (this.roseState === 'idle' && this.roseGroup) {
-      const spin = this.autoRotateEnabled ? 0.002 : 0;
+      const spin = this.autoRotateEnabled && !this.reducedMotionQuery?.matches ? 0.002 : 0;
       this.roseGroup.rotation.y += spin + this.scrollDeltaYaw;
       this.scrollDeltaYaw *= this.SCROLL_YAW_DECAY;
     }
@@ -1018,8 +873,9 @@ export class GoldenRoseElement extends LitElement {
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }
-    window.removeEventListener('resize', this.handleResize);
-    window.visualViewport?.removeEventListener('resize', this.handleResize);
+    this.viewportObserver?.disconnect();
+    this.viewportObserver = null;
+    this.sceneViewport = null;
 
     // Remove canvas event listeners
     const canvas = this.renderer?.domElement;
@@ -1027,16 +883,8 @@ export class GoldenRoseElement extends LitElement {
       canvas.removeEventListener('mousemove', this.handleMouseMove);
       canvas.removeEventListener('click', this.handleCanvasClick);
     }
-    window.removeEventListener('wheel', this.handleWheel);
     this.coarseQuery?.removeEventListener('change', this.handleCoarseChange);
     this.coarseQuery = null;
-    this.pillObserver?.disconnect();
-    this.pillObserver = null;
-    if (this.snapEndTimeoutId !== null) {
-      clearTimeout(this.snapEndTimeoutId);
-      this.snapEndTimeoutId = null;
-    }
-
     // Dispose controls
     this.controls?.dispose();
 
@@ -1058,53 +906,55 @@ export class GoldenRoseElement extends LitElement {
 
   render() {
     return html`
-      ${this.loading
-        ? html`<div class="loading-shimmer" data-testid="loading-shimmer"></div>`
-        : null}
-      <canvas data-testid="rose-canvas"></canvas>
-      <div id="content-root" class="${this.roseState === 'open' ? 'visible' : ''}">
-        <button
-          class="close-button"
-          data-testid="close-button"
-          @click=${this.handleCloseClick}
-          aria-label="Close content"
+      <div class="scene-viewport" data-testid="rose-viewport">
+        ${this.loading
+          ? html`<div class="loading-shimmer" data-testid="loading-shimmer"></div>`
+          : null}
+        <canvas data-testid="rose-canvas"></canvas>
+        <div id="content-root" class="${this.roseState === 'open' ? 'visible' : ''}">
+          <button
+            class="close-button"
+            data-testid="close-button"
+            @click=${this.handleCloseClick}
+            aria-label="Close content"
+          >
+            ×
+          </button>
+          <div id="content-mount" class="content-body" data-testid="content-body"></div>
+        </div>
+        <div class="attribution" data-testid="model-attribution">
+          <a
+            href="https://sketchfab.com/3d-models/rose-6281bf3703584323bb4d8326f1f1b59d"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Thank you Heliona for this model from Sketchfab
+          </a>
+        </div>
+        <div
+          class="truth-nav ${this.coarsePointer ? 'coarse' : ''}"
+          data-testid="truth-nav"
+          aria-label="Truth statement navigation"
         >
-          ×
-        </button>
-        <div id="content-mount" class="content-body" data-testid="content-body"></div>
-      </div>
-      <div class="attribution" data-testid="model-attribution">
-        <a
-          href="https://sketchfab.com/3d-models/rose-6281bf3703584323bb4d8326f1f1b59d"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Thank you Heliona for this model from Sketchfab
-        </a>
-      </div>
-      <div
-        class="truth-nav ${this.coarsePointer ? 'coarse' : ''}"
-        data-testid="truth-nav"
-        aria-label="Truth statement navigation"
-      >
-        <button
-          class="truth-nav-button"
-          type="button"
-          data-testid="truth-nav-prev"
-          aria-label="Previous truth paragraph"
-          @click=${this.handleTruthPrev}
-        >
-          <span aria-hidden="true">↑</span>
-        </button>
-        <button
-          class="truth-nav-button"
-          type="button"
-          data-testid="truth-nav-next"
-          aria-label="Next truth paragraph"
-          @click=${this.handleTruthNext}
-        >
-          <span aria-hidden="true">↓</span>
-        </button>
+          <button
+            class="truth-nav-button"
+            type="button"
+            data-testid="truth-nav-prev"
+            aria-label="Previous truth paragraph"
+            @click=${this.handleTruthPrev}
+          >
+            <span aria-hidden="true">↑</span>
+          </button>
+          <button
+            class="truth-nav-button"
+            type="button"
+            data-testid="truth-nav-next"
+            aria-label="Next truth paragraph"
+            @click=${this.handleTruthNext}
+          >
+            <span aria-hidden="true">↓</span>
+          </button>
+        </div>
       </div>
     `;
   }

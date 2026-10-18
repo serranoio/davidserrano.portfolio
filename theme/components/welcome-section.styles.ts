@@ -5,11 +5,9 @@ export default css`
     display: block;
     position: relative;
     width: 100vw;
-    /* dvh tracks the visual viewport so iOS Safari URL-bar transitions
-       don't carve a strip off the section. Older browsers fall back to vh. */
+    /* Keep section boundaries stable while mobile browser toolbars move. */
     height: 100vh;
-    height: 100dvh;
-    scroll-snap-align: start;
+    height: 100svh;
     overflow: hidden;
     /* Hardcoded — rspress defines --color-bg as a light cream which would
        win over a var() fallback and leave the night sky unreadable. */

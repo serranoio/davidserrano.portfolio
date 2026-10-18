@@ -8,6 +8,8 @@ describe('Rose Edge Cases', () => {
       .shadow()
       .find('[data-testid="loading-shimmer"]')
       .should('not.exist');
+    // Visibility assertions exercise the scene after the user reaches it.
+    cy.get('golden-rose').scrollIntoView();
   });
 
   describe('Rapid Interaction (US-13)', () => {

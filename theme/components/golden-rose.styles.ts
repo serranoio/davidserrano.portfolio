@@ -4,15 +4,20 @@ export default css`
   :host {
     display: block;
     width: 100vw;
-    height: 100vh;
-    height: 100dvh;
-    scroll-snap-align: start;
+    height: calc(100svh + var(--poem-scroll-distance, 0px));
     position: relative;
-    overflow: hidden;
     /* Hardcoded dark — rspress sets --color-bg to a light cream in its
        light theme, which would win over a var() fallback and leave the
        night sky behind the rose looking like a blank cream rectangle. */
     background-color: #0a0a08;
+  }
+
+  .scene-viewport {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100svh;
+    overflow: hidden;
   }
 
   canvas {
@@ -78,6 +83,7 @@ export default css`
   }
 
   #content-root {
+    box-sizing: border-box;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -86,6 +92,7 @@ export default css`
     max-width: 600px;
     max-height: 70vh;
     overflow-y: auto;
+    overscroll-behavior-y: contain;
     background: rgba(8, 8, 6, 0.985);
     border: 1px solid rgba(244, 215, 123, 0.35);
     border-radius: 8px;
@@ -249,7 +256,7 @@ export default css`
   }
 
   .truth-nav.coarse {
-    position: fixed;
+    position: absolute;
     right: calc(1rem + env(safe-area-inset-right));
     /* Music player is fixed at bottom: 1rem with a 48px button; sit just above it. */
     bottom: calc(4.75rem + env(safe-area-inset-bottom));

@@ -44,7 +44,7 @@ describe('Rose Interaction', () => {
       });
     });
 
-    it('does NOT zoom on wheel — wheel is repurposed for text scroll', () => {
+    it('does not zoom when the wheel scrolls the page', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
         cy.waitUntil(() => api.getTruthParagraphCount() > 0, { timeout: 5000 });
@@ -54,10 +54,9 @@ describe('Rose Interaction', () => {
         const api = (win as any).__ROSE_TEST_API__;
         const initialZoom = api.getCameraPosition().z;
 
-        // Dispatch a real WheelEvent on the window (handler lives there now,
-        // not on canvas). cy.trigger('wheel') sends a synthetic Event that
-        // doesn't reliably reach { passive: false } listeners.
-        win.dispatchEvent(
+        // Exercise OrbitControls on its actual canvas event target.
+        const canvas = win.document.querySelector('golden-rose')!.shadowRoot!.querySelector('canvas')!;
+        canvas.dispatchEvent(
           new WheelEvent('wheel', {
             bubbles: true,
             cancelable: true,
@@ -67,8 +66,8 @@ describe('Rose Interaction', () => {
 
         cy.wait(50).then(() => {
           // OrbitControls.enableZoom is disabled — camera distance unchanged
-          // regardless of which scroll-hijack mode the rose is in.
-          expect(api.getCameraPosition().z).to.equal(initialZoom);
+          // Allow floating-point drift from the controls updating each frame.
+          expect(api.getCameraPosition().z).to.be.closeTo(initialZoom, 1e-10);
         });
       });
     });

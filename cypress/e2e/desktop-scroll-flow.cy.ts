@@ -1,170 +1,68 @@
 /// <reference types="cypress" />
+import { expectProgress, nativeWheel, scrollGeometry, seek, visitHome } from '../support/scroll-flow';
 
-type RoseTestAPI = {
-  getScrollMode: () => string;
-  getTruthScrollTarget: () => number;
-  getTruthMaxScrollOffset: () => number;
-};
-
-function installDesktopMatchMedia(win: Window) {
-  const nativeMatchMedia = win.matchMedia.bind(win);
-
-  win.matchMedia = ((query: string) => {
-    if (query === '(pointer: coarse)') {
-      return {
-        media: query,
-        matches: false,
-        onchange: null,
-        addEventListener: () => undefined,
-        removeEventListener: () => undefined,
-        addListener: () => undefined,
-        removeListener: () => undefined,
-        dispatchEvent: () => true,
-      } as unknown as MediaQueryList;
-    }
-
-    return nativeMatchMedia(query);
-  }) as typeof win.matchMedia;
-}
-
-function visitDesktop() {
-  cy.viewport(1280, 800);
-  cy.visit('/', {
-    onBeforeLoad(win) {
-      installDesktopMatchMedia(win);
-    },
+describe('Continuous desktop poem scrolling', () => {
+  beforeEach(() => {
+    cy.viewport(1280, 800);
+    visitHome();
   });
-  cy.get('golden-rose', { timeout: 10000 }).should('exist');
-  cy.get('golden-rose')
-    .shadow()
-    .find('[data-testid="loading-shimmer"]', { timeout: 15000 })
-    .should('not.exist');
-}
 
-function roseApi() {
-  return cy.window().its('__ROSE_TEST_API__').should('exist') as Cypress.Chainable<RoseTestAPI>;
-}
-
-function wheel(deltaY: number) {
-  cy.window().then((win) => {
-    win.dispatchEvent(
-      new WheelEvent('wheel', {
-        bubbles: true,
-        cancelable: true,
-        deltaY,
-      })
-    );
-  });
-}
-
-function sectionTop(selector: 'welcome-section' | 'golden-rose' | 'writing-section') {
-  return cy.window().then((win) => {
-    const section = win.document.querySelector(selector) as HTMLElement | null;
-    expect(section, selector).to.exist;
-    return section!.getBoundingClientRect().top;
-  });
-}
-
-function scrollNearRoseFromAbove() {
-  cy.window().then((win) => {
-    const rose = win.document.querySelector('golden-rose') as HTMLElement;
-    const roseTop = rose.getBoundingClientRect().top + win.scrollY;
-    win.scrollTo(0, Math.max(0, roseTop - win.innerHeight * 0.45));
-  });
-}
-
-function scrollNearRoseFromBelow() {
-  cy.window().then((win) => {
-    const rose = win.document.querySelector('golden-rose') as HTMLElement;
-    const roseTop = rose.getBoundingClientRect().top + win.scrollY;
-    win.scrollTo(0, roseTop + win.innerHeight * 0.45);
-  });
-}
-
-function expectRoseSnapped() {
-  sectionTop('golden-rose').should((top) => {
-    expect(Math.abs(top)).to.be.lessThan(45);
-  });
-}
-
-function enterPinnedFromAbove() {
-  scrollNearRoseFromAbove();
-  wheel(260);
-  cy.wait(850);
-  expectRoseSnapped();
-  roseApi().invoke('getScrollMode').should('eq', 'pinned');
-}
-
-function enterPinnedFromBelow() {
-  scrollNearRoseFromBelow();
-  wheel(-260);
-  cy.wait(850);
-  expectRoseSnapped();
-  roseApi().invoke('getScrollMode').should('eq', 'pinned');
-}
-
-function driveTruthTextToEnd() {
-  for (let i = 0; i < 12; i += 1) {
-    wheel(900);
-  }
-  roseApi().then((api) => {
-    expect(api.getTruthScrollTarget()).to.be.closeTo(api.getTruthMaxScrollOffset(), 0.02);
-  });
-}
-
-function driveTruthTextToStart() {
-  for (let i = 0; i < 12; i += 1) {
-    wheel(-900);
-  }
-  roseApi().invoke('getTruthScrollTarget').should('be.closeTo', 0, 0.02);
-}
-
-describe('Desktop rose scroll handoff', () => {
-  it('wheels into the Three.js section, pins for inner truth-text scroll, then releases down to writing', () => {
-    visitDesktop();
-
-    enterPinnedFromAbove();
-
-    roseApi().invoke('getTruthScrollTarget').then((before) => {
-      wheel(450);
-      roseApi().invoke('getTruthScrollTarget').should('be.greaterThan', before);
-    });
-
-    driveTruthTextToEnd();
-    wheel(260);
-
-    sectionTop('writing-section').should((top) => {
-      expect(Math.abs(top)).to.be.lessThan(45);
+  it('crosses both poem boundaries in small wheel steps and reverses without jumping', () => {
+    scrollGeometry().then(({ start, distance }) => {
+      for (const boundary of [start, start + distance]) {
+        seek(boundary - 40);
+        nativeWheel(80);
+        cy.window().its('scrollY').should('be.closeTo', boundary + 40, 2);
+        nativeWheel(-80);
+        cy.window().its('scrollY').should('be.closeTo', boundary - 40, 2);
+        nativeWheel(20);
+        cy.window().its('scrollY').should('be.closeTo', boundary - 20, 2);
+      }
     });
   });
 
-  it('reverses from writing, pins for inner truth-text scroll, then releases up to welcome', () => {
-    visitDesktop();
-
-    cy.window().then((win) => {
-      const writing = win.document.querySelector('writing-section') as HTMLElement;
-      win.scrollTo(0, writing.getBoundingClientRect().top + win.scrollY);
+  it('retraces the poem on reversal and keeps the canvas pinned throughout reading', () => {
+    scrollGeometry().then(({ start, distance }) => {
+      for (const progress of [0, 0.25, 0.8, 0.45, 1, 0.6, 0]) {
+        seek(start + distance * progress);
+        expectProgress(progress);
+        cy.get('golden-rose').shadow().find('[data-testid="rose-viewport"]').should(($viewport) => {
+          expect($viewport[0].getBoundingClientRect().top).to.be.closeTo(0, 1);
+        });
+      }
     });
-    sectionTop('writing-section').should((top) => {
-      expect(Math.abs(top)).to.be.lessThan(45);
+  });
+
+  it('reverses immediately during the partial exit to writing', () => {
+    scrollGeometry().then(({ start, distance }) => {
+      seek(start + distance + 40);
+      nativeWheel(-80);
+      cy.window().its('scrollY').should('be.closeTo', start + distance - 40, 2);
+      expectProgress(1 - 40 / distance);
+      nativeWheel(80);
+      cy.window().its('scrollY').should('be.closeTo', start + distance + 40, 2);
+      expectProgress(1);
     });
+  });
 
-    enterPinnedFromBelow();
-
-    roseApi().then((api) => {
-      expect(api.getTruthScrollTarget()).to.be.closeTo(api.getTruthMaxScrollOffset(), 0.02);
-      expect(api.getScrollMode()).to.equal('pinned');
+  it('supports large scrollbar seeks and preserves contiguous layout after resizing', () => {
+    scrollGeometry().then(({ start, distance }) => {
+      seek(start + distance * 0.9);
+      expectProgress(0.9);
+      seek(start + distance * 0.1);
+      expectProgress(0.1);
     });
-    roseApi().invoke('getTruthScrollTarget').then((endTarget) => {
-      wheel(-450);
-      roseApi().invoke('getTruthScrollTarget').should('be.lessThan', endTarget);
-    });
-
-    driveTruthTextToStart();
-    wheel(-260);
-
-    sectionTop('welcome-section').should((top) => {
-      expect(Math.abs(top)).to.be.lessThan(45);
+    cy.viewport(1024, 650);
+    scrollGeometry().then(({ start, distance, height }) => {
+      seek(start + distance);
+      expectProgress(1);
+      cy.get('writing-section').should(($writing) => {
+        expect($writing[0].getBoundingClientRect().top).to.be.closeTo(height, 1);
+      });
+      cy.get('golden-rose').shadow().find('canvas').should(($canvas) => {
+        expect($canvas[0].getBoundingClientRect().height).to.equal(height);
+        expect($canvas[0].getBoundingClientRect().width).to.equal(1024);
+      });
     });
   });
 });

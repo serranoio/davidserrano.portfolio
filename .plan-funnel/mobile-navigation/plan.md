@@ -1,3 +1,5 @@
+> **Superseded — 2026-10-18.** The approved continuous-scroll implementation replaces this plan's wheel interception and mandatory section snapping. The rose now uses a sticky viewport inside native page scroll; one-finger swipes advance and reverse the poem. The text below is historical, not an active implementation constraint. Current behavior is covered by [desktop scroll tests](../../cypress/e2e/desktop-scroll-flow.cy.ts), [mobile scroll tests](../../cypress/e2e/mobile-scroll-flow.cy.ts), and the [manual checks](../../test-plan-truth-statement.md).
+
 # Plan — Seamless Mobile Scroll (welcome → rose → writing)
 
 ## Problem Summary

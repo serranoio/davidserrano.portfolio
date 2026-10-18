@@ -1,232 +1,85 @@
 /// <reference types="cypress" />
+import { expectProgress, nativeTouchSwipe, roseApi, scrollGeometry, seek, visitHome } from '../support/scroll-flow';
 
-type RoseTestAPI = {
-  getControlsConfig: () => { enabled: boolean; touchesOne: number };
-  getScrollMode: () => string;
-  getTruthParagraphCount: () => number;
-  getTruthScrollTarget: () => number;
-  getTruthMaxScrollOffset: () => number;
-  getTruthActiveParagraphScreenBounds: () => { left: number; right: number; top: number; bottom: number } | null;
-};
-
-function installMobileMatchMedia(win: Window) {
-  const nativeMatchMedia = win.matchMedia.bind(win);
-
-  win.matchMedia = ((query: string) => {
-    if (query === '(pointer: coarse)') {
-      return {
-        media: query,
-        matches: true,
-        onchange: null,
-        addEventListener: () => undefined,
-        removeEventListener: () => undefined,
-        addListener: () => undefined,
-        removeListener: () => undefined,
-        dispatchEvent: () => true,
-      } as unknown as MediaQueryList;
-    }
-
-    return nativeMatchMedia(query);
-  }) as typeof win.matchMedia;
+function truthButton(direction: 'prev' | 'next') {
+  return cy.get('golden-rose').shadow().find(`[data-testid="truth-nav-${direction}"]`);
 }
 
-function visitMobile() {
-  cy.viewport('iphone-x');
-  cy.visit('/', {
-    onBeforeLoad(win) {
-      installMobileMatchMedia(win);
-    },
-  });
-  cy.get('golden-rose', { timeout: 10000 }).should('exist');
-  cy.get('golden-rose')
-    .shadow()
-    .find('[data-testid="loading-shimmer"]', { timeout: 15000 })
-    .should('not.exist');
-}
+describe('Continuous mobile poem scrolling', () => {
+  beforeEach(() => cy.viewport('iphone-x'));
 
-function roseApi() {
-  return cy.window().its('__ROSE_TEST_API__').should('exist') as Cypress.Chainable<RoseTestAPI>;
-}
-
-function scrollToSection(selector: 'welcome-section' | 'golden-rose' | 'writing-section') {
-  cy.window().then((win) => {
-    const section = win.document.querySelector(selector) as HTMLElement | null;
-    expect(section, selector).to.exist;
-    win.scrollTo(0, section!.getBoundingClientRect().top + win.scrollY);
-  });
-}
-
-function expectSectionAtTop(selector: 'welcome-section' | 'golden-rose' | 'writing-section') {
-  cy.get(selector).should(($section) => {
-    const top = $section[0].getBoundingClientRect().top;
-    expect(Math.abs(top), `${selector} top=${top}`).to.be.lessThan(45);
-  });
-}
-
-function expectTruthNavVisible() {
-  cy.get('golden-rose')
-    .shadow()
-    .find('[data-testid="truth-nav"]')
-    .should('have.class', 'coarse')
-    .and('have.css', 'position', 'fixed')
-    .and('have.css', 'pointer-events', 'auto')
-    .then(($nav) => {
-      const rect = $nav[0].getBoundingClientRect();
-      const view = $nav[0].ownerDocument.defaultView!;
-      expect(rect.right, 'truth nav right edge').to.be.greaterThan(view.innerWidth - 60);
-      expect(rect.left, 'truth nav left edge').to.be.greaterThan(view.innerWidth - 120);
-      expect(rect.bottom, 'truth nav bottom is above music button').to.be.lessThan(view.innerHeight - 64);
-      expect(rect.bottom, 'truth nav remains near bottom').to.be.greaterThan(view.innerHeight - 170);
-    });
-}
-
-function expectActiveTruthTextVisible() {
-  cy.window().then((win) => {
-    roseApi().should((api) => {
-      const bounds = api.getTruthActiveParagraphScreenBounds();
-      expect(bounds, 'active truth paragraph bounds').to.not.equal(null);
-      expect(bounds!.left, 'truth text left').to.be.greaterThan(6);
-      expect(bounds!.right, 'truth text right').to.be.lessThan(win.innerWidth - 6);
-      expect(bounds!.top, 'truth text top').to.be.greaterThan(6);
-      expect(bounds!.bottom, 'truth text bottom').to.be.lessThan(win.innerHeight - 6);
+  it('lets vertical touch scrolling own poem progress without section snapping', () => {
+    visitHome(true);
+    cy.get('html').should('have.css', 'scroll-snap-type', 'none');
+    cy.get('golden-rose').shadow().find('canvas').should('have.css', 'touch-action', 'pan-y pinch-zoom');
+    roseApi().invoke('getControlsConfig').its('touchesOne').should('eq', null);
+    scrollGeometry().then(({ start, distance }) => {
+      for (const progress of [0, 0.6, 1, 0.35, 0]) {
+        seek(start + distance * progress);
+        expectProgress(progress);
+      }
     });
   });
-}
 
-function pointerSwipeOnCanvas() {
-  cy.get('golden-rose')
-    .shadow()
-    .find('canvas[data-testid="rose-canvas"]')
-    .trigger('pointerdown', {
-      pointerId: 1,
-      pointerType: 'touch',
-      isPrimary: true,
-      button: 0,
-      buttons: 1,
-      clientX: 190,
-      clientY: 500,
-      eventConstructor: 'PointerEvent',
-      force: true,
-    })
-    .trigger('pointermove', {
-      pointerId: 1,
-      pointerType: 'touch',
-      isPrimary: true,
-      button: 0,
-      buttons: 1,
-      clientX: 260,
-      clientY: 360,
-      eventConstructor: 'PointerEvent',
-      force: true,
-    })
-    .trigger('pointerup', {
-      pointerId: 1,
-      pointerType: 'touch',
-      isPrimary: true,
-      button: 0,
-      buttons: 0,
-      clientX: 260,
-      clientY: 360,
-      eventConstructor: 'PointerEvent',
-      force: true,
-    });
-}
-
-function clickTruthNext(times = 1) {
-  for (let i = 0; i < times; i += 1) {
-    cy.get('golden-rose').shadow().find('[data-testid="truth-nav-next"]').click();
-  }
-}
-
-function clickTruthPrev(times = 1) {
-  for (let i = 0; i < times; i += 1) {
-    cy.get('golden-rose').shadow().find('[data-testid="truth-nav-prev"]').click();
-  }
-}
-
-describe('Mobile rose scene controls and truth navigation', () => {
-  it('keeps the truth controls fixed bottom-right across mobile sections', () => {
-    visitMobile();
-
-    scrollToSection('welcome-section');
-    expectSectionAtTop('welcome-section');
-    expectTruthNavVisible();
-
-    scrollToSection('golden-rose');
-    expectSectionAtTop('golden-rose');
-    expectTruthNavVisible();
-
-    scrollToSection('writing-section');
-    expectSectionAtTop('writing-section');
-    expectTruthNavVisible();
-  });
-
-  it('routes one-finger drag to Three.js controls and buttons to truth text / writing handoff', () => {
-    visitMobile();
-
-    scrollToSection('golden-rose');
-    expectSectionAtTop('golden-rose');
-
-    expectTruthNavVisible();
-    expectActiveTruthTextVisible();
-
-    roseApi().then((api) => {
-      const cfg = api.getControlsConfig();
-      expect(cfg.enabled).to.equal(true);
-      expect(cfg.touchesOne).to.equal(0);
-      expect(api.getScrollMode()).to.equal('free');
-    });
-
-    roseApi().then((api) => {
-      const beforeText = api.getTruthScrollTarget();
-      pointerSwipeOnCanvas();
-      cy.wait(150).then(() => {
-        const afterText = api.getTruthScrollTarget();
-        expect(afterText).to.equal(beforeText);
+  it('advances and reverses with real one-finger swipes over the canvas', () => {
+    visitHome(true);
+    scrollGeometry().then(({ start, distance }) => {
+      const middle = start + distance / 2;
+      seek(middle);
+      nativeTouchSwipe(1);
+      cy.window().its('scrollY').should('be.greaterThan', middle + 40);
+      cy.window().then((win) => {
+        const afterDown = win.scrollY;
+        expectProgress((afterDown - start) / distance);
+        nativeTouchSwipe(-1);
+        cy.window().its('scrollY').should('be.lessThan', afterDown - 40);
       });
     });
-
-    roseApi().invoke('getTruthScrollTarget').then((before) => {
-      clickTruthNext();
-      roseApi().invoke('getTruthScrollTarget').should('be.greaterThan', before);
-    });
-    expectActiveTruthTextVisible();
-
-    roseApi().then((api) => {
-      for (let i = 0; i < api.getTruthParagraphCount() - 1; i += 1) {
-        clickTruthNext();
-        expectActiveTruthTextVisible();
-      }
-      roseApi().invoke('getTruthScrollTarget').should('be.closeTo', api.getTruthMaxScrollOffset(), 0.02);
-    });
-
-    clickTruthNext();
-    expectSectionAtTop('writing-section');
   });
 
-  it('uses the previous button to reverse truth text and return to welcome', () => {
-    visitMobile();
-
-    scrollToSection('golden-rose');
-    expectSectionAtTop('golden-rose');
-    expectTruthNavVisible();
-
-    roseApi().then((api) => {
-      clickTruthNext(api.getTruthParagraphCount());
-      roseApi().invoke('getTruthScrollTarget').should('be.closeTo', api.getTruthMaxScrollOffset(), 0.02);
+  it('uses paragraph buttons on the same page timeline and scopes them to the rose', () => {
+    visitHome(true);
+    scrollGeometry().then(({ start, distance, height }) => {
+      seek(start);
+      roseApi().then((api) => {
+        const step = 1 / (api.getTruthParagraphCount() - 1);
+        truthButton('next').click({ scrollBehavior: false });
+        expectProgress(step);
+        cy.window().its('scrollY').should('be.closeTo', start + distance * step, 2);
+        truthButton('prev').click({ scrollBehavior: false });
+        expectProgress(0);
+        cy.window().its('scrollY').should('be.closeTo', start, 2);
+      });
+      seek(start + distance);
+      truthButton('next').click({ scrollBehavior: false });
+      cy.window().its('scrollY').should('be.closeTo', start + distance + height, 2);
+      truthButton('next').should(($button) => {
+        expect($button[0].getBoundingClientRect().bottom).to.be.lessThan(0);
+      });
+      // Native reversal returns to the final paragraph, then retraces it.
+      seek(start + distance - 100);
+      expectProgress(1 - 100 / distance);
+      seek(start);
+      truthButton('prev').click({ scrollBehavior: false });
+      cy.get('welcome-section').should(($hero) => {
+        expect($hero[0].getBoundingClientRect().top).to.be.closeTo(0, 2);
+      });
     });
+  });
 
-    roseApi().invoke('getTruthScrollTarget').then((atEnd) => {
-      clickTruthPrev();
-      roseApi().invoke('getTruthScrollTarget').should('be.lessThan', atEnd);
+  it('honors reduced motion for explicit paragraph navigation', () => {
+    visitHome(true, true);
+    scrollGeometry().then(({ start, distance }) => {
+      seek(start);
+      roseApi().then((api) => {
+        const step = 1 / (api.getTruthParagraphCount() - 1);
+        truthButton('next').then(($button) => {
+          $button[0].click();
+          const win = $button[0].ownerDocument.defaultView!;
+          expect(win.scrollY).to.be.closeTo(start + distance * step, 1);
+        });
+        expectProgress(step);
+      });
     });
-
-    roseApi().then((api) => {
-      clickTruthPrev(api.getTruthParagraphCount());
-      roseApi().invoke('getTruthScrollTarget').should('be.closeTo', 0, 0.02);
-    });
-
-    clickTruthPrev();
-    expectSectionAtTop('welcome-section');
   });
 });

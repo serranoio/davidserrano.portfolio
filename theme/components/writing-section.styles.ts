@@ -6,8 +6,7 @@ export default css`
     position: relative;
     width: 100vw;
     min-height: 100vh;
-    min-height: 100dvh;
-    scroll-snap-align: start;
+    min-height: 100svh;
     background: #0a0a08;
     color: #f7efde;
     font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
@@ -33,7 +32,7 @@ export default css`
   .header {
     display: flex;
     min-height: calc(100vh - 11rem);
-    min-height: calc(100dvh - 11rem);
+    min-height: calc(100svh - 11rem);
     align-items: center;
     justify-content: center;
     max-width: 1100px;
@@ -66,7 +65,7 @@ export default css`
     }
     .header {
       min-height: calc(100vh - 7.5rem);
-      min-height: calc(100dvh - 7.5rem);
+      min-height: calc(100svh - 7.5rem);
     }
   }
 
