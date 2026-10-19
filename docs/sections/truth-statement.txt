@@ -4,21 +4,25 @@ By David Serrano
 
 Preface
 
-It was 8:11 am in a Summer in San Francisco in 2023. I had downloaded a personal project vacuum made by my mentor, quobix, onto my goland IDE. After browsing for a 'lil, I remember standing away from my desk in absolute awe of what I had just seen. I think this was the second epiphany moment of my lifetime. I saw a code **forged** into art.
+It was 8:11 am in a Summer in San Francisco in 2023. I had downloaded a personal project vacuum made by my mentor, quobix, onto my goland IDE. After browsing for a 'lil, I remember standing away from my desk in absolute awe of what I had just seen. I think this was the second epiphany moment of my lifetime. I saw code **forged** into art.
  It was the equivalent of the Stormbreaker forged by a star in Avengers: Infinity War. 
 
- Every strike of the hammer, every drop of sweat, my mentor's +20 years of experience, of failing & learning from this mistakes, his entire soul had been poured into this codebase. You can't just harness the power of a star out of nowhere. This has to be cultivated, learned. 
- The root word for passion is patio, which means to struggle in Latin. I could feel the passion in the code. There is no reason why someone would build such a beautiful masterpiece if it didn't have passion behind it.
+Every strike of the hammer, every drop of sweat, my mentor's +20 years of experience, of failing & learning from these mistakes, his entire soul had been poured into this codebase. You can't just harness the power of a star out of nowhere. This has to be cultivated, learned. 
 
- The power of a star can only be contained thru the mastery of hammer forging.
+The root word for passion is patio, which means to struggle in Latin. I could feel the passion in the code. There is no reason why someone would build such a beautiful masterpiece if it didn't have passion behind it.
 
+The power of a star can only be contained thru the mastery of hammer forging.
 
 Honestly, the stormbreaker is a perfect analogy for it. The axe is vacuum, it's purpose being to cut. Every part of the axe was consequentially made. The handle was created by Groot, which gives it an organic feel to it. This is the UX, the CLI, organic in its nature. 
 
 
-There is more to coding than just creating the solution, it is actually the other way around; the solution already exists, and we are here to discover the solution. I would rather be wrong and discover the truth than right and have chosen a fantasy. What is bad makes space for what is good, and when you accept being wrong, you make space for the truth. That is a gorgeous truth of reality.
+There is more to coding than just creating the solution, it is actually the other way around; the solution already exists, and we are here to discover the solution. I would rather be wrong and discover the truth than right and have chosen a fantasy.  Also, what is bad makes space for what is good, and when you accept being wrong, you make space for the truth. That is a gorgeous truth of reality.
 
-Just as how every petal of the rose contributes to the whole to make it so beautiful and so full of life, every day of your life contributes to the whole to make it so beautiful and full of life.
+This journey of coding has opened me up to a vast well of potential. Why stop here? Why stop now? I can already feel the potential for the amount of 'life' I can create from my software. Whether that 'life' means that it gives rise to more software, or it saves me more time, or that it helps out another person, that is the goal. 
+
+The beautiful rose came across the golden ratio to form its spiral. It's a very simple recursive formula that can be coded in like 5 lines. It chose this formula because it is optimal: allows for optimal sun exposure by minimizing pettal overlap. This is what truth discovery looks like in nature. What makes the rose beautiful is because it converged to truth. It didn't manufacture it. It didnt lie its way to the top. It didn't put itself inside a mask. Instead, it exists in its fullest expression, raw, exposed.
+
+This is what real engineering is. This is what I felt when I saw vacuum, this is what the rose represents.
 
 Find and click a petal that is bouncy to read a poem!
 

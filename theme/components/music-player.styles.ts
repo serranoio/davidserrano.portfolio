@@ -8,6 +8,31 @@ export default css`
     z-index: 50;
   }
 
+  .player-mount {
+    position: fixed;
+    left: -9999px;
+    top: -9999px;
+    width: 200px;
+    height: 200px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .player-message {
+    position: absolute;
+    right: 0;
+    bottom: 100%;
+    box-sizing: border-box;
+    width: min(17rem, calc(100vw - 2rem));
+    margin: 0 0 0.75rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--color-gold-muted, rgba(212, 175, 55, 0.4));
+    border-radius: 8px;
+    background: var(--color-bg, #0a0a08);
+    color: var(--color-text, #faf3df);
+    font: 0.875rem/1.5 var(--font-body, system-ui, sans-serif);
+  }
+
   .player-button {
     width: 48px;
     height: 48px;
