@@ -1,7 +1,7 @@
 import { LitElement, html, type PropertyValues } from 'lit';
 import styles from './writing-section.styles';
 import { ShootingStarsCanvas } from './shooting-stars-canvas';
-const BLOG_LINK = '/blog/intro';
+const BLOG_LINK = '/writing.html';
 
 export class WritingSectionElement extends LitElement {
   static styles = [styles];
@@ -32,7 +32,7 @@ export class WritingSectionElement extends LitElement {
           href=${BLOG_LINK}
           data-testid="writing-cta"
         >
-          I write too.
+          Read my writing <span aria-hidden="true">↗</span>
         </a>
       </header>
     `;

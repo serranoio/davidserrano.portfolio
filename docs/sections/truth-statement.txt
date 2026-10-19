@@ -13,7 +13,7 @@ The root word for passion is patio, which means to struggle in Latin. I could fe
 
 The power of a star can only be contained thru the mastery of hammer forging.
 
-Honestly, the stormbreaker is a perfect analogy for it. The axe is vacuum, it's purpose being to cut. Every part of the axe was consequentially made. The handle was created by Groot, which gives it an organic feel to it. This is the UX, the CLI, organic in its nature. 
+Honestly, the stormbreaker is a perfect analogy for it. The axe is vacuum. The axe cuts, vacuum lints. Every part of the axe was consequentially made. The handle was created by Groot, which gives it an organic feel. To vacuum, this handle is the UX, the CLI, organic in its nature.
 
 
 There is more to coding than just creating the solution, it is actually the other way around; the solution already exists, and we are here to discover the solution. I would rather be wrong and discover the truth than right and have chosen a fantasy.  Also, what is bad makes space for what is good, and when you accept being wrong, you make space for the truth. That is a gorgeous truth of reality.

@@ -4,17 +4,11 @@ export default css`
   :host {
     display: block;
     position: relative;
-    width: 100vw;
-    /* Keep section boundaries stable while mobile browser toolbars move. */
-    height: 100vh;
-    height: 100svh;
-    overflow: hidden;
-    /* Hardcoded — rspress defines --color-bg as a light cream which would
-       win over a var() fallback and leave the night sky unreadable. */
-    background-color: #0a0a08;
+    width: 100%;
+    min-height: 100svh;
+    background: #0a0a08;
     color: #faf3df;
-    font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
-    /* --paint-progress is set on the host each rAF tick by the element. */
+    font-family: var(--font-body, 'DM Sans', sans-serif);
   }
 
   .stars-canvas {
@@ -23,167 +17,180 @@ export default css`
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 0;
   }
 
   .container {
     position: relative;
-    z-index: 1;
     display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 4rem;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: clamp(3rem, 7vw, 7rem);
     align-items: center;
-    width: min(1200px, 92vw);
-    height: 100%;
+    width: min(1120px, 88%);
+    min-height: 100svh;
     margin: 0 auto;
-    padding: 2rem;
+    padding: clamp(3rem, 7vh, 6rem) 0;
     box-sizing: border-box;
   }
 
-  .text-col {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    align-items: flex-start;
+  .greeting {
+    margin: 0 0 1.5rem;
+    font-size: 1rem;
+    color: #d9cba9;
   }
 
-  /* Headline is two stacked copies inside a wrap:
-     - .headline-stroke: outline-only, always fully visible (the "canvas")
-     - .headline: solid gold, clip-pathed left→right by --paint-progress
-     The paintbrush rides the leading edge of the clip. */
-  .headline-wrap {
-    position: relative;
-    display: inline-block;
-    line-height: 1;
-  }
-
-  .headline-stroke,
   .headline {
     font-family: var(--font-title, 'Cormorant Garamond', Georgia, serif);
-    font-weight: 600;
-    font-size: clamp(3rem, 7vw, 5.5rem);
-    line-height: 1.05;
-    letter-spacing: 0.01em;
+    font-weight: 400;
+    font-size: clamp(4.5rem, 8.4vw, 7.5rem);
+    line-height: 0.92;
+    letter-spacing: -0.035em;
     margin: 0;
-    white-space: nowrap;
   }
 
-  .headline-stroke {
-    color: rgba(244, 215, 123, 0.22);
-    -webkit-text-stroke: 1.25px rgba(244, 215, 123, 0.75);
-    text-stroke: 1.25px rgba(244, 215, 123, 0.75);
-    pointer-events: none;
-  }
-
-  .headline {
-    position: absolute;
-    top: 0;
-    left: 0;
-    color: #f4d77b;
-    text-shadow: 0 0 24px rgba(244, 215, 123, 0.25);
-    clip-path: inset(0 calc((1 - var(--paint-progress, 0)) * 100%) 0 0);
-  }
-
-  .paintbrush {
-    position: absolute;
-    top: 50%;
-    left: calc(var(--paint-progress, 0) * 100%);
-    transform: translate(-30%, -40%) rotate(-18deg);
-    width: clamp(70px, 9vw, 110px);
-    height: auto;
-    pointer-events: none;
-    opacity: clamp(0, calc(var(--paint-progress, 0) * 6), 1);
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.5));
+  .headline em {
+    color: #e6c886;
+    font-weight: 400;
   }
 
   .subline {
+    margin: 1.5rem 0 0;
     font-family: var(--font-title, 'Cormorant Garamond', Georgia, serif);
-    font-style: italic;
-    font-size: clamp(1.1rem, 1.8vw, 1.5rem);
-    color: rgba(244, 215, 123, 0.65);
-    letter-spacing: 0.18em;
-    margin: 0;
-    /* Fades in during the second half of the paint reveal — quiet entrance. */
-    opacity: clamp(0, calc((var(--paint-progress, 0) - 0.5) * 2), 1);
-    transform: translateY(calc((1 - clamp(0, (var(--paint-progress, 0) - 0.5) * 2, 1)) * 8px));
-    transition: transform 0.05s linear;
+    font-size: clamp(1.3rem, 1.8vw, 1.6rem);
+    line-height: 1.4;
   }
 
   .intro {
-    max-width: 34rem;
-    margin: 0.25rem 0 0;
-    color: rgba(250, 243, 223, 0.78);
-    font-size: clamp(1rem, 1.35vw, 1.18rem);
-    line-height: 1.65;
-    letter-spacing: 0;
-    text-wrap: balance;
+    max-width: 29rem;
+    margin: 1.25rem 0 0;
+    color: #c8c0ae;
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  .invitation {
+    margin-top: 1.5rem;
+  }
+
+  .destinations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .destination-link {
+    display: inline-flex;
+    gap: 0.75rem;
+    align-items: center;
+    min-height: 44px;
+    color: #faf3df;
+    text-decoration: underline;
+    text-underline-offset: 0.4em;
+    text-decoration-color: #a48a54;
+    font-size: 0.95rem;
+  }
+
+  .destination-link:hover {
+    color: #e6c886;
+  }
+
+  .destination-link:focus-visible {
+    outline: 2px solid #e6c886;
+    outline-offset: 4px;
+  }
+
+  .explore-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 48px;
+    box-sizing: border-box;
+    border-bottom: 1px solid #a48a54;
+    color: #e6c886;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 180ms ease;
+  }
+
+  .explore-link span {
+    transition: transform 180ms ease;
+  }
+
+  .explore-link:hover {
+    color: #faf3df;
+  }
+
+  .explore-link:hover span {
+    transform: translateY(3px);
+  }
+
+  .explore-link:focus-visible {
+    outline: 2px solid #e6c886;
+    outline-offset: 6px;
+  }
+
+  .explore-link:active {
+    color: #d9cba9;
+  }
+
+  .journey-note {
+    margin: 0.75rem 0 0;
+    color: #b9af98;
+    font-size: 0.875rem;
+    line-height: 1.5;
   }
 
   .photo-col {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    margin: 0;
+    align-self: center;
   }
 
   .photo {
-    width: min(420px, 80%);
+    width: 100%;
     aspect-ratio: 4 / 5;
     object-fit: cover;
     object-position: center 30%;
     display: block;
-    border: 1px solid rgba(244, 215, 123, 0.35);
-    border-radius: 4px;
-    box-shadow:
-      0 0 30px rgba(244, 215, 123, 0.08),
-      0 8px 32px rgba(0, 0, 0, 0.6);
+    border-radius: 2px;
   }
 
-  .scroll-hint {
-    position: absolute;
-    bottom: 1.75rem;
-    left: 50%;
-    transform: translateX(-50%);
-    color: rgba(244, 215, 123, 0.45);
-    font-size: 1.5rem;
-    z-index: 1;
-    animation: bob 2.5s ease-in-out infinite;
-    pointer-events: none;
-    /* Fades out as the user starts scrolling. */
-    opacity: clamp(0, calc(1 - var(--paint-progress, 0) * 3), 1);
-  }
-
-  @keyframes bob {
-    0%, 100% { transform: translate(-50%, 0); }
-    50% { transform: translate(-50%, 0.5rem); }
+  figcaption {
+    margin-top: 1rem;
+    color: #b9af98;
+    font-size: 0.875rem;
+    line-height: 1.5;
   }
 
   @media (max-width: 768px) {
     .container {
       grid-template-columns: 1fr;
-      grid-template-rows: auto auto;
       gap: 2.5rem;
-      align-content: center;
+      width: min(32rem, 86%);
+      padding: 3rem 0;
     }
-    .text-col {
-      order: 2;
-      align-items: center;
-      text-align: center;
+
+    .headline {
+      font-size: clamp(4.5rem, 17vw, 6.5rem);
     }
-    .intro {
-      max-width: min(32rem, 88vw);
-      font-size: 1rem;
-      line-height: 1.55;
+
+    .greeting {
+      margin-bottom: 1.25rem;
     }
+
+    .destinations {
+      column-gap: 1rem;
+    }
+
     .photo-col {
-      order: 1;
-    }
-    .photo {
-      width: min(220px, 55%);
+      width: 72%;
+      justify-self: end;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .scroll-hint { animation: none; }
-    .subline { transition: none; }
+    .explore-link,
+    .explore-link span {
+      transition: none;
+    }
   }
 `;

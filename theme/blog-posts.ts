@@ -167,7 +167,8 @@ function readBlogPosts(): BlogPost[] {
       const slugFromFile = file.replace(/\.(md|mdx)$/, '');
       const content = fs.readFileSync(path.join(BLOG_DIR, file), 'utf8');
       const frontmatter = content.match(FRONTMATTER_RE)?.[1] ?? '';
-      const slug = parseScalar(frontmatter, 'slug') ?? slugFromFile;
+      // Rspress routes follow filenames; `slug` frontmatter does not rename them.
+      const slug = slugFromFile;
       const title = parseScalar(frontmatter, 'title') ?? FALLBACK_TITLES[slug] ?? slug;
       const tags = parseTags(frontmatter);
 

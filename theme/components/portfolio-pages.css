@@ -1,0 +1,54 @@
+.portfolio-page {
+  min-height: calc(100svh - var(--rp-nav-height, 64px));
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.portfolio-page__inner {
+  width: min(1024px, 86%);
+  margin-inline: auto;
+  padding-top: clamp(3rem, 7vw, 6rem);
+  padding-bottom: 2rem;
+}
+
+.portfolio-page__header { max-width: 46rem; margin-bottom: 2.5rem; }
+.portfolio-page__eyebrow { color: var(--color-gold-dark); font-size: 0.875rem; margin: 0 0 1rem; }
+.dark .portfolio-page__eyebrow { color: var(--color-gold-light); }
+.portfolio-page h1 { font-size: clamp(3.25rem, 7vw, 5.5rem); line-height: 1.02; font-weight: 400; letter-spacing: -0.035em; margin: 0 0 1.5rem; text-wrap: balance; }
+.portfolio-page__introduction { font-size: clamp(1.05rem, 1.7vw, 1.2rem); line-height: 1.75; max-width: 40rem; color: var(--color-text-muted); }
+.portfolio-page h2 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; line-height: 1.15; margin: 0 0 1.25rem; }
+.portfolio-page h3 { font-size: 1.6rem; font-weight: 500; margin: 0 0 0.75rem; }
+.portfolio-page p { line-height: 1.75; }
+.portfolio-page a { text-decoration: none; }
+.portfolio-page a:focus-visible, .portfolio-page button:focus-visible { outline: 2px solid var(--color-gold-primary); outline-offset: 5px; }
+.portfolio-page a:hover { color: var(--color-gold-dark); }
+.dark .portfolio-page a:hover { color: var(--color-gold-light); }
+.portfolio-links { display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; }
+.portfolio-links a, .portfolio-text-link { display: inline-flex; align-items: center; gap: 1rem; min-height: 44px; color: var(--color-text); text-decoration: underline !important; text-decoration-color: var(--color-gold-primary) !important; text-underline-offset: 0.4em; }
+.portfolio-section { padding-top: 3rem; margin-top: 3rem; border-top: 1px solid var(--rp-c-divider); }
+.portfolio-section > p { max-width: 40rem; }
+.engineering-story { max-width: 48rem; }
+.experience-entry { margin-top: 2rem; max-width: 40rem; }
+.portfolio-reading-list { list-style: none; padding: 0; margin: 0; }
+.portfolio-reading-list a { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 0; color: var(--color-text); border-bottom: 1px solid var(--rp-c-divider); }
+.portfolio-page__footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; margin-top: 5rem; padding-top: 1.5rem; border-top: 1px solid var(--rp-c-divider); font-size: 0.875rem; color: var(--color-text-muted); }
+.portfolio-page__footer a { display: inline-flex; align-items: center; min-height: 44px; color: inherit; }
+.portfolio-page__footer > span { align-self: center; }
+.writing-filters { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; border-block: 1px solid var(--rp-c-divider); padding: 0.75rem 0; }
+.writing-filters button { min-height: 44px; padding: 0.25rem 0; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--color-text-muted); font: inherit; font-size: 0.875rem; cursor: pointer; }
+.writing-filters button:hover { color: var(--color-text); }
+.writing-filters button[aria-pressed='true'] { color: var(--color-text); border-bottom-color: var(--color-gold-primary); }
+.writing-count { margin: 1.5rem 0 0.5rem; color: var(--color-text-muted); font-size: 0.875rem; }
+.writing-list { list-style: none; padding: 0; margin: 0; }
+.writing-list li { border-bottom: 1px solid var(--rp-c-divider); }
+.writing-list a { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding: 1.5rem 0; color: var(--color-text); }
+.writing-list__title { display: block; font-family: var(--font-title); font-size: clamp(1.6rem, 3vw, 2rem); line-height: 1.2; }
+.writing-list__topics { display: block; margin-top: 0.5rem; font-size: 0.8rem; color: var(--color-text-muted); }
+.about-composition { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: clamp(2rem, 6vw, 5rem); align-items: start; margin-top: 3rem; margin-bottom: 3rem; }
+.about-composition img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: center 30%; }
+.about-story p { color: var(--color-text-muted); margin: 0 0 1.25rem; }
+@media (max-width: 640px) {
+  .about-composition { grid-template-columns: 1fr; }
+  .about-composition img { max-width: 16rem; }
+  .portfolio-page__footer { margin-top: 3rem; }
+}

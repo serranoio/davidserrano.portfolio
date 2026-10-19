@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import { defineConfig } from '@rspress/core';
-import { TAG_ORDER, TAG_LABELS, postsByTag } from './theme/blog-posts';
+import { BLOG_POSTS, TAG_ORDER, TAG_LABELS, postsByTag } from './theme/blog-posts';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -9,6 +9,11 @@ export default defineConfig({
   logo: '/serrano-heart.png',
   logoText: 'David Serrano',
   themeConfig: {
+    nav: [
+      { text: 'Engineering', link: '/engineering' },
+      { text: 'Writing', link: '/writing', activeMatch: '^/(writing(?:\\.html)?$|blog/)' },
+      { text: 'About', link: '/about' },
+    ],
     socialLinks: [
       {
         icon: 'github',
@@ -29,6 +34,14 @@ export default defineConfig({
     },
   },
   builderConfig: {
+    source: {
+      define: {
+        __WRITING_CATALOG__: JSON.stringify({
+          posts: BLOG_POSTS.filter((post) => post.slug !== 'intro'),
+          tags: TAG_ORDER.map((id) => ({ id, label: TAG_LABELS[id] })),
+        }),
+      },
+    },
     tools: {
       rspack: (config) => {
         config.module ??= {};
