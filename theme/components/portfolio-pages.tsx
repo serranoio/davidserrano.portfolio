@@ -56,15 +56,11 @@ export function EngineeringPage() {
           ))}
         </section>
       )}
-      <section className="portfolio-section engineering-story" aria-labelledby="craft-heading">
-        <p className="portfolio-page__eyebrow">The story behind the craft</p>
-        <h2 id="craft-heading">The day I saw code become art.</h2>
-        <p>In San Francisco in 2023, I opened my mentor’s codebase and stepped away
-          from my desk in awe. Years of learning, care, and experience had become
-          something I could feel in the code.</p>
-        <p>That moment became <em>The Ballad of Programata</em>, a collection of
-          poems about coding, and the rose at the heart of this site.</p>
-        <a className="portfolio-text-link" href="/#rose">Discover the beauty in engineering <span aria-hidden="true">→</span></a>
+      <section className="portfolio-section engineering-story" aria-label="The Ballad of Programata">
+        <a className="portfolio-text-link" href="/#rose">
+          <span>Read The Ballad Of Programata: where you can find beauty in engineering</span>
+          <span aria-hidden="true">→</span>
+        </a>
       </section>
       <section className="portfolio-section" aria-labelledby="engineering-writing-heading">
         <h2 id="engineering-writing-heading">Thinking about the work</h2>

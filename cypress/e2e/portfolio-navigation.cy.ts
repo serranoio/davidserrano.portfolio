@@ -13,7 +13,7 @@ describe('Life portfolio navigation', () => {
     cy.get('main a').each(($link) => {
       expect($link.attr('href')).not.to.equal('#');
     });
-    cy.get('main').contains('a', 'Discover the beauty in engineering').click();
+    cy.get('main').contains('a', 'Read The Ballad Of Programata').click();
     cy.location('hash').should('eq', '#rose');
     cy.get('golden-rose').should(($rose) => {
       expect(Math.abs($rose[0].getBoundingClientRect().top)).to.be.lessThan(70);
