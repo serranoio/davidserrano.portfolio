@@ -20,7 +20,7 @@ There is more to coding than just creating the solution, it is actually the othe
 
 This journey of coding has opened me up to a vast well of potential. Why stop here? Why stop now? I can already feel the potential for the amount of 'life' I can create from my software. Whether that 'life' means that it gives rise to more software, or it saves me more time, or that it helps out another person, that is the goal. 
 
-The beautiful rose came across the golden ratio to form its spiral. It's a very simple recursive formula that can be coded in like 5 lines. It chose this formula because it is optimal: allows for optimal sun exposure by minimizing pettal overlap. This is what truth discovery looks like in nature. What makes the rose beautiful is because it converged to truth. It didn't manufacture it. It didnt lie its way to the top. It didn't put itself inside a mask. Instead, it exists in its fullest expression, raw, exposed.
+The beautiful rose came across the golden ratio to form its spiral. It's a very simple recursive formula that can be coded in like 5 lines. It chose this formula because it is optimal: allows for optimal sun exposure by minimizing pettal overlap. This is what truth discovery looks like in nature. What makes the rose beautiful is because it converged to truth. It didn't manufacture it. It didnt lie its way to the top. It didn't put itself inside a mask. Instead, it exists in its fullest expression, raw, exposed. It's the evidence of nature's passion.
 
 This is what real engineering is. This is what I felt when I saw vacuum, this is what the rose represents.
 
