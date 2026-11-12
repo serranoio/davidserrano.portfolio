@@ -18,7 +18,7 @@ describe('Rose Click Detection', () => {
         expect(api.getState()).to.equal('idle');
 
         // Programmatically click an active petal
-        api.clickPetalBySection('about'); // First active petal (About)
+        api.clickPetalBySection('todo-v1'); // First active petal (TO DO v1)
 
         cy.wait(50).then(() => {
           const state = api.getState();
@@ -33,34 +33,34 @@ describe('Rose Click Detection', () => {
         expect(api.getActiveSection()).to.be.null;
 
         // Click the first active petal
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
 
         cy.wait(50).then(() => {
-          expect(api.getActiveSection()).to.equal('about');
+          expect(api.getActiveSection()).to.equal('todo-v1');
         });
       });
     });
 
-    it('clicking second active petal sets poetry section', () => {
+    it('clicking second article petal sets TO DO v2 section', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
 
-        // Click the second active petal (index 6)
-        api.clickPetalBySection('poetry');
+        // Click the second placeholder article.
+        api.clickPetalBySection('todo-v2');
 
         cy.wait(50).then(() => {
-          expect(api.getActiveSection()).to.equal('poetry');
+          expect(api.getActiveSection()).to.equal('todo-v2');
         });
       });
     });
 
-    it('clicking non-active petal does not change state', () => {
+    it('clicking an invalid petal does not change state', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
         expect(api.getState()).to.equal('idle');
 
-        // Click a non-active petal (index 1)
-        api.clickPetal(1);
+        // An index outside the loaded petals must remain harmless.
+        api.clickPetal(api.getPetalCount());
 
         cy.wait(50).then(() => {
           expect(api.getState()).to.equal('idle');
@@ -83,13 +83,26 @@ describe('Rose Click Detection', () => {
 
         cy.window().then((win) => {
           const api = (win as any).__ROSE_TEST_API__;
-          api.clickPetalBySection('about');
+          api.clickPetalBySection('todo-v1');
         });
 
-        cy.wrap(eventPromise).should('deep.equal', { section: 'about' });
+        cy.wrap(eventPromise).should('deep.equal', { section: 'todo-v1' });
       });
     });
   });
+
+  for (const [index, title] of [[0, 'TO DO v1'], [1, 'TO DO v2'], [45, 'TO DO v2']] as const) {
+    it(`opens ${title} from newly active petal ${index}`, () => {
+      cy.get('golden-rose').scrollIntoView();
+      cy.window().then((win) => {
+        const api = (win as any).__ROSE_TEST_API__;
+        api.clickPetal(index);
+        expect(api.getActiveSection()).to.equal(`petal-${index}`);
+      });
+      cy.get('golden-rose').shadow().find('#content-root.visible')
+        .should('be.visible').and('contain.text', title);
+    });
+  }
 
   describe('Mobile Click (US-7)', () => {
     beforeEach(() => {
@@ -107,7 +120,7 @@ describe('Rose Click Detection', () => {
         const api = (win as any).__ROSE_TEST_API__;
         expect(api.getState()).to.equal('idle');
 
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
 
         cy.wait(50).then(() => {
           const state = api.getState();

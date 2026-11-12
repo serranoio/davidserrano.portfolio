@@ -31,23 +31,23 @@ describe('Rose petal real-pixel clicks', () => {
     });
   });
 
-  it('opens About by clicking its petal on the canvas', () => {
-    realPixelClickPetal('about').then(() => {
+  it('opens TO DO v1 by clicking its petal on the canvas', () => {
+    realPixelClickPetal('todo-v1').then(() => {
       cy.wait(1500);
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        expect(api.getActiveSection()).to.equal('about');
+        expect(api.getActiveSection()).to.equal('todo-v1');
         expect(api.getState()).to.equal('open');
       });
     });
   });
 
-  it('opens Poetry by clicking its petal on the canvas', () => {
-    realPixelClickPetal('poetry').then(() => {
+  it('opens TO DO v2 by clicking its petal on the canvas', () => {
+    realPixelClickPetal('todo-v2').then(() => {
       cy.wait(1500);
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        expect(api.getActiveSection()).to.equal('poetry');
+        expect(api.getActiveSection()).to.equal('todo-v2');
         expect(api.getState()).to.equal('open');
       });
     });

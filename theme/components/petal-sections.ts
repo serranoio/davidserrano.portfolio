@@ -1,24 +1,12 @@
 import type { ComponentType } from 'react';
-import About from '../../docs/sections/about.mdx';
-import Poetry from '../../docs/sections/poetry.mdx';
+import TodoV1 from '../../docs/sections/to-do-v1.mdx';
+import TodoV2 from '../../docs/sections/to-do-v2.mdx';
 
-// Registry of which rose petals are clickable and what MDX renders inside.
-//
-// To add a new section:
-//   1. Drop a new MDX file in docs/sections/
-//   2. Add an `import` line above for it
-//   3. Add an entry below: { petalIndex, id, Component }
-//
-// `petalIndex` indexes directly into the GLB's petal meshes, sorted by name
-// (so it's stable across reloads). The petal at that index stays exactly
-// where the model placed it — registering it just makes it clickable and
-// glowing. To discover which physical petal a given index is, open the
-// browser console and call:
-//   __ROSE_TEST_API__.getPetalPositions()
-// — that returns [{x,y,z}, ...] in the same order as petalIndex.
-//
-// `id` is the slug used as `activeSection` state and dispatched in the
-// `section-selected` event detail. Keep it URL-safe and unique.
+// The current rose_separated.glb contains 46 petal meshes, sorted by name.
+// Every petal has its own section id and can host a different MDX article.
+// To publish an article: import its MDX component, then add/replace an entry
+// in PETAL_SECTION_OVERRIDES using the desired petalIndex and a unique id.
+// Unassigned petals alternate between the two placeholder articles.
 
 export interface PetalSection {
   petalIndex: number;
@@ -26,23 +14,24 @@ export interface PetalSection {
   Component: ComponentType;
 }
 
-export const PETAL_SECTIONS: readonly PetalSection[] = [
-  // Indices verified empirically with __ROSE_TEST_API__.raycastAtCanvas():
-  // these two are the petals that *win* their own raycast from the default
-  // camera angle (the GLB has co-located duplicate meshes, so naive picks
-  // get occluded by a sibling at the same XYZ).
-  //
-  // 41 = front-right outer petal (x≈0.09, z≈0.15) — covers a wide right
-  //      area, several "lower" petals (19, 24, 25, 26, 31, 34, 39, 44) all
-  //      raycast to this one. Big and prominent.
-  // 43 = front-left outer petal (x≈-0.15, z≈0.12). Pair to 41 on the left.
-  //
-  // To find more click-winning indices later, run cypress on
-  // cypress/e2e/rose/raycast-click.cy.ts and inspect API output via
-  // __ROSE_TEST_API__.raycastAtCanvas(x, y).
-  { petalIndex: 41, id: 'about', Component: About },
-  { petalIndex: 43, id: 'poetry', Component: Poetry },
+const PETAL_COUNT = 46;
+
+const PETAL_SECTION_OVERRIDES: readonly PetalSection[] = [
+  // Prominent front-right and front-left petals keep both articles reachable.
+  { petalIndex: 41, id: 'todo-v1', Component: TodoV1 },
+  { petalIndex: 43, id: 'todo-v2', Component: TodoV2 },
 ];
+
+export const PETAL_SECTIONS: readonly PetalSection[] = [
+  ...Array.from({ length: PETAL_COUNT }, (_, petalIndex) => ({
+    petalIndex,
+    id: `petal-${petalIndex}`,
+    Component: petalIndex % 2 === 0 ? TodoV1 : TodoV2,
+  })).filter(
+    ({ petalIndex }) => !PETAL_SECTION_OVERRIDES.some((entry) => entry.petalIndex === petalIndex)
+  ),
+  ...PETAL_SECTION_OVERRIDES,
+].sort((a, b) => a.petalIndex - b.petalIndex);
 
 // Loud at module load: duplicate petalIndex or id is a config bug, not a
 // runtime degrade. Out-of-bounds petalIndex (depends on the loaded GLB) is

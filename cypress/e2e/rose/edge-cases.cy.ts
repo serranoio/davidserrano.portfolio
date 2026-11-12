@@ -18,7 +18,7 @@ describe('Rose Edge Cases', () => {
         const api = (win as any).__ROSE_TEST_API__;
 
         // Start blooming
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
 
         // Try to click another petal during animation
         cy.wait(50).then(() => {
@@ -29,7 +29,7 @@ describe('Rose Edge Cases', () => {
         // Verify we still end up on the first section
         cy.wait(1500).then(() => {
           expect(api.getState()).to.equal('open');
-          expect(api.getActiveSection()).to.equal('about');
+          expect(api.getActiveSection()).to.equal('todo-v1');
         });
       });
     });
@@ -39,7 +39,7 @@ describe('Rose Edge Cases', () => {
         const api = (win as any).__ROSE_TEST_API__;
 
         // Open first
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
       });
 
       cy.wait(1500);
@@ -86,7 +86,7 @@ describe('Rose Edge Cases', () => {
     it('handles resize during animation', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
       });
 
       // Resize mid-animation
@@ -107,7 +107,7 @@ describe('Rose Edge Cases', () => {
     it('handles very long content scrolling', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
       });
 
       cy.wait(1500);
@@ -122,7 +122,7 @@ describe('Rose Edge Cases', () => {
     it('close button remains accessible when scrolled', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
       });
 
       cy.wait(1500);
@@ -142,7 +142,7 @@ describe('Rose Edge Cases', () => {
         const api = (win as any).__ROSE_TEST_API__;
 
         // Open, close, open different section
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
       });
 
       cy.wait(1500);
@@ -156,7 +156,7 @@ describe('Rose Edge Cases', () => {
 
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('poetry');
+        api.clickPetalBySection('todo-v2');
       });
 
       cy.wait(1500);
@@ -164,7 +164,7 @@ describe('Rose Edge Cases', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
         expect(api.getState()).to.equal('open');
-        expect(api.getActiveSection()).to.equal('poetry');
+        expect(api.getActiveSection()).to.equal('todo-v2');
       });
     });
 
@@ -173,7 +173,7 @@ describe('Rose Edge Cases', () => {
         const api = (win as any).__ROSE_TEST_API__;
         const originalPositions = api.getPetalPositions();
 
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
 
         cy.wait(1500).then(() => {
           api.closeContent();

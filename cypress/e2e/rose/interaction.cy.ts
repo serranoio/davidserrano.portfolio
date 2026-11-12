@@ -164,13 +164,29 @@ describe('Rose Interaction', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
         const activePetals = api.getActivePetalIndices();
-        // Registry-driven — about + poetry land on whichever physical petals
-        // PETAL_SECTIONS points at. We just check both registered sections
-        // resolved to real petal slots.
-        expect(activePetals.length).to.equal(2);
-        expect(api.getPetalIndexForSection('about')).to.not.be.null;
-        expect(api.getPetalIndexForSection('poetry')).to.not.be.null;
+        // Every loaded petal has an article assignment.
+        expect(activePetals.length).to.equal(api.getPetalCount());
+        expect(api.getPetalIndexForSection('todo-v1')).to.not.be.null;
+        expect(api.getPetalIndexForSection('todo-v2')).to.not.be.null;
       });
     });
   });
+  it('bounces every petal while idle', () => {
+    cy.window().then((win) => {
+      const api = (win as any).__ROSE_TEST_API__;
+      const initial = api.getPetalPositions();
+      expect(initial.length).to.equal(46);
+      const moved = new Set<number>();
+      // Sample a full bounce cycle so a petal at its turning point is covered.
+      for (let sample = 0; sample < 5; sample++) {
+        cy.wait(400).then(() => {
+          api.getPetalPositions().forEach((position: { y: number }, index: number) => {
+            if (Math.abs(position.y - initial[index].y) > 0.001) moved.add(index);
+          });
+        });
+      }
+      cy.then(() => expect(moved.size).to.equal(initial.length));
+    });
+  });
+
 });

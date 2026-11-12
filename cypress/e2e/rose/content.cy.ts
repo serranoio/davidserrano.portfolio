@@ -16,7 +16,7 @@ describe('Rose Content Container', () => {
     it('shows content container when rose is open', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
       });
 
       // Wait for bloom animation
@@ -40,7 +40,7 @@ describe('Rose Content Container', () => {
     it('displays section title in content', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
       });
 
       cy.wait(1500);
@@ -48,13 +48,13 @@ describe('Rose Content Container', () => {
       cy.get('golden-rose')
         .shadow()
         .find('#content-root')
-        .should('contain.text', 'About');
+        .should('contain.text', 'TO DO v1');
     });
 
     it('shows close button in content container', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
       });
 
       cy.wait(1500);
@@ -68,7 +68,7 @@ describe('Rose Content Container', () => {
     it('close button closes content and returns to idle', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
       });
 
       cy.wait(1500);
@@ -93,7 +93,7 @@ describe('Rose Content Container', () => {
     it('content container has proper styling', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
       });
 
       cy.wait(1500);
@@ -108,7 +108,7 @@ describe('Rose Content Container', () => {
     it('content is scrollable if content exceeds container', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
       });
 
       cy.wait(1500);
@@ -121,10 +121,10 @@ describe('Rose Content Container', () => {
   });
 
   describe('Section Content (US-10)', () => {
-    it('shows About section content', () => {
+    it('shows TO DO v1 section content', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('about');
+        api.clickPetalBySection('todo-v1');
       });
 
       cy.wait(1500);
@@ -132,13 +132,13 @@ describe('Rose Content Container', () => {
       cy.get('golden-rose')
         .shadow()
         .find('#content-root')
-        .should('contain.text', 'About');
+        .should('contain.text', 'TO DO v1');
     });
 
-    it('shows Poetry section content', () => {
+    it('shows TO DO v2 section content', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('poetry');
+        api.clickPetalBySection('todo-v2');
       });
 
       cy.wait(1500);
@@ -146,7 +146,7 @@ describe('Rose Content Container', () => {
       cy.get('golden-rose')
         .shadow()
         .find('#content-root')
-        .should('contain.text', 'Poetry');
+        .should('contain.text', 'TO DO v2');
     });
   });
 
@@ -155,8 +155,8 @@ describe('Rose Content Container', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
 
-        // Open About
-        api.clickPetalBySection('about');
+        // Open TO DO v1
+        api.clickPetalBySection('todo-v1');
       });
 
       cy.wait(1500);
@@ -164,9 +164,9 @@ describe('Rose Content Container', () => {
       cy.get('golden-rose')
         .shadow()
         .find('#content-root')
-        .should('contain.text', 'About');
+        .should('contain.text', 'TO DO v1');
 
-      // Close and open Poetry
+      // Close and open TO DO v2
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
         api.closeContent();
@@ -176,7 +176,7 @@ describe('Rose Content Container', () => {
 
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('poetry');
+        api.clickPetalBySection('todo-v2');
       });
 
       cy.wait(1500);
@@ -184,7 +184,7 @@ describe('Rose Content Container', () => {
       cy.get('golden-rose')
         .shadow()
         .find('#content-root')
-        .should('contain.text', 'Poetry');
+        .should('contain.text', 'TO DO v2');
     });
   });
 });
