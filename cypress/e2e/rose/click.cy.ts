@@ -18,7 +18,7 @@ describe('Rose Click Detection', () => {
         expect(api.getState()).to.equal('idle');
 
         // Programmatically click an active petal
-        api.clickPetalBySection('todo-v1'); // First active petal (TO DO v1)
+        api.clickPetalBySection('code-is-architecture'); // First active petal (Code is architecture (skyscrapers))
 
         cy.wait(50).then(() => {
           const state = api.getState();
@@ -33,23 +33,23 @@ describe('Rose Click Detection', () => {
         expect(api.getActiveSection()).to.be.null;
 
         // Click the first active petal
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
 
         cy.wait(50).then(() => {
-          expect(api.getActiveSection()).to.equal('todo-v1');
+          expect(api.getActiveSection()).to.equal('code-is-architecture');
         });
       });
     });
 
-    it('clicking second article petal sets TO DO v2 section', () => {
+    it('clicking second article petal sets History in cities (legacy systems) section', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
 
-        // Click the second placeholder article.
-        api.clickPetalBySection('todo-v2');
+        // Click the second article.
+        api.clickPetalBySection('history-in-cities');
 
         cy.wait(50).then(() => {
-          expect(api.getActiveSection()).to.equal('todo-v2');
+          expect(api.getActiveSection()).to.equal('history-in-cities');
         });
       });
     });
@@ -83,15 +83,25 @@ describe('Rose Click Detection', () => {
 
         cy.window().then((win) => {
           const api = (win as any).__ROSE_TEST_API__;
-          api.clickPetalBySection('todo-v1');
+          api.clickPetalBySection('code-is-architecture');
         });
 
-        cy.wrap(eventPromise).should('deep.equal', { section: 'todo-v1' });
+        cy.wrap(eventPromise).should('deep.equal', { section: 'code-is-architecture' });
       });
     });
   });
 
-  for (const [index, title] of [[0, 'TO DO v1'], [1, 'TO DO v2'], [45, 'TO DO v2']] as const) {
+  for (const [index, title] of [
+    [0, 'Code is architecture (skyscrapers)'],
+    [1, 'History in cities (legacy systems)'],
+    [2, 'The Forest (the system)'],
+    [3, 'Guitar hero (pipelines)'],
+    [4, 'Like an Eagle (high low level)'],
+    [5, 'Cooking a dish(MRs)'],
+    [6, 'Code is dance (the process)'],
+    [7, 'Forging code'],
+    [45, 'Cooking a dish(MRs)'],
+  ] as const) {
     it(`opens ${title} from newly active petal ${index}`, () => {
       cy.get('golden-rose').scrollIntoView();
       cy.window().then((win) => {
@@ -120,7 +130,7 @@ describe('Rose Click Detection', () => {
         const api = (win as any).__ROSE_TEST_API__;
         expect(api.getState()).to.equal('idle');
 
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
 
         cy.wait(50).then(() => {
           const state = api.getState();

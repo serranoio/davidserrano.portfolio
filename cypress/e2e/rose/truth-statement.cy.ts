@@ -31,7 +31,7 @@ describe('Rose Truth Statement', () => {
   it('fades out while a section is open', () => {
     cy.window().then((win) => {
       const api = (win as any).__ROSE_TEST_API__;
-      api.clickPetalBySection('todo-v1');
+      api.clickPetalBySection('code-is-architecture');
       cy.wait(1500).then(() => {
         expect(api.getState()).to.equal('open');
         expect(api.getTruthTextOpacity()).to.be.lessThan(0.05);
@@ -42,7 +42,7 @@ describe('Rose Truth Statement', () => {
   it('returns to full opacity after closing a section', () => {
     cy.window().then((win) => {
       const api = (win as any).__ROSE_TEST_API__;
-      api.clickPetalBySection('todo-v1');
+      api.clickPetalBySection('code-is-architecture');
       cy.wait(1500).then(() => {
         api.closeContent();
         cy.wait(1500).then(() => {

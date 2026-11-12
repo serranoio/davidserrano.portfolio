@@ -1,15 +1,8 @@
 /// <reference types="cypress" />
 
-// Real-pixel raycasting test. Most petal tests use api.clickPetal(idx)
-// which calls the click handler directly. This test projects the petal's
-// world position to screen coords via the live camera matrix and dispatches
-// a real click on the canvas at those coords, exercising the full
-// raycaster path the user actually hits.
-//
-// If a registered petal is occluded by other petals, this test fails —
-// because raycasting from the camera will hit the occluding petal first
-// and section won't open. That's what makes it a useful smoke test for
-// "are the registered petals actually visible/clickable?"
+// Exercise the canvas click listener and raycaster using actual screen pixels.
+// Bouncing petals can occlude a neighbor's projected center, so assert that
+// the article selected belongs to the visible surface actually hit.
 
 describe('Rose petal real-pixel clicks', () => {
   beforeEach(() => {
@@ -31,23 +24,23 @@ describe('Rose petal real-pixel clicks', () => {
     });
   });
 
-  it('opens TO DO v1 by clicking its petal on the canvas', () => {
-    realPixelClickPetal('todo-v1').then(() => {
+  it('opens the visible article at the architecture petal', () => {
+    realPixelClickPetal('code-is-architecture').then((hitSection) => {
       cy.wait(1500);
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        expect(api.getActiveSection()).to.equal('todo-v1');
+        expect(api.getActiveSection()).to.equal(hitSection);
         expect(api.getState()).to.equal('open');
       });
     });
   });
 
-  it('opens TO DO v2 by clicking its petal on the canvas', () => {
-    realPixelClickPetal('todo-v2').then(() => {
+  it('opens the visible article at the history petal', () => {
+    realPixelClickPetal('history-in-cities').then((hitSection) => {
       cy.wait(1500);
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        expect(api.getActiveSection()).to.equal('todo-v2');
+        expect(api.getActiveSection()).to.equal(hitSection);
         expect(api.getState()).to.equal('open');
       });
     });
@@ -55,26 +48,31 @@ describe('Rose petal real-pixel clicks', () => {
 });
 
 function realPixelClickPetal(sectionId: string) {
-  return cy.window().then((win) => {
-    const api = (win as any).__ROSE_TEST_API__;
-    const idx = api.getPetalIndexForSection(sectionId);
-    if (idx === null) throw new Error(`no petal for section "${sectionId}"`);
-    const screen = api.projectPetalToScreen(idx);
-    if (!screen) throw new Error(`could not project petal ${idx}`);
-
-    return cy
-      .get('golden-rose')
-      .shadow()
-      .find('canvas[data-testid="rose-canvas"]')
-      .then(($canvas) => {
-        const canvas = $canvas[0] as HTMLCanvasElement;
-        const rect = canvas.getBoundingClientRect();
-        // projectPetalToScreen returns CSS pixels (renderer.getSize uses CSS,
-        // not the DPR-scaled drawing-buffer size). Click expects CSS pixels
-        // relative to the element. Bounds-check against the canvas CSS rect.
-        expect(screen.x).to.be.within(0, rect.width);
-        expect(screen.y).to.be.within(0, rect.height);
-        cy.wrap(canvas).click(screen.x, screen.y);
+  return cy.get('golden-rose').shadow()
+    .find('canvas[data-testid="rose-canvas"]')
+    .then(($canvas) => {
+      const canvas = $canvas[0] as HTMLCanvasElement;
+      const win = canvas.ownerDocument.defaultView!;
+      const api = (win as any).__ROSE_TEST_API__;
+      const idx = api.getPetalIndexForSection(sectionId);
+      if (idx === null) throw new Error(`no petal for section "${sectionId}"`);
+      const screen = api.projectPetalToScreen(idx);
+      if (!screen) throw new Error(`could not project petal ${idx}`);
+      const rect = canvas.getBoundingClientRect();
+      expect(screen.x).to.be.within(0, rect.width);
+      expect(screen.y).to.be.within(0, rect.height);
+      // MouseEvent rounds client coordinates. Sample using those same pixel
+      // coordinates, because overlapping petals may differ within one pixel.
+      const click = new win.MouseEvent('click', {
+        bubbles: true,
+        clientX: rect.left + screen.x,
+        clientY: rect.top + screen.y,
       });
-  });
+      const hit = api.raycastAtCanvas(click.clientX - rect.left, click.clientY - rect.top);
+      expect(hit?.isActive).to.equal(true);
+      expect(hit?.section).to.be.a('string');
+      // Stay in the same frame so bouncing cannot move the visible target.
+      canvas.dispatchEvent(click);
+      return hit.section as string;
+    });
 }

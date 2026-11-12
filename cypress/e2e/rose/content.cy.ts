@@ -16,7 +16,7 @@ describe('Rose Content Container', () => {
     it('shows content container when rose is open', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       // Wait for bloom animation
@@ -40,7 +40,7 @@ describe('Rose Content Container', () => {
     it('displays section title in content', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
@@ -48,13 +48,13 @@ describe('Rose Content Container', () => {
       cy.get('golden-rose')
         .shadow()
         .find('#content-root')
-        .should('contain.text', 'TO DO v1');
+        .should('contain.text', 'Code is architecture (skyscrapers)');
     });
 
     it('shows close button in content container', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
@@ -68,7 +68,7 @@ describe('Rose Content Container', () => {
     it('close button closes content and returns to idle', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
@@ -93,7 +93,7 @@ describe('Rose Content Container', () => {
     it('content container has proper styling', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
@@ -108,7 +108,7 @@ describe('Rose Content Container', () => {
     it('content is scrollable if content exceeds container', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
@@ -121,10 +121,10 @@ describe('Rose Content Container', () => {
   });
 
   describe('Section Content (US-10)', () => {
-    it('shows TO DO v1 section content', () => {
+    it('shows Code is architecture (skyscrapers) section content', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
@@ -132,13 +132,13 @@ describe('Rose Content Container', () => {
       cy.get('golden-rose')
         .shadow()
         .find('#content-root')
-        .should('contain.text', 'TO DO v1');
+        .should('contain.text', 'Code is architecture (skyscrapers)');
     });
 
-    it('shows TO DO v2 section content', () => {
+    it('shows History in cities (legacy systems) section content', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v2');
+        api.clickPetalBySection('history-in-cities');
       });
 
       cy.wait(1500);
@@ -146,7 +146,7 @@ describe('Rose Content Container', () => {
       cy.get('golden-rose')
         .shadow()
         .find('#content-root')
-        .should('contain.text', 'TO DO v2');
+        .should('contain.text', 'History in cities (legacy systems)');
     });
   });
 
@@ -155,8 +155,8 @@ describe('Rose Content Container', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
 
-        // Open TO DO v1
-        api.clickPetalBySection('todo-v1');
+        // Open Code is architecture (skyscrapers)
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
@@ -164,9 +164,9 @@ describe('Rose Content Container', () => {
       cy.get('golden-rose')
         .shadow()
         .find('#content-root')
-        .should('contain.text', 'TO DO v1');
+        .should('contain.text', 'Code is architecture (skyscrapers)');
 
-      // Close and open TO DO v2
+      // Close and open History in cities (legacy systems)
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
         api.closeContent();
@@ -176,7 +176,7 @@ describe('Rose Content Container', () => {
 
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v2');
+        api.clickPetalBySection('history-in-cities');
       });
 
       cy.wait(1500);
@@ -184,7 +184,7 @@ describe('Rose Content Container', () => {
       cy.get('golden-rose')
         .shadow()
         .find('#content-root')
-        .should('contain.text', 'TO DO v2');
+        .should('contain.text', 'History in cities (legacy systems)');
     });
   });
 });

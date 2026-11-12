@@ -13,10 +13,10 @@ describe('Rose MDX Content Loading', () => {
   });
 
   describe('Content Loading (US-10)', () => {
-    it('loads TO DO v1 section content', () => {
+    it('loads Code is architecture (skyscrapers) section content', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
@@ -24,13 +24,13 @@ describe('Rose MDX Content Loading', () => {
       cy.get('golden-rose')
         .shadow()
         .find('#content-root')
-        .should('contain.text', 'TO DO v1');
+        .should('contain.text', 'Code is architecture (skyscrapers)');
     });
 
-    it('loads TO DO v2 section content', () => {
+    it('loads History in cities (legacy systems) section content', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v2');
+        api.clickPetalBySection('history-in-cities');
       });
 
       cy.wait(1500);
@@ -38,13 +38,13 @@ describe('Rose MDX Content Loading', () => {
       cy.get('golden-rose')
         .shadow()
         .find('#content-root')
-        .should('contain.text', 'TO DO v2');
+        .should('contain.text', 'History in cities (legacy systems)');
     });
 
     it('content includes section-specific details', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
@@ -54,7 +54,7 @@ describe('Rose MDX Content Loading', () => {
         .shadow()
         .find('#content-root')
         .invoke('text')
-        .should('match', /TO DO v1/);
+        .should('match', /A skyscraper must be planned/);
     });
   });
 
@@ -62,7 +62,7 @@ describe('Rose MDX Content Loading', () => {
     it('content is readable with proper contrast', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
@@ -76,7 +76,7 @@ describe('Rose MDX Content Loading', () => {
     it('headings are properly styled', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);

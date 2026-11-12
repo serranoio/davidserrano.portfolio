@@ -1,32 +1,37 @@
 import type { ComponentType } from 'react';
-import TodoV1 from '../../docs/sections/to-do-v1.mdx';
-import TodoV2 from '../../docs/sections/to-do-v2.mdx';
+import Architecture from '../../docs/sections/code-is-architecture.mdx';
+import History from '../../docs/sections/history-in-cities.mdx';
+import Forest from '../../docs/sections/the-forest.mdx';
+import GuitarHero from '../../docs/sections/guitar-hero.mdx';
+import Eagle from '../../docs/sections/like-an-eagle.mdx';
+import Cooking from '../../docs/sections/cooking-a-dish.mdx';
+import Dance from '../../docs/sections/code-is-dance.mdx';
+import Forging from '../../docs/sections/forging-code.mdx';
 
-// The current rose_separated.glb contains 46 petal meshes, sorted by name.
-// Every petal has its own section id and can host a different MDX article.
-// To publish an article: import its MDX component, then add/replace an entry
-// in PETAL_SECTION_OVERRIDES using the desired petalIndex and a unique id.
-// Unassigned petals alternate between the two placeholder articles.
-
+// Each petal keeps its own section id so it can host a different article later.
+// Import an MDX article and add a PETAL_SECTION_OVERRIDES entry to assign it
+// to a specific petal. Indices follow the GLB petal meshes sorted by name.
 export interface PetalSection {
   petalIndex: number;
   id: string;
   Component: ComponentType;
 }
 
+// Ballad of Programata: only the eight linked notes, in index order.
+const ARTICLES: readonly ComponentType[] = [
+  Architecture, History, Forest, GuitarHero, Eagle, Cooking, Dance, Forging,
+];
 const PETAL_COUNT = 46;
-
 const PETAL_SECTION_OVERRIDES: readonly PetalSection[] = [
-  // Prominent front-right and front-left petals keep both articles reachable.
-  { petalIndex: 41, id: 'todo-v1', Component: TodoV1 },
-  { petalIndex: 43, id: 'todo-v2', Component: TodoV2 },
+  { petalIndex: 41, id: 'code-is-architecture', Component: Architecture },
+  { petalIndex: 43, id: 'history-in-cities', Component: History },
 ];
 
 export const PETAL_SECTIONS: readonly PetalSection[] = [
   ...Array.from({ length: PETAL_COUNT }, (_, petalIndex) => ({
     petalIndex,
     id: `petal-${petalIndex}`,
-    Component: petalIndex % 2 === 0 ? TodoV1 : TodoV2,
+    Component: ARTICLES[petalIndex % ARTICLES.length],
   })).filter(
     ({ petalIndex }) => !PETAL_SECTION_OVERRIDES.some((entry) => entry.petalIndex === petalIndex)
   ),

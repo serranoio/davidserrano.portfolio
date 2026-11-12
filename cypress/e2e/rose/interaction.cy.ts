@@ -166,8 +166,8 @@ describe('Rose Interaction', () => {
         const activePetals = api.getActivePetalIndices();
         // Every loaded petal has an article assignment.
         expect(activePetals.length).to.equal(api.getPetalCount());
-        expect(api.getPetalIndexForSection('todo-v1')).to.not.be.null;
-        expect(api.getPetalIndexForSection('todo-v2')).to.not.be.null;
+        expect(api.getPetalIndexForSection('code-is-architecture')).to.not.be.null;
+        expect(api.getPetalIndexForSection('history-in-cities')).to.not.be.null;
       });
     });
   });

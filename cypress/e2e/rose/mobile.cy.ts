@@ -33,7 +33,7 @@ describe('Rose Mobile Experience', () => {
     it('supports tap to open section', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
@@ -41,7 +41,7 @@ describe('Rose Mobile Experience', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
         expect(api.getState()).to.equal('open');
-        expect(api.getActiveSection()).to.equal('todo-v1');
+        expect(api.getActiveSection()).to.equal('code-is-architecture');
       });
     });
 
@@ -60,7 +60,7 @@ describe('Rose Mobile Experience', () => {
     it('shows content panel on mobile', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
@@ -75,7 +75,7 @@ describe('Rose Mobile Experience', () => {
     it('content is readable on mobile viewport', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
@@ -96,7 +96,7 @@ describe('Rose Mobile Experience', () => {
     it('close button is touch-friendly', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
@@ -150,7 +150,7 @@ describe('Rose Mobile Experience', () => {
     it('maintains animation performance on mobile', () => {
       cy.window().then((win) => {
         const api = (win as any).__ROSE_TEST_API__;
-        api.clickPetalBySection('todo-v1');
+        api.clickPetalBySection('code-is-architecture');
       });
 
       cy.wait(1500);
