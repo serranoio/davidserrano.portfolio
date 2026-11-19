@@ -1,3 +1,31 @@
-.phoenix-figure { display: block; width: 100%; height: auto; overflow: visible; }
-.phoenix-figure__guide { fill: none; stroke: var(--color-gold-muted); stroke-width: 1; stroke-linecap: round; }
-.phoenix-figure__ember { fill: var(--color-gold-primary); }
+.phoenix-figure {
+  --phoenix-ink-warm: var(--color-gold-primary);
+  --phoenix-ink-cool: var(--color-gold-primary);
+  display: block; width: 100%; height: auto; overflow: visible;
+}
+/* Each part has its own ink, so its heat (0 at rest – 1 alight) can warm it alone. */
+.phoenix-figure__ink { --phoenix-ink-alight: var(--phoenix-alight, var(--phoenix-ink-lit)); --phoenix-ink-heat: calc(var(--phoenix-heat, 0) * 100%); }
+.phoenix-figure__ink-hot { stop-color: color-mix(in srgb, var(--phoenix-ink-alight) var(--phoenix-ink-heat), var(--phoenix-ink-hot)); }
+.phoenix-figure__ink-warm { stop-color: color-mix(in srgb, var(--phoenix-ink-alight) var(--phoenix-ink-heat), var(--phoenix-ink-warm)); }
+.phoenix-figure__ink-cool { stop-color: color-mix(in srgb, var(--phoenix-ink-alight) var(--phoenix-ink-heat), var(--phoenix-ink-cool)); }
+
+/* While one part is alight, the rest of the bird steps back. */
+.phoenix-figure__part { opacity: calc(1 - 0.55 * (var(--phoenix-lit-any, 0) - var(--phoenix-lit, 0))); }
+/* Everything rests fully drawn; the animations only describe how it arrives. */
+.phoenix-figure__pen, .phoenix-figure__fire { fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 2; }
+.phoenix-figure__pen { animation: phoenix-write var(--pen-duration) cubic-bezier(0.45, 0.05, 0.3, 1) var(--pen-delay) backwards; }
+/* The threads: faint gold at rest. As a part is lit, the fire runs out along its thread to the words. */
+.phoenix-figure__faint { opacity: 0.6; }
+.phoenix-figure__burn, .phoenix-figure__lodged { fill: var(--phoenix-ember); }
+.phoenix-figure__lodged { filter: drop-shadow(0 0 calc(var(--phoenix-lit, 0) * 2px) var(--phoenix-ember)); }
+.phoenix-figure__fire { stroke-dashoffset: calc(1 - var(--phoenix-lit, 0)); }
+.phoenix-figure__eye { animation: phoenix-appear 0.3s ease 1s backwards; }
+/* The ink is a hairline, so each part is touched through a generous unseen shape. */
+.phoenix-figure__touch { fill: transparent; pointer-events: all; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+@keyframes phoenix-write { from { stroke-dashoffset: var(--pen-from, 1); } }
+@keyframes phoenix-appear { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .phoenix-figure__pen, .phoenix-figure__eye { animation: none; }
+}
