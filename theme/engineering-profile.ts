@@ -21,28 +21,23 @@ export interface PhoenixPath {
   name: string;
   /** The poetic line for the path. */
   verse: string;
-  /** The plain label, so nobody has to decode the metaphor. */
-  label: string;
   links: readonly PathLink[];
   /** Entries that have no destination yet. */
   notes: readonly PathNote[];
 }
 
 interface EngineeringProfile {
-  githubUrl: string;
   paths: readonly PhoenixPath[];
   /** The tail of the phoenix, grounded to the earth. */
   groundingLine: string;
 }
 
 export const engineeringProfile: EngineeringProfile = {
-  githubUrl: 'https://github.com/serranoio',
   paths: [
     {
       id: 'mind',
       name: 'The mind',
       verse: 'The fire rises, and you can turn what you love into reality.',
-      label: 'Thinking about the work',
       links: [
         { title: 'The Missing Piece to Agile', href: '/blog/the-missing-piece-to-agile.html' },
         { title: 'Disruptive Strategic Design', href: '/blog/disruptive-strategic-design.html' },
@@ -53,7 +48,6 @@ export const engineeringProfile: EngineeringProfile = {
       id: 'heart',
       name: 'The heart',
       verse: 'Where the arrow landed.',
-      label: 'The Ballad of Programata',
       links: [{ title: 'Read The Ballad Of Programata', href: '/#rose' }],
       notes: [],
     },
@@ -61,7 +55,6 @@ export const engineeringProfile: EngineeringProfile = {
       id: 'hands',
       name: 'The hands',
       verse: 'To care for what you love.',
-      label: 'Résumé',
       links: [],
       notes: [
         {

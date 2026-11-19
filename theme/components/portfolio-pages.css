@@ -27,16 +27,15 @@
 .portfolio-links a, .portfolio-text-link { display: inline-flex; align-items: center; gap: 1rem; min-height: 44px; color: var(--color-text); text-decoration: underline !important; text-decoration-color: var(--color-gold-primary) !important; text-underline-offset: 0.4em; }
 .portfolio-page__title-row { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
 .portfolio-page__title-row h1 { margin-bottom: 0; }
-.portfolio-icon-link { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 44px; height: 44px; color: var(--color-text); }
 .phoenix { display: grid; grid-template-columns: 1fr minmax(0, 18rem) 1fr; grid-template-areas: '. mind .' 'hands figure heart' 'ground ground ground'; column-gap: clamp(1.5rem, 4vw, 3rem); align-items: center; }
 .phoenix__figure { grid-area: figure; }
 .phoenix-path--mind { grid-area: mind; text-align: center; padding-bottom: 1.5rem; }
 .phoenix-path--heart { grid-area: heart; }
 .phoenix-path--hands { grid-area: hands; text-align: right; }
-.phoenix-path__name { color: var(--color-gold-dark); font-size: 0.875rem; margin: 0 0 0.5rem; }
-.dark .phoenix-path__name { color: var(--color-gold-light); }
 .phoenix-path__verse { font-family: var(--font-title); font-style: italic; font-size: clamp(1.3rem, 2.2vw, 1.6rem); line-height: 1.35 !important; margin: 0 0 1rem; text-wrap: balance; }
-.portfolio-page .phoenix-path h2 { font-family: var(--font-body); font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); margin: 0 0 0.25rem; }
+.portfolio-page .phoenix-path__name { font-family: var(--font-title); font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 400; letter-spacing: normal; text-transform: none; color: var(--color-text); margin: 0 0 1rem; }
+.phoenix-path__verse + .phoenix-path__entries { margin-top: 2rem; }
+.phoenix-path--mind .phoenix-path__entries { display: grid; gap: 1.25rem; }
 .phoenix-path__entries { list-style: none; padding: 0; margin: 0; }
 .phoenix-path__entries a { display: inline-flex; align-items: center; gap: 0.75rem; min-height: 44px; color: var(--color-text); text-decoration: underline !important; text-decoration-color: var(--color-gold-primary) !important; text-underline-offset: 0.4em; }
 .phoenix-path__note-title { display: block; padding-top: 0.6rem; font-family: var(--font-title); font-size: 1.4rem; }
