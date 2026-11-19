@@ -1,20 +1,43 @@
+import type { CSSProperties } from 'react';
+import { PHOENIX_EYE, PHOENIX_HEART, PHOENIX_PARTS } from './phoenix-drawing';
 import './phoenix-figure.css';
 
+/** Extra width on the reveal so the widest shade is never clipped. */
+const REVEAL_MARGIN = 3;
+
 /**
- * The phoenix itself. This is the placement scaffold: a spine, a wing axis,
- * the ember at the heart and the ground under the tail. The drawing replaces
- * the marks inside the SVG; the viewBox and the four anchors stay put so the
- * paths around it keep lining up.
- *
- * Anchors (viewBox 0 0 300 400): head 150,40 · heart 150,170 ·
- * wingtips 20,150 and 280,150 · tail 150,380.
+ * The phoenix, flourished with a pointed pen. Each stroke is a filled shape
+ * with real thick-and-thin; a mask carrying its centreline is drawn on load,
+ * so the bird appears to be written.
  */
 export function PhoenixFigure() {
   return (
     <svg className="phoenix-figure" viewBox="0 0 300 400" role="presentation" aria-hidden="true">
-      <path className="phoenix-figure__guide" d="M150 40 V380" />
-      <path className="phoenix-figure__guide" d="M20 150 Q150 110 280 150" />
-      <circle className="phoenix-figure__ember" cx="150" cy="170" r="7" />
+      <circle className="phoenix-figure__glow" cx={PHOENIX_HEART.x} cy={PHOENIX_HEART.y} r="16" />
+      {PHOENIX_PARTS.map((part, partIndex) => (
+        <g key={partIndex} className={`phoenix-figure__part phoenix-figure__part--${part.id}`}>
+          {part.strokes.map((stroke, strokeIndex) => {
+            const maskId = `phoenix-stroke-${partIndex}-${strokeIndex}`;
+            const timing = {
+              '--pen-delay': `${stroke.delay.toFixed(2)}s`,
+              '--pen-duration': `${stroke.duration.toFixed(2)}s`,
+            } as CSSProperties;
+            return (
+              <g key={maskId}>
+                <mask id={maskId} maskUnits="userSpaceOnUse" x="-60" y="-20" width="420" height="440">
+                  <path className="phoenix-figure__pen" d={stroke.centreline} pathLength={1}
+                    strokeWidth={stroke.width + REVEAL_MARGIN} style={timing} />
+                </mask>
+                <path d={stroke.outline} mask={`url(#${maskId})`} />
+              </g>
+            );
+          })}
+          {part.id === 'mind' && (
+            <circle className="phoenix-figure__eye" cx={PHOENIX_EYE.x} cy={PHOENIX_EYE.y} r="1.1" />
+          )}
+        </g>
+      ))}
+      <circle className="phoenix-figure__ember" cx={PHOENIX_HEART.x} cy={PHOENIX_HEART.y} r="4.2" />
     </svg>
   );
 }

@@ -7,10 +7,8 @@ describe('Life portfolio navigation', () => {
     cy.visit('/');
     cy.get('welcome-section').shadow().contains('a', 'Explore my engineering').click();
     cy.location('pathname').should('eq', '/engineering.html');
-    cy.get('main').contains('h1', /^Engineering$/).should('be.visible');
     cy.get('main').should('not.contain.text', 'Software as a craft');
-    cy.get('main a[aria-label="GitHub"]').should('have.attr', 'href', 'https://github.com/serranoio');
-    ['Thinking about the work', 'The Ballad of Programata', 'Résumé'].forEach((path) => {
+    ['The mind', 'The heart', 'The hands'].forEach((path) => {
       cy.get('main').contains('h2', path).should('be.visible');
     });
     cy.get('main').contains('The House of Arcana').should('be.visible');

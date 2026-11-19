@@ -1,3 +1,18 @@
-.phoenix-figure { display: block; width: 100%; height: auto; overflow: visible; }
-.phoenix-figure__guide { fill: none; stroke: var(--color-gold-muted); stroke-width: 1; stroke-linecap: round; }
-.phoenix-figure__ember { fill: var(--color-gold-primary); }
+.phoenix-figure { display: block; width: 100%; height: auto; overflow: visible; --phoenix-ink: var(--color-gold-primary); --phoenix-ink-lit: var(--color-gold-dark); }
+.dark .phoenix-figure { --phoenix-ink-lit: var(--color-gold-light); }
+
+.phoenix-figure__part { fill: var(--phoenix-ink); transition: fill 0.4s ease, opacity 0.4s ease; }
+/* Everything rests fully drawn; the animations only describe how it arrives. */
+.phoenix-figure__pen { fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 2; animation: phoenix-write var(--pen-duration) cubic-bezier(0.45, 0.05, 0.3, 1) var(--pen-delay) backwards; }
+.phoenix-figure__eye { animation: phoenix-appear 0.3s ease 1s backwards; }
+.phoenix-figure__ember { fill: var(--phoenix-ink-lit); transform-origin: 150px 170px; transform-box: view-box; animation: phoenix-spark 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) backwards; transition: fill 0.4s ease; }
+.phoenix-figure__glow { fill: var(--color-gold-primary); opacity: 0.3; filter: blur(7px); animation: phoenix-appear 1.2s ease 0.1s backwards; transition: opacity 0.4s ease; }
+
+@keyframes phoenix-write { from { stroke-dashoffset: 1; } }
+@keyframes phoenix-appear { from { opacity: 0; } }
+@keyframes phoenix-spark { from { transform: scale(0); opacity: 0; } 60% { transform: scale(1.5); opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .phoenix-figure__pen, .phoenix-figure__eye, .phoenix-figure__ember, .phoenix-figure__glow { animation: none; }
+  .phoenix-figure__part, .phoenix-figure__ember, .phoenix-figure__glow { transition: none; }
+}
