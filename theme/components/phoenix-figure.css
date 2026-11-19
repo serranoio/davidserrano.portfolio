@@ -1,0 +1,3 @@
+.phoenix-figure { display: block; width: 100%; height: auto; overflow: visible; }
+.phoenix-figure__guide { fill: none; stroke: var(--color-gold-muted); stroke-width: 1; stroke-linecap: round; }
+.phoenix-figure__ember { fill: var(--color-gold-primary); }

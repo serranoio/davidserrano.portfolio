@@ -25,12 +25,23 @@
 .dark .portfolio-page a:hover { color: var(--color-gold-light); }
 .portfolio-links { display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; }
 .portfolio-links a, .portfolio-text-link { display: inline-flex; align-items: center; gap: 1rem; min-height: 44px; color: var(--color-text); text-decoration: underline !important; text-decoration-color: var(--color-gold-primary) !important; text-underline-offset: 0.4em; }
-.portfolio-section { padding-top: 3rem; margin-top: 3rem; border-top: 1px solid var(--rp-c-divider); }
-.portfolio-section > p { max-width: 40rem; }
-.engineering-story { max-width: 48rem; }
-.experience-entry { margin-top: 2rem; max-width: 40rem; }
-.portfolio-reading-list { list-style: none; padding: 0; margin: 0; }
-.portfolio-reading-list a { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 0; color: var(--color-text); border-bottom: 1px solid var(--rp-c-divider); }
+.portfolio-page__title-row { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+.portfolio-page__title-row h1 { margin-bottom: 0; }
+.portfolio-icon-link { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 44px; height: 44px; color: var(--color-text); }
+.phoenix { display: grid; grid-template-columns: 1fr minmax(0, 18rem) 1fr; grid-template-areas: '. mind .' 'hands figure heart' 'ground ground ground'; column-gap: clamp(1.5rem, 4vw, 3rem); align-items: center; }
+.phoenix__figure { grid-area: figure; }
+.phoenix-path--mind { grid-area: mind; text-align: center; padding-bottom: 1.5rem; }
+.phoenix-path--heart { grid-area: heart; }
+.phoenix-path--hands { grid-area: hands; text-align: right; }
+.phoenix-path__name { color: var(--color-gold-dark); font-size: 0.875rem; margin: 0 0 0.5rem; }
+.dark .phoenix-path__name { color: var(--color-gold-light); }
+.phoenix-path__verse { font-family: var(--font-title); font-style: italic; font-size: clamp(1.3rem, 2.2vw, 1.6rem); line-height: 1.35 !important; margin: 0 0 1rem; text-wrap: balance; }
+.portfolio-page .phoenix-path h2 { font-family: var(--font-body); font-size: 0.8rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); margin: 0 0 0.25rem; }
+.phoenix-path__entries { list-style: none; padding: 0; margin: 0; }
+.phoenix-path__entries a { display: inline-flex; align-items: center; gap: 0.75rem; min-height: 44px; color: var(--color-text); text-decoration: underline !important; text-decoration-color: var(--color-gold-primary) !important; text-underline-offset: 0.4em; }
+.phoenix-path__note-title { display: block; padding-top: 0.6rem; font-family: var(--font-title); font-size: 1.4rem; }
+.phoenix-path__note-description { display: block; font-size: 0.9rem; line-height: 1.6; color: var(--color-text-muted); }
+.phoenix__ground { grid-area: ground; margin: 0; padding-top: 2rem; border-top: 1px solid var(--color-gold-muted); text-align: center; font-family: var(--font-title); font-style: italic; font-size: clamp(1.75rem, 4vw, 2.75rem); line-height: 1.2 !important; }
 .portfolio-page__footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; margin-top: 5rem; padding-top: 1.5rem; border-top: 1px solid var(--rp-c-divider); font-size: 0.875rem; color: var(--color-text-muted); }
 .portfolio-page__footer a { display: inline-flex; align-items: center; min-height: 44px; color: inherit; }
 .portfolio-page__footer > span { align-self: center; }
@@ -47,6 +58,11 @@
 .about-composition { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: clamp(2rem, 6vw, 5rem); align-items: start; margin-top: 3rem; margin-bottom: 3rem; }
 .about-composition img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: center 30%; }
 .about-story p { color: var(--color-text-muted); margin: 0 0 1.25rem; }
+@media (max-width: 768px) {
+  .phoenix { grid-template-columns: 1fr; grid-template-areas: 'figure' 'mind' 'heart' 'hands' 'ground'; row-gap: 2.5rem; }
+  .phoenix__figure { width: min(12rem, 60%); margin-inline: auto; }
+  .phoenix-path--mind, .phoenix-path--heart, .phoenix-path--hands { text-align: center; padding-bottom: 0; }
+}
 @media (max-width: 640px) {
   .about-composition { grid-template-columns: 1fr; }
   .about-composition img { max-width: 16rem; }

@@ -7,8 +7,14 @@ describe('Life portfolio navigation', () => {
     cy.visit('/');
     cy.get('welcome-section').shadow().contains('a', 'Explore my engineering').click();
     cy.location('pathname').should('eq', '/engineering.html');
-    cy.get('main').contains('h1', 'Software as a craft.').should('be.visible');
-    cy.get('main').contains('a', 'Find me on GitHub').should('have.attr', 'href', 'https://github.com/serranoio');
+    cy.get('main').contains('h1', /^Engineering$/).should('be.visible');
+    cy.get('main').should('not.contain.text', 'Software as a craft');
+    cy.get('main a[aria-label="GitHub"]').should('have.attr', 'href', 'https://github.com/serranoio');
+    ['Thinking about the work', 'The Ballad of Programata', 'Résumé'].forEach((path) => {
+      cy.get('main').contains('h2', path).should('be.visible');
+    });
+    cy.get('main').contains('The House of Arcana').should('be.visible');
+    cy.get('main').contains('What you love is not crazy.').should('be.visible');
     cy.get('main').should('not.contain.text', 'Project Alpha');
     cy.get('main a').each(($link) => {
       expect($link.attr('href')).not.to.equal('#');
