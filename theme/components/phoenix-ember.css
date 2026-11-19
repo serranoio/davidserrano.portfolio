@@ -1,0 +1,35 @@
+/* The fire's palette and its breath, shared by the bird and the words. */
+:root {
+  --phoenix-ember: #d8501c;
+  --phoenix-ember-core: #ffd9a3;
+  --phoenix-ink-hot: color-mix(in srgb, var(--phoenix-ember) 62%, var(--color-gold-dark));
+  --phoenix-ink-lit: color-mix(in srgb, var(--phoenix-ember) 30%, var(--color-gold-dark));
+  --phoenix-halo-strength: 0.42;
+  --phoenix-breath: 4.6s;
+  --phoenix-breath-delay: 0.6s;
+}
+.dark {
+  --phoenix-ember: #ff6a1f;
+  --phoenix-ember-core: #fff3cf;
+  --phoenix-ink-hot: color-mix(in srgb, var(--phoenix-ember) 55%, var(--color-gold-light));
+  --phoenix-ink-lit: color-mix(in srgb, var(--phoenix-ember) 22%, var(--color-gold-light));
+  --phoenix-halo-strength: 1;
+}
+.phoenix-ember__halo-stop, .phoenix-ember__coal-edge { stop-color: var(--phoenix-ember); }
+.phoenix-ember__coal-core { stop-color: var(--phoenix-ember-core); }
+
+/* Lit first, then it breathes. Every ember on the page keeps this one clock. */
+.phoenix-ember__coal, .phoenix-ember__halo { transform-box: fill-box; transform-origin: center; }
+.phoenix-ember__coal { filter: drop-shadow(0 0 3px var(--phoenix-ember)); animation: phoenix-ignite 0.55s cubic-bezier(0.2, 1.6, 0.4, 1) backwards, phoenix-breathe var(--phoenix-breath) ease-in-out var(--phoenix-breath-delay) infinite alternate; }
+.dark .phoenix-ember__coal { filter: drop-shadow(0 0 5px var(--phoenix-ember)) drop-shadow(0 0 12px var(--phoenix-ember)); }
+.phoenix-ember__halo { opacity: calc(var(--phoenix-halo-strength) * (1 + 0.6 * var(--phoenix-lit-heart, 0))); animation: phoenix-ignite 0.9s ease-out backwards, phoenix-glow var(--phoenix-breath) ease-in-out calc(var(--phoenix-breath-delay) + 0.3s) infinite alternate; }
+.dark .phoenix-ember__halo { mix-blend-mode: screen; }
+.phoenix-coal { display: block; overflow: visible; pointer-events: none; }
+
+@keyframes phoenix-ignite { from { transform: scale(0); opacity: 0; } }
+@keyframes phoenix-breathe { to { transform: scale(1.16); } }
+@keyframes phoenix-glow { to { transform: scale(1.22); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .phoenix-ember__coal, .phoenix-ember__halo { animation: none; }
+}

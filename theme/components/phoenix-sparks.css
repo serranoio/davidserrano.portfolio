@@ -1,0 +1,5 @@
+.phoenix-sparks { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+/* Centred on its own origin, so a flight is nothing but a translation. */
+.phoenix-spark { --phoenix-spark-size: 9px; position: absolute; top: calc(var(--phoenix-spark-size) / -2); left: calc(var(--phoenix-spark-size) / -2); width: var(--phoenix-spark-size); height: var(--phoenix-spark-size); will-change: transform, opacity; }
+/* A spark is already alight: it neither ignites nor breathes on the way. */
+.phoenix-spark .phoenix-ember__coal, .phoenix-spark .phoenix-ember__halo { animation: none; }

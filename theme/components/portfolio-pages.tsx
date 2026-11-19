@@ -1,7 +1,10 @@
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type CSSProperties, type ReactNode, type Ref } from 'react';
 import type { BlogPost, BlogTag } from '../blog-posts';
-import { engineeringProfile, type PhoenixPath } from '../engineering-profile';
+import { engineeringProfile, type PhoenixPath, type PhoenixPathId } from '../engineering-profile';
+import { PHOENIX_WRITTEN_AT, type PhoenixPoint } from './phoenix-drawing';
+import { PhoenixCoal } from './phoenix-ember';
 import { PhoenixFigure } from './phoenix-figure';
+import { PhoenixSparks, prefersStillness, type PhoenixSparksHandle } from './phoenix-sparks';
 import './portfolio-pages.css';
 
 declare const __WRITING_CATALOG__: {
@@ -37,11 +40,29 @@ function PortfolioPage({ eyebrow, title, introduction, children }: {
   );
 }
 
-function PhoenixPathSection({ path }: { path: PhoenixPath }) {
+const KINDLE_POINT = 'phoenix-path__kindle';
+
+/**
+ * One path's words. The heading is where its fire lands: the heart keeps a
+ * twin of the bird's ember there, the others a point on the rule beneath.
+ */
+function PhoenixPathSection({ path, kindling, ref }: {
+  path: PhoenixPath;
+  /** A spark is on its way here and has not landed yet. */
+  kindling: boolean;
+  ref: Ref<HTMLElement>;
+}) {
   const headingId = `phoenix-${path.id}-heading`;
   return (
-    <section className={`phoenix-path phoenix-path--${path.id}`} aria-labelledby={headingId}>
-      <h2 className="phoenix-path__name" id={headingId}>{path.name}</h2>
+    <section ref={ref} className={`phoenix-path phoenix-path--${path.id}`} aria-labelledby={headingId}
+      tabIndex={-1} data-kindling={kindling || undefined}>
+      <h2 className="phoenix-path__name" id={headingId}>
+        {path.name}
+        <span className="phoenix-path__rule" aria-hidden="true" />
+        {path.id === 'heart'
+          ? <PhoenixCoal className={`${KINDLE_POINT} phoenix-path__coal`} />
+          : <span className={KINDLE_POINT} aria-hidden="true" />}
+      </h2>
       <p className="phoenix-path__verse">{path.verse}</p>
       <ul className="phoenix-path__entries">
         {path.links.map((link) => (
@@ -60,14 +81,40 @@ function PhoenixPathSection({ path }: { path: PhoenixPath }) {
   );
 }
 
+/** Scroll only when the section is not already whole on the screen. */
+function _bringIntoView(section: HTMLElement) {
+  const { top, bottom } = section.getBoundingClientRect();
+  if (top >= 0 && bottom <= window.innerHeight) return;
+  section.scrollIntoView({ block: 'center', behavior: prefersStillness() ? 'auto' : 'smooth' });
+}
+
 export function EngineeringPage() {
   const profile = engineeringProfile;
+  const sections = useRef<Partial<Record<PhoenixPathId, HTMLElement | null>>>({});
+  const sparks = useRef<PhoenixSparksHandle>(null);
+  const [kindling, setKindling] = useState<PhoenixPathId | null>(null);
+
+  /** Pressing a part of the bird hands the visitor, and its fire, to that part's words. */
+  const sendFire = (id: PhoenixPathId, sources: PhoenixPoint[]) => {
+    const section = sections.current[id];
+    const landing = section?.querySelector(`.${KINDLE_POINT}`);
+    if (!section || !landing) return;
+    section.focus({ preventScroll: true });
+    _bringIntoView(section);
+    setKindling(id);
+    sparks.current?.send(sources, landing, () => setKindling((flying) => (flying === id ? null : flying)));
+  };
+
   return (
     <PortfolioPage>
-      <div className="phoenix">
-        <div className="phoenix__figure"><PhoenixFigure /></div>
-        {profile.paths.map((path) => <PhoenixPathSection key={path.id} path={path} />)}
+      <div className="phoenix" style={{ '--phoenix-written': `${PHOENIX_WRITTEN_AT.toFixed(2)}s` } as CSSProperties}>
+        <div className="phoenix__figure"><PhoenixFigure onPress={sendFire} /></div>
+        {profile.paths.map((path) => (
+          <PhoenixPathSection key={path.id} path={path} kindling={kindling === path.id}
+            ref={(section) => { sections.current[path.id] = section; }} />
+        ))}
         <p className="phoenix__ground">{profile.groundingLine}</p>
+        <PhoenixSparks ref={sparks} />
       </div>
     </PortfolioPage>
   );

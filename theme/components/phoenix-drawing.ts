@@ -25,9 +25,14 @@ export interface PhoenixPart {
   strokes: readonly TimedStroke[];
 }
 
+export interface PhoenixPoint {
+  x: number;
+  y: number;
+}
+
 export const PHOENIX_CENTRE_X = 150;
-export const PHOENIX_HEART = { x: PHOENIX_CENTRE_X, y: 170 } as const;
-export const PHOENIX_EYE = { x: 155.5, y: 46.5 } as const;
+export const PHOENIX_HEART: PhoenixPoint = { x: PHOENIX_CENTRE_X, y: 170 };
+export const PHOENIX_EYE: PhoenixPoint = { x: 155.5, y: 46.5 };
 
 const PEN_SPEED = 520; // viewBox units per second
 const SHORTEST_STROKE_SECONDS = 0.22;
@@ -121,4 +126,33 @@ export const PHOENIX_PARTS: readonly PhoenixPart[] = [
   _write('heart', 1.7, 2.0, paired(RIGHT_BODY_OVAL)),
   _write('ground', 1.95, 2.55, TAIL),
   _write('ground', 2.6, 2.7, GROUND_LINE),
+];
+
+/** Seconds after load when the last stroke lifts off the page. */
+export const PHOENIX_WRITTEN_AT = Math.max(
+  ...PHOENIX_PARTS.flatMap((part) => part.strokes.map((stroke) => stroke.delay + stroke.duration)),
+);
+
+/** How a part of the bird is touched: the area that answers, and where its fire leaves from. */
+export interface PhoenixTouch {
+  id: PhoenixPathId;
+  /** Closed shapes far wider than the ink, so a hairline is never the target. */
+  shapes: readonly string[];
+  sources: readonly PhoenixPoint[];
+}
+
+const RIGHT_WING_REACH = 'M154 166 L198 104 L230 28 L268 38 L298 78 L292 148 L266 184 L232 204 L198 214 Z';
+const RIGHT_WING_SOURCE: PhoenixPoint = { x: 232, y: 112 };
+const HEAD_AND_NECK_REACH = 'M102 -4 L198 -4 L202 62 L176 102 L170 142 L130 142 L124 102 L98 62 Z';
+const CROWN: PhoenixPoint = { x: PHOENIX_CENTRE_X, y: 42 };
+
+/** In painting order: where they overlap, the later part is the one touched. */
+export const PHOENIX_TOUCH: readonly PhoenixTouch[] = [
+  {
+    id: 'hands',
+    shapes: [RIGHT_WING_REACH, mirrorPath(RIGHT_WING_REACH, PHOENIX_CENTRE_X)],
+    sources: [RIGHT_WING_SOURCE, { ...RIGHT_WING_SOURCE, x: 2 * PHOENIX_CENTRE_X - RIGHT_WING_SOURCE.x }],
+  },
+  { id: 'mind', shapes: [HEAD_AND_NECK_REACH], sources: [CROWN] },
+  { id: 'heart', shapes: [`${ovalPath([PHOENIX_CENTRE_X, 197], 36, 54, 0, 0, 360)} Z`], sources: [PHOENIX_HEART] },
 ];
