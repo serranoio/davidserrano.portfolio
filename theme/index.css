@@ -6,9 +6,11 @@
 
    The palette is three adjacent warm hues, about 30° apart on the colour
    wheel: crimson (~345°), ember (~17°), gold (~45°). Crimson is the primary
-   colour; ember is fire and energy; gold is the accent that answers the
-   visitor. Every colour in the repo is one of these tokens or a neutral
-   below — component files hold no colour literals of their own.
+   colour: brand, links, emphasis, focus and hairlines all use --color-primary.
+   Ember is the phoenix's fire. Gold is kept for two things only: the rose
+   answering the visitor's touch, and the phoenix's ink before it catches.
+   Every colour in the repo is one of these tokens or a neutral below —
+   component files hold no colour literals of their own.
 
    Three rules, in order:
      1. the palette, with the light theme's values (the default);
@@ -86,8 +88,7 @@ welcome-section,
 writing-section,
 case-studies-section {
   --color-text-muted: color-mix(in srgb, var(--color-text) 70%, transparent);
-  --color-gold-muted: color-mix(in srgb, var(--color-gold-primary) 60%, transparent);
-  --color-gold-tint: color-mix(in srgb, var(--color-gold-primary) 12%, transparent);
+  --color-primary-muted: color-mix(in srgb, var(--color-primary) 60%, transparent);
   --color-primary-tint: color-mix(in srgb, var(--color-primary) 12%, transparent);
 
   /* Rspress brand: crimson */
@@ -103,9 +104,9 @@ case-studies-section {
   --rp-c-text-1: var(--color-text);
   --rp-c-text-2: var(--color-text-muted);
 
-  /* Hairlines stay gold */
-  --rp-c-divider: color-mix(in srgb, var(--color-gold-primary) 20%, transparent);
-  --rp-c-divider-light: color-mix(in srgb, var(--color-gold-primary) 10%, transparent);
+  /* Hairlines */
+  --rp-c-divider: color-mix(in srgb, var(--color-primary) 20%, transparent);
+  --rp-c-divider-light: color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 
 /* ========================================

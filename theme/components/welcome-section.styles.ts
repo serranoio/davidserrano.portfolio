@@ -57,7 +57,7 @@ export default css`
   }
 
   .headline em {
-    color: var(--color-gold-light);
+    color: var(--color-primary);
     font-weight: 400;
   }
 
@@ -95,16 +95,16 @@ export default css`
     color: var(--color-text);
     text-decoration: underline;
     text-underline-offset: 0.4em;
-    text-decoration-color: var(--color-gold-muted);
+    text-decoration-color: var(--color-primary-muted);
     font-size: 0.95rem;
   }
 
   .destination-link:hover {
-    color: var(--color-gold-light);
+    color: var(--color-primary);
   }
 
   .destination-link:focus-visible {
-    outline: 2px solid var(--color-gold-light);
+    outline: 2px solid var(--color-primary);
     outline-offset: 4px;
   }
 
@@ -114,8 +114,8 @@ export default css`
     gap: 0.75rem;
     min-height: 48px;
     box-sizing: border-box;
-    border-bottom: 1px solid var(--color-gold-muted);
-    color: var(--color-gold-light);
+    border-bottom: 1px solid var(--color-primary-muted);
+    color: var(--color-primary);
     text-decoration: none;
     font-size: 0.9rem;
     transition: color 180ms ease;
@@ -134,7 +134,7 @@ export default css`
   }
 
   .explore-link:focus-visible {
-    outline: 2px solid var(--color-gold-light);
+    outline: 2px solid var(--color-primary);
     outline-offset: 6px;
   }
 

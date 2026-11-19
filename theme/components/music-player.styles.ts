@@ -26,7 +26,7 @@ export default css`
     width: min(17rem, calc(100vw - 2rem));
     margin: 0 0 0.75rem;
     padding: 0.75rem 1rem;
-    border: 1px solid var(--color-gold-muted);
+    border: 1px solid var(--color-primary-muted);
     border-radius: 8px;
     background: var(--color-bg);
     color: var(--color-text);
@@ -37,9 +37,9 @@ export default css`
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    border: 1px solid var(--color-gold-muted);
+    border: 1px solid var(--color-primary-muted);
     background: var(--color-bg);
-    color: var(--color-gold-primary);
+    color: var(--color-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -51,12 +51,12 @@ export default css`
   }
 
   .player-button:hover {
-    background: var(--color-gold-tint);
-    border-color: var(--color-gold-primary);
+    background: var(--color-primary-tint);
+    border-color: var(--color-primary);
   }
 
   .player-button:focus-visible {
-    outline: 2px solid var(--color-gold-primary);
+    outline: 2px solid var(--color-primary);
     outline-offset: 2px;
   }
 

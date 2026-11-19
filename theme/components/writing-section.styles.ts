@@ -45,17 +45,17 @@ export default css`
     font-size: clamp(2.4rem, 5vw, 3.6rem);
     font-weight: 500;
     line-height: 1.1;
-    color: var(--color-gold-light);
+    color: var(--color-primary);
     letter-spacing: 0.01em;
     text-decoration: none;
-    text-shadow: 0 0 20px color-mix(in srgb, var(--color-gold-light) 18%, transparent);
+    text-shadow: 0 0 20px color-mix(in srgb, var(--color-primary) 18%, transparent);
     transition: color 0.3s ease, text-shadow 0.3s ease;
   }
 
   .writing-link:hover,
   .writing-link:focus-visible {
-    color: color-mix(in srgb, var(--color-gold-light) 60%, var(--color-text));
-    text-shadow: 0 0 28px color-mix(in srgb, var(--color-gold-light) 32%, transparent);
+    color: color-mix(in srgb, var(--color-primary) 60%, var(--color-text));
+    text-shadow: 0 0 28px color-mix(in srgb, var(--color-primary) 32%, transparent);
     outline: none;
   }
 

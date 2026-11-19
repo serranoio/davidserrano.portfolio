@@ -15,8 +15,8 @@ export default css`
     font-weight: 300;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--color-gold-primary);
+    color: var(--color-primary);
     margin: 0;
-    text-shadow: 0 0 40px color-mix(in srgb, var(--color-gold-primary) 15%, transparent);
+    text-shadow: 0 0 40px color-mix(in srgb, var(--color-primary) 15%, transparent);
   }
 `;

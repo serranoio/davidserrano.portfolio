@@ -12,17 +12,15 @@
 }
 
 .portfolio-page__header { max-width: 46rem; margin-bottom: 2.5rem; }
-.portfolio-page__eyebrow { color: var(--color-gold-dark); font-size: 0.875rem; margin: 0 0 1rem; }
-.dark .portfolio-page__eyebrow { color: var(--color-gold-light); }
+.portfolio-page__eyebrow { color: var(--color-primary); font-size: 0.875rem; margin: 0 0 1rem; }
 .portfolio-page h1 { font-size: clamp(3.25rem, 7vw, 5.5rem); line-height: 1.02; font-weight: 400; letter-spacing: -0.035em; margin: 0 0 1.5rem; text-wrap: balance; }
 .portfolio-page__introduction { font-size: clamp(1.05rem, 1.7vw, 1.2rem); line-height: 1.75; max-width: 40rem; color: var(--color-text-muted); }
 .portfolio-page h2 { font-size: clamp(2rem, 4vw, 3rem); font-weight: 400; line-height: 1.15; margin: 0 0 1.25rem; }
 .portfolio-page h3 { font-size: 1.6rem; font-weight: 500; margin: 0 0 0.75rem; }
 .portfolio-page p { line-height: 1.75; }
 .portfolio-page a { text-decoration: none; }
-.portfolio-page a:focus-visible, .portfolio-page button:focus-visible { outline: 2px solid var(--color-gold-primary); outline-offset: 5px; }
-.portfolio-page a:hover { color: var(--color-gold-dark); }
-.dark .portfolio-page a:hover { color: var(--color-gold-light); }
+.portfolio-page a:focus-visible, .portfolio-page button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 5px; }
+.portfolio-page a:hover { color: var(--color-primary); }
 .portfolio-links { display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; }
 .portfolio-links a, .portfolio-text-link { display: inline-flex; align-items: center; gap: 1rem; min-height: 44px; color: var(--color-text); text-decoration: underline !important; text-decoration-color: var(--color-gold-primary) !important; text-underline-offset: 0.4em; }
 .portfolio-page__title-row { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
@@ -129,7 +127,7 @@
 .writing-filters { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; border-block: 1px solid var(--rp-c-divider); padding: 0.75rem 0; }
 .writing-filters button { min-height: 44px; padding: 0.25rem 0; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--color-text-muted); font: inherit; font-size: 0.875rem; cursor: pointer; }
 .writing-filters button:hover { color: var(--color-text); }
-.writing-filters button[aria-pressed='true'] { color: var(--color-text); border-bottom-color: var(--color-gold-primary); }
+.writing-filters button[aria-pressed='true'] { color: var(--color-text); border-bottom-color: var(--color-primary); }
 .writing-count { margin: 1.5rem 0 0.5rem; color: var(--color-text-muted); font-size: 0.875rem; }
 .writing-list { list-style: none; padding: 0; margin: 0; }
 .writing-list li { border-bottom: 1px solid var(--rp-c-divider); }

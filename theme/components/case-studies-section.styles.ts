@@ -41,7 +41,7 @@ export default css`
     text-transform: uppercase;
     letter-spacing: 0.32em;
     font-size: 0.78rem;
-    color: var(--color-gold-primary);
+    color: var(--color-primary);
     margin-bottom: 1rem;
     opacity: 0.85;
   }
@@ -51,8 +51,8 @@ export default css`
     font-size: clamp(2.4rem, 5vw, 3.6rem);
     font-weight: 500;
     margin: 0 0 1rem;
-    color: var(--color-gold-light);
-    text-shadow: 0 0 20px color-mix(in srgb, var(--color-gold-light) 18%, transparent);
+    color: var(--color-primary);
+    text-shadow: 0 0 20px color-mix(in srgb, var(--color-primary) 18%, transparent);
     letter-spacing: 0.01em;
     line-height: 1.1;
   }
@@ -80,7 +80,7 @@ export default css`
       color-mix(in srgb, var(--color-bg-muted) 65%, transparent) 0%,
       color-mix(in srgb, var(--color-bg) 85%, transparent) 100%
     );
-    border: 1px solid color-mix(in srgb, var(--color-gold-light) 16%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 16%, transparent);
     border-radius: 10px;
     padding: 1.75rem 1.6rem 1.6rem;
     transition: transform 0.35s ease, border-color 0.35s ease,
@@ -94,7 +94,7 @@ export default css`
     border-radius: 10px;
     background: radial-gradient(
       circle at top left,
-      color-mix(in srgb, var(--color-gold-light) 8%, transparent),
+      color-mix(in srgb, var(--color-primary) 8%, transparent),
       transparent 60%
     );
     opacity: 0;
@@ -104,9 +104,9 @@ export default css`
 
   .card:hover {
     transform: translateY(-4px);
-    border-color: color-mix(in srgb, var(--color-gold-light) 40%, transparent);
+    border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
     box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45),
-      0 0 0 1px color-mix(in srgb, var(--color-gold-light) 12%, transparent);
+      0 0 0 1px color-mix(in srgb, var(--color-primary) 12%, transparent);
   }
 
   .card:hover::before {
@@ -118,7 +118,7 @@ export default css`
     font-size: 1.65rem;
     font-weight: 600;
     margin: 0 0 0.75rem;
-    color: var(--color-gold-light);
+    color: var(--color-primary);
     letter-spacing: 0.015em;
   }
 
@@ -141,9 +141,9 @@ export default css`
     text-transform: uppercase;
     padding: 0.3rem 0.65rem;
     border-radius: 999px;
-    border: 1px solid color-mix(in srgb, var(--color-gold-light) 25%, transparent);
-    color: color-mix(in srgb, var(--color-gold-light) 85%, transparent);
-    background: color-mix(in srgb, var(--color-gold-light) 4%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+    color: color-mix(in srgb, var(--color-primary) 85%, transparent);
+    background: color-mix(in srgb, var(--color-primary) 4%, transparent);
   }
 
   @media (max-width: 640px) {
