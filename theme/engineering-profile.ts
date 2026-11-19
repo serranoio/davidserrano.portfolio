@@ -51,7 +51,7 @@ export const engineeringProfile: EngineeringProfile = {
     {
       id: 'hands',
       name: 'The hands',
-      verse: 'are there for you to care for what you love.',
+      verse: 'are there for you to build what you love.',
       links: [],
       notes: [
         {
@@ -61,5 +61,5 @@ export const engineeringProfile: EngineeringProfile = {
       ],
     },
   ],
-  groundingLine: 'Build. Build. Build away. Build your codebase, build your dreams.',
+  groundingLine: "Build the craziest of dreams.",
 };
