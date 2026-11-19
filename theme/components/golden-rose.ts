@@ -22,7 +22,7 @@ import {
   OFFER,
   PETAL_PAIR_DISTANCE,
 } from './rose-look';
-import { ACTIVE_PETAL_INDICES, SECTIONS } from './petal-sections';
+import { ACTIVE_PETAL_INDICES, SECTIONS, SECTION_TITLES } from './petal-sections';
 import truthStatement from '../../docs/sections/truth-statement.txt?raw';
 
 const ROSE_MODEL_URL = '/models/rose_separated.glb';
@@ -68,6 +68,7 @@ export class GoldenRoseElement extends LitElement {
     activeSection: { type: String, state: true },
     coarsePointer: { type: Boolean, state: true },
     hintSeen: { type: Boolean, state: true },
+    hoveredTitle: { type: String, state: true },
   };
 
   private _loading = true;
@@ -75,6 +76,9 @@ export class GoldenRoseElement extends LitElement {
   private _activeSection: string | null = null;
   private _coarsePointer = false;
   private _hintSeen = false;
+  private _hoveredTitle: string | null = null;
+  // The last title shown stays in the label while it fades out.
+  private lastTitle = '';
 
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
@@ -181,6 +185,18 @@ export class GoldenRoseElement extends LitElement {
     breathWeight: number;
     breathLag: number;
   }> = [];
+
+  get hoveredTitle() {
+    return this._hoveredTitle;
+  }
+
+  set hoveredTitle(val: string | null) {
+    const oldVal = this._hoveredTitle;
+    if (oldVal === val) return;
+    this._hoveredTitle = val;
+    if (val !== null) this.lastTitle = val;
+    this.requestUpdate('hoveredTitle', oldVal);
+  }
 
   get hintSeen() {
     return this._hintSeen;
@@ -564,13 +580,16 @@ export class GoldenRoseElement extends LitElement {
         this.setGold(member, Math.max(this.goldLevels[member], GOLD.instantLevel));
       }
     }
+    const section: string | null = this.petals[index].userData.section;
+    this.hoveredTitle = section ? SECTION_TITLES[section] ?? null : null;
     if (this.renderer) {
       this.renderer.domElement.style.cursor = isActive ? 'pointer' : 'default';
     }
   }
 
   private unhighlightPetal(_index: number) {
-    // The gold itself fades in updateOffers(); only the cursor resets here.
+    // The gold itself fades in updateOffers(); only the cursor and title reset here.
+    this.hoveredTitle = null;
     if (this.renderer) {
       this.renderer.domElement.style.cursor = 'default';
     }
@@ -1191,6 +1210,13 @@ export class GoldenRoseElement extends LitElement {
           aria-hidden=${this.hintSeen ? 'true' : 'false'}
         >
           ${HINT.text}
+        </p>
+        <p
+          class="petal-title ${this.hoveredTitle !== null && this.roseState === 'idle' && !this.coarsePointer ? 'shown' : ''}"
+          data-testid="petal-title"
+          aria-hidden="true"
+        >
+          ${this.hoveredTitle ?? this.lastTitle}
         </p>
         <div id="content-root" class="${this.roseState === 'open' ? 'visible' : ''}">
           <button

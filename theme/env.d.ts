@@ -5,6 +5,11 @@ declare module '*.mdx' {
   export default Component;
 }
 
+declare module '*.mdx?raw' {
+  const content: string;
+  export default content;
+}
+
 declare module '*.txt?raw' {
   const content: string;
   export default content;

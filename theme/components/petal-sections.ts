@@ -1,17 +1,30 @@
 import type { ComponentType } from 'react';
 import Architecture from '../../docs/sections/code-is-architecture.mdx';
+import ArchitectureSource from '../../docs/sections/code-is-architecture.mdx?raw';
 import History from '../../docs/sections/history-in-cities.mdx';
+import HistorySource from '../../docs/sections/history-in-cities.mdx?raw';
 import Forest from '../../docs/sections/the-forest.mdx';
+import ForestSource from '../../docs/sections/the-forest.mdx?raw';
 import GuitarHero from '../../docs/sections/guitar-hero.mdx';
+import GuitarHeroSource from '../../docs/sections/guitar-hero.mdx?raw';
 import Eagle from '../../docs/sections/like-an-eagle.mdx';
+import EagleSource from '../../docs/sections/like-an-eagle.mdx?raw';
 import Cooking from '../../docs/sections/cooking-a-dish.mdx';
+import CookingSource from '../../docs/sections/cooking-a-dish.mdx?raw';
 import Dance from '../../docs/sections/code-is-dance.mdx';
+import DanceSource from '../../docs/sections/code-is-dance.mdx?raw';
 import SystemDance from '../../docs/sections/the-system-dance.mdx';
+import SystemDanceSource from '../../docs/sections/the-system-dance.mdx?raw';
 import DataDance from '../../docs/sections/the-data-dance.mdx';
+import DataDanceSource from '../../docs/sections/the-data-dance.mdx?raw';
 import TeamDance from '../../docs/sections/the-team-dance.mdx';
+import TeamDanceSource from '../../docs/sections/the-team-dance.mdx?raw';
 import PartnerDance from '../../docs/sections/the-partner-dance.mdx';
+import PartnerDanceSource from '../../docs/sections/the-partner-dance.mdx?raw';
 import FlowState from '../../docs/sections/the-flow-state-in-coding.mdx';
+import FlowStateSource from '../../docs/sections/the-flow-state-in-coding.mdx?raw';
 import Forging from '../../docs/sections/forging-code.mdx';
+import ForgingSource from '../../docs/sections/forging-code.mdx?raw';
 
 // Each petal keeps its own section id so it can host a different article later.
 // Import an MDX article and add a PETAL_SECTION_OVERRIDES entry to assign it
@@ -19,27 +32,57 @@ import Forging from '../../docs/sections/forging-code.mdx';
 export interface PetalSection {
   petalIndex: number;
   id: string;
+  title: string;
   Component: ComponentType;
+}
+
+interface Article {
+  title: string;
+  Component: ComponentType;
+}
+
+// The poem's own first heading is its title, so renaming a poem in its file
+// renames it everywhere.
+const TITLE_PATTERN = /^#\s+(.+?)\s*$/m;
+
+export function _titleOf(source: string): string {
+  const title = TITLE_PATTERN.exec(source)?.[1];
+  if (!title) throw new Error('[petal-sections] a section file has no "# " title heading');
+  return title;
+}
+
+function article(Component: ComponentType, source: string): Article {
+  return { title: _titleOf(source), Component };
 }
 
 // Ballad of Programata: the linked notes, in index order. The dance note is
 // split into one article per poem, kept together after its opening poem.
-const ARTICLES: readonly ComponentType[] = [
-  Architecture, History, Forest, GuitarHero, Eagle, Cooking,
-  Dance, SystemDance, DataDance, TeamDance, PartnerDance, FlowState,
-  Forging,
+const ARTICLES: readonly Article[] = [
+  article(Architecture, ArchitectureSource),
+  article(History, HistorySource),
+  article(Forest, ForestSource),
+  article(GuitarHero, GuitarHeroSource),
+  article(Eagle, EagleSource),
+  article(Cooking, CookingSource),
+  article(Dance, DanceSource),
+  article(SystemDance, SystemDanceSource),
+  article(DataDance, DataDanceSource),
+  article(TeamDance, TeamDanceSource),
+  article(PartnerDance, PartnerDanceSource),
+  article(FlowState, FlowStateSource),
+  article(Forging, ForgingSource),
 ];
 const PETAL_COUNT = 46;
 const PETAL_SECTION_OVERRIDES: readonly PetalSection[] = [
-  { petalIndex: 41, id: 'code-is-architecture', Component: Architecture },
-  { petalIndex: 43, id: 'history-in-cities', Component: History },
+  { petalIndex: 41, id: 'code-is-architecture', ...article(Architecture, ArchitectureSource) },
+  { petalIndex: 43, id: 'history-in-cities', ...article(History, HistorySource) },
 ];
 
 export const PETAL_SECTIONS: readonly PetalSection[] = [
   ...Array.from({ length: PETAL_COUNT }, (_, petalIndex) => ({
     petalIndex,
     id: `petal-${petalIndex}`,
-    Component: ARTICLES[petalIndex % ARTICLES.length],
+    ...ARTICLES[petalIndex % ARTICLES.length],
   })).filter(
     ({ petalIndex }) => !PETAL_SECTION_OVERRIDES.some((entry) => entry.petalIndex === petalIndex)
   ),
@@ -76,4 +119,8 @@ export const SECTIONS: readonly string[] = PETAL_SECTIONS.map((s) => s.id);
 
 export const POEM_COMPONENTS: Record<string, ComponentType> = Object.fromEntries(
   PETAL_SECTIONS.map((s) => [s.id, s.Component])
+);
+
+export const SECTION_TITLES: Record<string, string> = Object.fromEntries(
+  PETAL_SECTIONS.map((s) => [s.id, s.title])
 );

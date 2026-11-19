@@ -18,6 +18,7 @@ export default css`
     --rose-ink: var(--color-text);
     --rose-ink-quiet: color-mix(in srgb, var(--color-text) 55%, transparent);
     --rose-gold: var(--color-gold-light);
+    --rose-crimson: crimson;
   }
 
   .scene-viewport {
@@ -97,6 +98,28 @@ export default css`
     opacity: 0;
     visibility: hidden;
     transition: opacity 1.4s ease, visibility 0s linear 1.4s;
+  }
+
+  /* The hovered petal's poem title, bottom-left of the sky. */
+  .petal-title {
+    position: absolute;
+    left: 1.5rem;
+    bottom: 1.5rem;
+    max-width: calc(100% - 3rem);
+    margin: 0;
+    z-index: 3;
+    pointer-events: none;
+    font-family: var(--font-title, 'Cormorant Garamond', Georgia, serif);
+    font-weight: 400;
+    font-size: 1.6rem;
+    letter-spacing: 0.06em;
+    color: var(--rose-crimson);
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+
+  .petal-title.shown {
+    opacity: 1;
   }
 
   .loading-shimmer {
@@ -352,6 +375,7 @@ export default css`
     .truth-nav,
     .petal-hint,
     .petal-hint.gone,
+    .petal-title,
     #content-root,
     #content-root.visible,
     .scene-viewport::after {

@@ -47,9 +47,18 @@ export default defineConfig({
         config.module ??= {};
         config.module.rules ??= [];
         // Treat any `import x from '...?raw'` as the file's raw contents.
-        // Used by golden-rose to inline the truth-statement prose.
+        // Used by golden-rose to inline the truth-statement prose, and by
+        // petal-sections to read each poem's title from its own heading.
+        const rawQuery = /raw/;
+        // A raw import of a poem must skip the MDX compiler, or the "source"
+        // would be compiled JavaScript instead of the words.
+        for (const rule of config.module.rules) {
+          if (rule && typeof rule === 'object' && rule.test instanceof RegExp && rule.test.test('poem.mdx')) {
+            rule.resourceQuery = { not: [rawQuery] };
+          }
+        }
         config.module.rules.push({
-          resourceQuery: /raw/,
+          resourceQuery: rawQuery,
           type: 'asset/source',
         });
         return config;
