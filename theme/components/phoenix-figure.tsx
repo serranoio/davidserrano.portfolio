@@ -9,7 +9,8 @@ import './phoenix-figure.css';
 
 /** Extra width on the reveal so the widest shade is never clipped. */
 const REVEAL_MARGIN = 3;
-const EMBER = { ...PHOENIX_HEART, r: 6 } as const;
+/** Large enough for the coal to read as a heart, not a dot. */
+const EMBER = { ...PHOENIX_HEART, r: 8 } as const;
 const INK_REACH = 120;
 const INKS = [...new Set(PHOENIX_PARTS.map((part) => part.id))];
 const inkId = (part: string) => `phoenix-ink-${part}`;
@@ -115,7 +116,7 @@ export function PhoenixFigure({ onHover, onLeave, onPress }: {
           {part.id !== 'ground' && <Thread id={part.id} />}
         </g>
       ))}
-      <EmberCoal {...EMBER} />
+      <EmberCoal {...EMBER} shape="heart" />
       {PHOENIX_TOUCH.map((touch) => (
         <g key={touch.id} className={`phoenix-figure__touch phoenix-figure__touch--${touch.id}`} 
           onPointerEnter={(event) => { if (_isMouse(event)) onHover?.(touch.id, onScreen(touch)); }}

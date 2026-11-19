@@ -13,7 +13,6 @@ const TEXT_OFFSET = new THREE.Vector3(0, -0.62, -1.1);
 
 // Flat and quiet: unlit warm ivory, no outline, no glow. It should read like
 // words set on the night, not like an object in the scene.
-const TEXT_COLOR = 0xe6dccb;
 const TEXT_OPACITY = 0.86;
 const TEXT_FONT_SIZE = 0.098;
 const TEXT_LINE_HEIGHT = 1.42;
@@ -52,7 +51,8 @@ export class RoseText {
   // returns this field instead of round-tripping through Troika.
   private lastOpacity = 1;
 
-  constructor(body: string, bloomCenter: THREE.Vector3) {
+  // `color` is the resolved text colour token (any CSS colour string).
+  constructor(body: string, bloomCenter: THREE.Vector3, color: string) {
     if (typeof body !== 'string') {
       throw new TypeError(
         `RoseText requires a string body, got ${typeof body}. ` +
@@ -72,11 +72,11 @@ export class RoseText {
       text.anchorX = 'center';
       text.anchorY = 'middle';
       text.textAlign = 'center';
-      text.color = TEXT_COLOR;
+      text.color = color;
       text.font = textFontUrl;
       text.letterSpacing = TEXT_LETTER_SPACING;
       text.material = new THREE.MeshBasicMaterial({
-        color: TEXT_COLOR,
+        color,
         transparent: true,
         opacity: TEXT_OPACITY,
         toneMapped: false,

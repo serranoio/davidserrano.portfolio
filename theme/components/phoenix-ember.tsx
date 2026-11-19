@@ -11,7 +11,7 @@ const HALO_GRADIENT = 'phoenix-halo';
 const COAL_GRADIENT = 'phoenix-coal';
 
 /** How far the glow reaches, in coal radii, around the ember in the bird. */
-export const EMBER_GLOW = 52 / 6;
+export const EMBER_GLOW = 52 / 8;
 
 interface EmberPlace {
   x: number;
@@ -43,10 +43,24 @@ export function EmberHalo({ x, y, r, glow = EMBER_GLOW }: EmberPlace & { glow?: 
   return <circle className="phoenix-ember__halo" cx={x} cy={y} r={r * glow} fill={`url(#${HALO_GRADIENT})`} />;
 }
 
-export function EmberCoal({ x, y, r }: EmberPlace) {
+export type EmberShape = 'round' | 'heart';
+
+/** A heart one unit in radius, and the tongue of flame that rises from its cleft. */
+const HEART = 'M0 0.95 C-0.35 0.62 -1 0.22 -1 -0.32 C-1 -0.72 -0.7 -0.95 -0.42 -0.95 C-0.22 -0.95 -0.07 -0.82 0 -0.62 '
+  + 'C0.07 -0.82 0.22 -0.95 0.42 -0.95 C0.7 -0.95 1 -0.72 1 -0.32 C1 0.22 0.35 0.62 0 0.95 Z';
+const HEART_FLAME = 'M-0.02 -0.6 C-0.26 -0.86 -0.12 -1.16 0.06 -1.5 C0.08 -1.24 0.32 -1.04 0.1 -0.6 Z';
+
+/** The coal itself: a round spark, or the fiery heart the bird and its words share. */
+export function EmberCoal({ x, y, r, shape = 'round' }: EmberPlace & { shape?: EmberShape }) {
+  const fill = `url(#${COAL_GRADIENT})`;
   return (
     <g className="phoenix-ember__coal">
-      <circle cx={x} cy={y} r={r} fill={`url(#${COAL_GRADIENT})`} />
+      {shape === 'round' ? <circle cx={x} cy={y} r={r} fill={fill} /> : (
+        <g transform={`translate(${x} ${y}) scale(${r})`} fill={fill}>
+          <path className="phoenix-ember__flame" d={HEART_FLAME} />
+          <path d={HEART} />
+        </g>
+      )}
     </g>
   );
 }
@@ -58,16 +72,17 @@ const COAL_PLACE: EmberPlace = { x: 0, y: 0, r: COAL_BOX / 2 };
  * A coal on its own, outside the bird. It burns with the gradients of the
  * ember in the figure, so it only glows on a page where the phoenix stands.
  */
-export function PhoenixCoal({ className = '', glow, ref }: {
+export function PhoenixCoal({ className = '', glow, shape, ref }: {
   className?: string;
   glow?: number;
+  shape?: EmberShape;
   ref?: Ref<SVGSVGElement>;
 }) {
   return (
     <svg ref={ref} className={`phoenix-coal ${className}`} aria-hidden="true"
       viewBox={`${-COAL_BOX / 2} ${-COAL_BOX / 2} ${COAL_BOX} ${COAL_BOX}`}>
       <EmberHalo {...COAL_PLACE} glow={glow} />
-      <EmberCoal {...COAL_PLACE} />
+      <EmberCoal {...COAL_PLACE} shape={shape} />
     </svg>
   );
 }

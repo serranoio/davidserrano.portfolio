@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { readColorToken, type ColorToken } from '../design-tokens';
 import { GOLD, PETAL } from './rose-look';
 
 // A living petal: matte, velvety flesh that light passes through where it is
@@ -22,11 +23,23 @@ interface PetalUniforms {
   uGold: { value: number };
 }
 
-const SHARED_UNIFORMS = {
-  uDeep: { value: new THREE.Color(PETAL.deepColor) },
-  uLight: { value: new THREE.Color(PETAL.lightColor) },
-  uThrough: { value: new THREE.Color(PETAL.throughColor) },
-  uGoldColor: { value: new THREE.Color(GOLD.color) },
+// Everything the petals of one rose share: the uniforms every petal shader
+// reads, and the sheen colour. Built once per scene because its colours are
+// design tokens, read from the element the scene lives in.
+export interface PetalLook {
+  sharedUniforms: Record<string, THREE.IUniform>;
+  sheenColor: THREE.Color;
+}
+
+export function createPetalLook(scope: Element): PetalLook {
+  const color = (token: ColorToken) => new THREE.Color(readColorToken(scope, token));
+  return {
+    sheenColor: color(PETAL.sheenColor),
+    sharedUniforms: {
+  uDeep: { value: color(PETAL.deepColor) },
+  uLight: { value: color(PETAL.lightColor) },
+  uThrough: { value: color(PETAL.throughColor) },
+  uGoldColor: { value: color(GOLD.color) },
   uToneRange: { value: new THREE.Vector2(...PETAL.toneRange) },
   uThroughStrength: { value: PETAL.throughStrength },
   uWrap: { value: PETAL.wrap },
@@ -35,9 +48,11 @@ const SHARED_UNIFORMS = {
   uGoldGlow: { value: new THREE.Vector2(GOLD.glow, GOLD.rimGlow) },
   uGiltRange: { value: new THREE.Vector2(...GOLD.bodyRange) },
   uThinRange: { value: new THREE.Vector2(...PETAL.thinRange) },
-  uVelvet: { value: new THREE.Color(PETAL.velvetColor).multiplyScalar(PETAL.velvetStrength) },
+  uVelvet: { value: color(PETAL.velvetColor).multiplyScalar(PETAL.velvetStrength) },
   uFaceOnDepth: { value: PETAL.faceOnDepth },
-};
+    },
+  };
+}
 
 const FRAGMENT_PARS = /* glsl */ `
 uniform float uGold;
@@ -159,7 +174,11 @@ function patchPetalShader(
   this: THREE.Material,
   shader: THREE.WebGLProgramParametersWithUniforms
 ) {
-  Object.assign(shader.uniforms, SHARED_UNIFORMS, this.userData.petalUniforms as PetalUniforms);
+  Object.assign(
+    shader.uniforms,
+    (this.userData.petalLook as PetalLook).sharedUniforms,
+    this.userData.petalUniforms as PetalUniforms
+  );
   let fragment = insertAfter(shader.fragmentShader, 'common', FRAGMENT_PARS);
   fragment = fragment.replace('#include <map_fragment>', FRAGMENT_COLOR);
   fragment = insertAfter(fragment, 'normal_fragment_maps', FRAGMENT_RELIEF);
@@ -168,7 +187,7 @@ function patchPetalShader(
   shader.fragmentShader = fragment;
 }
 
-export function createPetalMaterial(maps: PetalMaps): THREE.MeshPhysicalMaterial {
+export function createPetalMaterial(maps: PetalMaps, look: PetalLook): THREE.MeshPhysicalMaterial {
   const material = new THREE.MeshPhysicalMaterial({
     map: maps.map,
     normalMap: maps.normalMap,
@@ -178,13 +197,14 @@ export function createPetalMaterial(maps: PetalMaps): THREE.MeshPhysicalMaterial
     metalness: 0,
     specularIntensity: PETAL.specularIntensity,
     sheen: PETAL.sheen,
-    sheenColor: new THREE.Color(PETAL.sheenColor),
+    sheenColor: look.sheenColor,
     sheenRoughness: PETAL.sheenRoughness,
     side: THREE.DoubleSide,
   });
   material.normalScale.setScalar(PETAL.normalStrength);
   const uniforms: PetalUniforms = { uGold: { value: 0 } };
   material.userData.petalUniforms = uniforms;
+  material.userData.petalLook = look;
   material.onBeforeCompile = patchPetalShader;
   return material;
 }

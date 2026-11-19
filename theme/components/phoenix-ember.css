@@ -1,7 +1,9 @@
-/* The fire's palette and its breath, shared by the bird and the words. */
+/* The fire's palette and its breath, shared by the bird and the words. The
+   ember itself is the global ember token; it is re-declared under .dark so it
+   resolves against that theme's value. */
 :root {
-  --phoenix-ember: #d8501c;
-  --phoenix-ember-core: #ffd9a3;
+  --phoenix-ember: var(--color-ember-primary);
+  --phoenix-ember-core: var(--color-ember-soft);
   --phoenix-ink-hot: color-mix(in srgb, var(--phoenix-ember) 62%, var(--color-gold-dark));
   --phoenix-ink-lit: color-mix(in srgb, var(--phoenix-ember) 30%, var(--color-gold-dark));
   --phoenix-halo-strength: 0.42;
@@ -9,8 +11,8 @@
   --phoenix-breath-delay: 0.6s;
 }
 .dark {
-  --phoenix-ember: #ff6a1f;
-  --phoenix-ember-core: #fff3cf;
+  --phoenix-ember: var(--color-ember-primary);
+  --phoenix-ember-core: var(--color-ember-soft);
   --phoenix-ink-hot: color-mix(in srgb, var(--phoenix-ember) 55%, var(--color-gold-light));
   --phoenix-ink-lit: color-mix(in srgb, var(--phoenix-ember) 22%, var(--color-gold-light));
   --phoenix-halo-strength: 1;
@@ -24,12 +26,15 @@
 .dark .phoenix-ember__coal { filter: drop-shadow(0 0 5px var(--phoenix-ember)) drop-shadow(0 0 12px var(--phoenix-ember)); }
 .phoenix-ember__halo { opacity: calc(var(--phoenix-halo-strength) * (1 + 0.6 * var(--phoenix-lit-heart, 0))); animation: phoenix-ignite 0.9s ease-out backwards, phoenix-glow var(--phoenix-breath) ease-in-out calc(var(--phoenix-breath-delay) + 0.3s) infinite alternate; }
 .dark .phoenix-ember__halo { mix-blend-mode: screen; }
+/* The flame in the heart's cleft leans and stretches a little, never in step with the breath. */
+.phoenix-ember__flame { transform-box: fill-box; transform-origin: 50% 100%; animation: phoenix-flicker 1.7s ease-in-out infinite alternate; }
 .phoenix-coal { display: block; overflow: visible; pointer-events: none; }
 
 @keyframes phoenix-ignite { from { transform: scale(0); opacity: 0; } }
 @keyframes phoenix-breathe { to { transform: scale(1.16); } }
 @keyframes phoenix-glow { to { transform: scale(1.22); } }
+@keyframes phoenix-flicker { 35% { transform: scale(0.88, 1.12) skewX(-7deg); } 70% { transform: scale(1.06, 0.9) skewX(5deg); } to { transform: scale(0.94, 1.18) skewX(-3deg); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .phoenix-ember__coal, .phoenix-ember__halo { animation: none; }
+  .phoenix-ember__coal, .phoenix-ember__halo, .phoenix-ember__flame { animation: none; }
 }

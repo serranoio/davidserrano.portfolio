@@ -26,10 +26,10 @@ export default css`
     width: min(17rem, calc(100vw - 2rem));
     margin: 0 0 0.75rem;
     padding: 0.75rem 1rem;
-    border: 1px solid var(--color-gold-muted, rgba(212, 175, 55, 0.4));
+    border: 1px solid var(--color-gold-muted);
     border-radius: 8px;
-    background: var(--color-bg, #0a0a08);
-    color: var(--color-text, #faf3df);
+    background: var(--color-bg);
+    color: var(--color-text);
     font: 0.875rem/1.5 var(--font-body, system-ui, sans-serif);
   }
 
@@ -37,9 +37,9 @@ export default css`
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    border: 1px solid var(--color-gold-muted, rgba(212, 175, 55, 0.4));
-    background: var(--color-bg, #0a0a08);
-    color: var(--color-gold-primary, #d4af37);
+    border: 1px solid var(--color-gold-muted);
+    background: var(--color-bg);
+    color: var(--color-gold-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -51,12 +51,12 @@ export default css`
   }
 
   .player-button:hover {
-    background: rgba(212, 175, 55, 0.12);
-    border-color: var(--color-gold-primary, #d4af37);
+    background: var(--color-gold-tint);
+    border-color: var(--color-gold-primary);
   }
 
   .player-button:focus-visible {
-    outline: 2px solid var(--color-gold-primary, #d4af37);
+    outline: 2px solid var(--color-gold-primary);
     outline-offset: 2px;
   }
 

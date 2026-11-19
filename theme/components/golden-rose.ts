@@ -10,7 +10,8 @@ import { RoseText } from './rose-text';
 import { MeteorField } from './meteor-field';
 import { SkyDome } from './sky-dome';
 import { breath } from './breath';
-import { createPetalMaterial, setPetalGold } from './petal-material';
+import { createPetalLook, createPetalMaterial, setPetalGold } from './petal-material';
+import { COLOR_TOKEN, readColorToken } from '../design-tokens';
 import {
   BREATH_MOTION,
   CAMERA,
@@ -21,7 +22,6 @@ import {
   OFFER,
   PETAL_PAIR_DISTANCE,
 } from './rose-look';
-import { SKY } from './shooting-stars-config';
 import { ACTIVE_PETAL_INDICES, SECTIONS } from './petal-sections';
 import truthStatement from '../../docs/sections/truth-statement.txt?raw';
 
@@ -404,7 +404,7 @@ export class GoldenRoseElement extends LitElement {
     // Scene
     this.scene = new THREE.Scene();
     // Fallback only — the sky dome paints over it every frame.
-    this.scene.background = new THREE.Color(SKY.edge);
+    this.scene.background = new THREE.Color(readColorToken(this, COLOR_TOKEN.bg));
 
     // Camera - positioned for a nice view of the rose
     this.camera = new THREE.PerspectiveCamera(
@@ -865,6 +865,7 @@ export class GoldenRoseElement extends LitElement {
     // material, quietened so colour gathers in the bloom.
     const petalMeshes: THREE.Mesh[] = [];
     const allMeshes: THREE.Mesh[] = [];
+    const petalLook = createPetalLook(this);
     model.traverse((child) => {
       if (!(child instanceof THREE.Mesh)) return;
       const source = child.material as THREE.MeshStandardMaterial;
@@ -874,7 +875,7 @@ export class GoldenRoseElement extends LitElement {
           map: source.map,
           normalMap: source.normalMap,
           ormMap: source.aoMap ?? source.roughnessMap,
-        });
+        }, petalLook);
         petalMeshes.push(child);
       } else {
         source.metalness = 0;
@@ -999,7 +1000,7 @@ export class GoldenRoseElement extends LitElement {
     this.loading = false;
 
     try {
-      this.roseText = new RoseText(truthStatement, this.bloomCenter);
+      this.roseText = new RoseText(truthStatement, this.bloomCenter, readColorToken(this, COLOR_TOKEN.text));
       this.roseText.setMobileLayout(this.coarseQuery?.matches ?? false);
       this.scene.add(this.roseText.group);
     } catch (err) {

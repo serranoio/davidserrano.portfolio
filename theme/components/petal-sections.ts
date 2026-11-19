@@ -6,6 +6,11 @@ import GuitarHero from '../../docs/sections/guitar-hero.mdx';
 import Eagle from '../../docs/sections/like-an-eagle.mdx';
 import Cooking from '../../docs/sections/cooking-a-dish.mdx';
 import Dance from '../../docs/sections/code-is-dance.mdx';
+import SystemDance from '../../docs/sections/the-system-dance.mdx';
+import DataDance from '../../docs/sections/the-data-dance.mdx';
+import TeamDance from '../../docs/sections/the-team-dance.mdx';
+import PartnerDance from '../../docs/sections/the-partner-dance.mdx';
+import FlowState from '../../docs/sections/the-flow-state-in-coding.mdx';
 import Forging from '../../docs/sections/forging-code.mdx';
 
 // Each petal keeps its own section id so it can host a different article later.
@@ -17,9 +22,12 @@ export interface PetalSection {
   Component: ComponentType;
 }
 
-// Ballad of Programata: only the eight linked notes, in index order.
+// Ballad of Programata: the linked notes, in index order. The dance note is
+// split into one article per poem, kept together after its opening poem.
 const ARTICLES: readonly ComponentType[] = [
-  Architecture, History, Forest, GuitarHero, Eagle, Cooking, Dance, Forging,
+  Architecture, History, Forest, GuitarHero, Eagle, Cooking,
+  Dance, SystemDance, DataDance, TeamDance, PartnerDance, FlowState,
+  Forging,
 ];
 const PETAL_COUNT = 46;
 const PETAL_SECTION_OVERRIDES: readonly PetalSection[] = [

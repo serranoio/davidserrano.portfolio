@@ -1,83 +1,111 @@
-/* Golden Rose Theme - Google Fonts */
+/* Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@400;500;600&display=swap');
 
 /* ========================================
-   Light Mode (Default) - Ivory & Antique Gold
-   ======================================== */
-:root {
-  /* Golden Rose Palette - Light */
-  --color-bg: #faf7f2;
-  --color-bg-soft: #f5f1ea;
-  --color-bg-muted: #ebe6dc;
+   Design tokens
 
+   The palette is three adjacent warm hues, about 30° apart on the colour
+   wheel: crimson (~345°), ember (~17°), gold (~45°). Crimson is the primary
+   colour; ember is fire and energy; gold is the accent that answers the
+   visitor. Every colour in the repo is one of these tokens or a neutral
+   below — component files hold no colour literals of their own.
+
+   Three rules, in order:
+     1. the palette, with the light theme's values (the default);
+     2. the night values, for dark mode and for the sections that are
+        always night;
+     3. everything derived from the first two, re-declared in both scopes
+        so each var() resolves against the scope it is used in.
+   ======================================== */
+
+/* 1. Palette — light theme */
+:root {
+  /* Crimson — primary. The same in both themes: it is the rose. */
+  --color-crimson-primary: #a83a58;
+  --color-crimson-light: #e83e62;
+  --color-crimson-dark: #1f050d;
+  --color-crimson-soft: #e58a93;
+
+  /* Ember */
+  --color-ember-primary: #d8501c;
+  --color-ember-soft: #ffd9a3;
+
+  /* Gold */
   --color-gold-primary: #a08050;
   --color-gold-light: #c9a86c;
   --color-gold-dark: #7a6040;
-  --color-gold-muted: rgba(160, 128, 80, 0.6);
-  --color-gold-tint: rgba(160, 128, 80, 0.12);
 
+  /* Neutrals */
+  --color-bg: #faf7f2;
+  --color-bg-soft: #f5f1ea;
+  --color-bg-muted: #ebe6dc;
   --color-text: #2a2520;
-  --color-text-muted: rgba(42, 37, 32, 0.7);
+
+  /* The primary colour as text and controls, tuned to read on this ground. */
+  --color-primary: var(--color-crimson-primary);
+  --color-primary-light: var(--color-crimson-light);
+  --color-primary-dark: color-mix(in srgb, var(--color-crimson-primary) 75%, var(--color-crimson-dark));
 
   /* Typography */
   --font-title: 'Cormorant Garamond', Georgia, serif;
   --font-body: 'DM Sans', system-ui, sans-serif;
-
-  /* Rspress brand overrides */
-  --rp-c-brand: var(--color-gold-primary);
-  --rp-c-brand-dark: var(--color-gold-dark);
-  --rp-c-brand-light: var(--color-gold-light);
-  --rp-c-brand-tint: var(--color-gold-tint);
-
-  /* Background overrides */
-  --rp-c-bg: var(--color-bg);
-  --rp-c-bg-soft: var(--color-bg-soft);
-  --rp-c-bg-muted: var(--color-bg-muted);
-
-  /* Text overrides */
-  --rp-c-text-1: var(--color-text);
-  --rp-c-text-2: var(--color-text-muted);
-
-  /* Divider */
-  --rp-c-divider: rgba(160, 128, 80, 0.2);
-  --rp-c-divider-light: rgba(160, 128, 80, 0.1);
 }
 
-/* ========================================
-   Dark Mode - Black & Gold
-   ======================================== */
-.dark, html.dark {
-  --color-bg: #0a0a08;
-  --color-bg-soft: #12120f;
-  --color-bg-muted: #1a1a16;
+/* 2. Night values — dark mode, and the home sections that are always night
+      whatever the theme (listed by element so the values reach their shadow
+      roots). */
+.dark,
+html.dark,
+golden-rose,
+welcome-section,
+writing-section,
+case-studies-section {
+  --color-ember-primary: #ff6a1f;
+  --color-ember-soft: #fff3cf;
 
   --color-gold-primary: #d4af37;
   --color-gold-light: #e6c866;
   --color-gold-dark: #b8960b;
-  --color-gold-muted: rgba(212, 175, 55, 0.6);
-  --color-gold-tint: rgba(212, 175, 55, 0.12);
 
+  --color-bg: #0a0a08;
+  --color-bg-soft: #12120f;
+  --color-bg-muted: #1a1a16;
   --color-text: #f5f0e6;
-  --color-text-muted: rgba(245, 240, 230, 0.7);
 
-  /* Rspress brand overrides - dark */
-  --rp-c-brand: var(--color-gold-primary);
-  --rp-c-brand-dark: var(--color-gold-dark);
-  --rp-c-brand-light: var(--color-gold-light);
-  --rp-c-brand-tint: var(--color-gold-tint);
+  --color-primary: var(--color-crimson-light);
+  --color-primary-light: var(--color-crimson-soft);
+  --color-primary-dark: var(--color-crimson-primary);
+}
 
-  /* Background overrides - dark */
+/* 3. Derived tokens and Rspress mappings — same recipe in every scope */
+:root,
+.dark,
+html.dark,
+golden-rose,
+welcome-section,
+writing-section,
+case-studies-section {
+  --color-text-muted: color-mix(in srgb, var(--color-text) 70%, transparent);
+  --color-gold-muted: color-mix(in srgb, var(--color-gold-primary) 60%, transparent);
+  --color-gold-tint: color-mix(in srgb, var(--color-gold-primary) 12%, transparent);
+  --color-primary-tint: color-mix(in srgb, var(--color-primary) 12%, transparent);
+
+  /* Rspress brand: crimson */
+  --rp-c-brand: var(--color-primary);
+  --rp-c-brand-dark: var(--color-primary-dark);
+  --rp-c-brand-light: var(--color-primary-light);
+  --rp-c-brand-tint: var(--color-primary-tint);
+
+  /* Rspress backgrounds and text */
   --rp-c-bg: var(--color-bg);
   --rp-c-bg-soft: var(--color-bg-soft);
   --rp-c-bg-muted: var(--color-bg-muted);
-
-  /* Text overrides - dark */
   --rp-c-text-1: var(--color-text);
   --rp-c-text-2: var(--color-text-muted);
 
-  /* Divider - dark */
-  --rp-c-divider: rgba(212, 175, 55, 0.2);
-  --rp-c-divider-light: rgba(212, 175, 55, 0.1);
+  /* Hairlines stay gold */
+  --rp-c-divider: color-mix(in srgb, var(--color-gold-primary) 20%, transparent);
+  --rp-c-divider-light: color-mix(in srgb, var(--color-gold-primary) 10%, transparent);
 }
 
 /* ========================================

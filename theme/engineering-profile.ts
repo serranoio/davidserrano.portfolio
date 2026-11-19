@@ -37,24 +37,21 @@ export const engineeringProfile: EngineeringProfile = {
     {
       id: 'mind',
       name: 'The mind',
-      verse: 'The fire rises, and you can turn what you love into reality.',
-      links: [
-        { title: 'The Missing Piece to Agile', href: '/blog/the-missing-piece-to-agile.html' },
-        { title: 'Disruptive Strategic Design', href: '/blog/disruptive-strategic-design.html' },
-      ],
+      verse: 'is where the fire rises, allowing you to turn what you love into reality.',
+      links: [{ title: 'Read my writing about engineering', href: '/writing.html?tag=tech' }],
       notes: [],
     },
     {
       id: 'heart',
       name: 'The heart',
-      verse: 'Where the arrow landed.',
-      links: [{ title: 'Read The Ballad Of Programata', href: '/#rose' }],
+      verse: 'is where the love for creation starts.',
+      links: [{ title: 'Read My Coding Poetry: The Ballad Of Programata', href: '/#rose' }],
       notes: [],
     },
     {
       id: 'hands',
       name: 'The hands',
-      verse: 'To care for what you love.',
+      verse: 'are there for you to care for what you love.',
       links: [],
       notes: [
         {
@@ -64,5 +61,5 @@ export const engineeringProfile: EngineeringProfile = {
       ],
     },
   ],
-  groundingLine: 'What you love is not crazy.',
+  groundingLine: 'Build. Build. Build away. Build your codebase, build your dreams.',
 };

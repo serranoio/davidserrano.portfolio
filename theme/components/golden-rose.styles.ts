@@ -10,15 +10,14 @@ export default css`
     width: 100vw;
     height: calc(100svh + var(--poem-scroll-distance, 0px));
     position: relative;
-    /* Hardcoded dark — rspress sets --color-bg to a light cream in its
-       light theme, which would win over a var() fallback and leave the
-       night sky behind the rose looking like a blank cream rectangle. */
+    /* Always night: theme/index.css gives this element the night token
+       values in either theme, so --color-bg here is never the light cream. */
     background-color: ${skyEdge};
     /* Quiet ivory for everything set over the night; gold is kept for the
        moment something is chosen. */
-    --rose-ink: #e6dccb;
-    --rose-ink-quiet: rgba(230, 220, 203, 0.55);
-    --rose-gold: #e9c46a;
+    --rose-ink: var(--color-text);
+    --rose-ink-quiet: color-mix(in srgb, var(--color-text) 55%, transparent);
+    --rose-gold: var(--color-gold-light);
   }
 
   .scene-viewport {
@@ -62,9 +61,9 @@ export default css`
     z-index: 2;
     background: radial-gradient(
       ellipse 62% 78% at 50% 50%,
-      rgba(6, 5, 7, 0.94) 0%,
-      rgba(6, 5, 7, 0.88) 45%,
-      rgba(6, 5, 7, 0) 100%
+      color-mix(in srgb, var(--color-bg) 94%, transparent) 0%,
+      color-mix(in srgb, var(--color-bg) 88%, transparent) 45%,
+      color-mix(in srgb, var(--color-bg) 0%, transparent) 100%
     );
     opacity: 0;
     transition: opacity 0.7s ease;
@@ -115,7 +114,7 @@ export default css`
     width: 9rem;
     height: 9rem;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(178, 58, 85, 0.5) 0%, transparent 68%);
+    background: radial-gradient(circle, color-mix(in srgb, var(--color-crimson-primary) 50%, transparent) 0%, transparent 68%);
     animation: breathe ${breathCycle} ease-in-out infinite;
   }
 
@@ -256,7 +255,7 @@ export default css`
 
   .content-body hr {
     border: none;
-    border-top: 1px solid rgba(230, 220, 203, 0.16);
+    border-top: 1px solid color-mix(in srgb, var(--color-text) 16%, transparent);
     width: 3rem;
     margin: 2.5rem 0;
   }

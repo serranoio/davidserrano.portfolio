@@ -6,7 +6,7 @@ export default css`
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background-color: var(--color-bg, #0a0a08);
+    background-color: var(--color-bg);
     font-family: var(--font-title, 'Cormorant Garamond', Georgia, serif);
   }
 
@@ -15,8 +15,8 @@ export default css`
     font-weight: 300;
     letter-spacing: 0.15em;
     text-transform: uppercase;
-    color: var(--color-gold-primary, #d4af37);
+    color: var(--color-gold-primary);
     margin: 0;
-    text-shadow: 0 0 40px rgba(212, 175, 55, 0.15);
+    text-shadow: 0 0 40px color-mix(in srgb, var(--color-gold-primary) 15%, transparent);
   }
 `;

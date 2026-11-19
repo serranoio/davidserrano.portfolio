@@ -2,19 +2,24 @@
 // far it moves when it breathes, and how it answers the pointer. Kept apart
 // from the scene code so the look can be adjusted without reading shaders.
 
+import { COLOR_TOKEN } from '../design-tokens';
+
+// Colours here are global design tokens (theme/index.css), named rather than
+// written out; the scene reads their values when it is built.
+
 // --- Petal flesh -----------------------------------------------------------
 // The model's base-colour map is a flat saturated red with the petal's own
 // shading and fibres baked in. We keep its tonal detail and re-colour it
 // between these two tones: a deep wine in the folds, a dusty rose where the
 // petal catches light.
 export const PETAL = {
-  deepColor: '#1f050d',
-  lightColor: '#a83a58',
+  deepColor: COLOR_TOKEN.crimsonDark,
+  lightColor: COLOR_TOKEN.crimsonPrimary,
   // Range of the map's (linear) red channel mapped onto deep → light.
   toneRange: [0.085, 0.3] as const,
   // Colour of light that has passed through a petal: warmer and more
   // saturated than the surface, like a petal held up to a lamp.
-  throughColor: '#e83e62',
+  throughColor: COLOR_TOKEN.crimsonLight,
   throughStrength: 1.9,
   // Occlusion-map range over which a petal goes from too thick to pass light
   // (its body, pressed against its neighbours) to thin enough to glow (its lip).
@@ -28,11 +33,11 @@ export const PETAL = {
   specularIntensity: 0.3,
   // Velvet: a soft bright edge at grazing angles, no highlight face-on.
   sheen: 0.7,
-  sheenColor: '#e58a93',
+  sheenColor: COLOR_TOKEN.crimsonSoft,
   sheenRoughness: 0.55,
   // The same velvet without needing the light: nap seen edge-on is paler,
   // seen face-on it drinks light and goes deeper.
-  velvetColor: '#d98a96',
+  velvetColor: COLOR_TOKEN.crimsonSoft,
   velvetStrength: 0.07,
   faceOnDepth: 0.55,
   // Multiplies the model's normal map, which is faint on its own.
@@ -43,7 +48,7 @@ export const PETAL = {
 
 // --- Gold: only ever an answer to the visitor ------------------------------
 export const GOLD = {
-  color: '#e8b04a',
+  color: COLOR_TOKEN.goldPrimary,
   // Gold arrives edge-first. Below the first level only the rim is lit;
   // between the two the flesh itself turns, fully gold at the second.
   bodyRange: [0.15, 1] as const,

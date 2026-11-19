@@ -154,9 +154,9 @@ export const PHOENIX_WRITTEN_AT = Math.max(
  * written above the bird, the hands to its left and the heart to its right.
  */
 
-/** The fire rises: a wisp climbs from the tip of the crest, between the essays, to the verse. */
+/** The fire rises: a wisp climbs from the tip of the crest and stops just under the mind's link. */
 const WISP: readonly Ink[] = [
-  ['M135 5 C127 0 125 -9 133 -15 C142 -22 151 -27 146 -40 C143 -49 148 -56 153 -61', 1.7, 0.3],
+  ['M135 5 C128 1 127 -5 134 -8 C140 -11 147 -8 150 -13', 1.7, 0.3],
 ];
 
 /** To care for what you love: the feather nearest the words carries on towards them. */

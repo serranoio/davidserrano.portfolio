@@ -68,10 +68,9 @@ export const STAR_CONFIG = {
   meteorWidthPx: 1.1,
 } as const;
 
-// The night itself. `edge` is the colour every home section meets its
-// neighbours with; the gradient and haze live inside that.
+// The night itself: the gradient and haze of the sky. Its edge — the colour
+// every home section meets its neighbours with — is the `--color-bg` token.
 export const SKY = {
-  edge: '#0a0a08',
   zenith: '#08070a',
   horizon: '#0f0a0c',
   haze: '#22111a',

@@ -1,6 +1,7 @@
-import { useRef, useState, type CSSProperties, type ReactNode, type Ref } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type Ref } from 'react';
 import type { BlogPost, BlogTag } from '../blog-posts';
 import { engineeringProfile, type PhoenixPath, type PhoenixPathId } from '../engineering-profile';
+import { ArcanaSpeed } from './arcana-speed';
 import { PHOENIX_WRITTEN_AT, type PhoenixPoint } from './phoenix-drawing';
 import { PhoenixCoal } from './phoenix-ember';
 import { PhoenixFigure } from './phoenix-figure';
@@ -13,6 +14,7 @@ declare const __WRITING_CATALOG__: {
 };
 
 const writingCatalog = __WRITING_CATALOG__;
+const WRITING_TAG_PARAM = 'tag';
 
 function PortfolioPage({ eyebrow, title, introduction, children }: {
   eyebrow?: string;
@@ -62,14 +64,14 @@ function PhoenixPathSection({ path, kindling, caught, ref }: {
         {path.name}
         <span className="phoenix-path__rule" aria-hidden="true" />
         {path.id === 'heart'
-          ? <PhoenixCoal className={`${KINDLE_POINT} phoenix-path__coal`} />
+          ? <PhoenixCoal className={`${KINDLE_POINT} phoenix-path__coal`} shape="heart" />
           : <span className={KINDLE_POINT} aria-hidden="true" />}
       </h2>
       <p className="phoenix-path__verse">{path.verse}</p>
       <ul className="phoenix-path__entries">
         {path.links.map((link) => (
           <li key={link.href}>
-            <a href={link.href}>{link.title} <span aria-hidden="true">→</span></a>
+            <a href={link.href}>{link.title}{'\u00a0'}<span aria-hidden="true">→</span></a>
           </li>
         ))}
         {path.notes.map((note) => (
@@ -140,12 +142,18 @@ export function EngineeringPage() {
         <p className="phoenix__ground">{profile.groundingLine}</p>
         <PhoenixSparks ref={sparks} />
       </div>
+      <ArcanaSpeed />
     </PortfolioPage>
   );
 }
 
 export function WritingPage() {
   const [selectedTag, setSelectedTag] = useState<BlogTag | null>(null);
+  // A link may arrive already filtered, e.g. /writing.html?tag=tech.
+  useEffect(() => {
+    const asked = new URLSearchParams(window.location.search).get(WRITING_TAG_PARAM);
+    if (writingCatalog.tags.some((tag) => tag.id === asked)) setSelectedTag(asked as BlogTag);
+  }, []);
   const posts = writingCatalog.posts
     .filter((post) => !selectedTag || post.tags.includes(selectedTag))
     .slice().sort((a, b) => a.title.localeCompare(b.title));

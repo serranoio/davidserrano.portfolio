@@ -32,15 +32,25 @@
 .phoenix { --phoenix-heart-lift: clamp(3rem, 9vw, 7rem); display: grid; grid-template-columns: 1fr minmax(0, 26rem) 1fr; grid-template-areas: 'mind mind mind' 'hands figure heart' 'ground ground ground'; column-gap: clamp(1rem, 2.5vw, 2rem); align-items: center; }
 .phoenix__figure { grid-area: figure; align-self: start; }
 .phoenix-path { animation: phoenix-settle 0.9s ease both; }
-.phoenix-path--mind { grid-area: mind; text-align: center; padding-bottom: 1rem; animation-delay: 0.9s; }
+/* The mind's words share one column as wide as the verse, so its link can sit at the verse's right edge. */
+.phoenix-path--mind { grid-area: mind; display: grid; grid-template-columns: fit-content(100%); justify-content: center; text-align: center; padding-bottom: 1rem; animation-delay: 0.9s; }
 .phoenix-path--heart { grid-area: heart; padding-bottom: var(--phoenix-heart-lift); animation-delay: 1.9s; }
 .phoenix-path--hands { grid-area: hands; padding-bottom: var(--phoenix-heart-lift); text-align: right; animation-delay: 1.5s; }
 .phoenix-path__verse { font-family: var(--font-title); font-style: italic; font-size: clamp(1.3rem, 2.2vw, 1.6rem); line-height: 1.35 !important; margin: 0 0 1rem; text-wrap: balance; }
 .portfolio-page .phoenix-path__name { font-family: var(--font-title); font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 400; letter-spacing: normal; text-transform: none; color: var(--color-text); margin: 0 0 1rem; }
-.phoenix-path__verse + .phoenix-path__entries { margin-top: 2rem; }
-.phoenix-path--mind .phoenix-path__entries { display: grid; grid-auto-flow: column; justify-content: center; gap: 1.25rem 2.5rem; }
+.phoenix-path__verse + .phoenix-path__entries { margin-top: 0.25rem; }
+.phoenix-path--mind .phoenix-path__entries { display: grid; grid-auto-flow: column; justify-content: end; gap: 1.25rem 2.5rem; text-align: right; }
+.phoenix-path--heart .phoenix-path__entries { text-align: center; }
 .phoenix-path__entries { list-style: none; padding: 0; margin: 0; }
-.phoenix-path__entries a { display: inline-flex; align-items: center; gap: 0.75rem; min-height: 44px; color: var(--color-text); text-decoration: underline !important; text-decoration-color: var(--color-gold-primary) !important; text-underline-offset: 0.4em; }
+/* A link is written in the page's own hand, on a pen stroke that tapers at both ends and catches fire when touched. */
+.portfolio-page .phoenix-path__entries a { --phoenix-link-ink: var(--color-gold-primary); padding: 0.55rem 0 0.2em; font-family: var(--font-title); font-size: clamp(1.05rem, 1.5vw, 1.2rem); line-height: 1.5; color: var(--color-text); text-decoration: none !important; background: linear-gradient(90deg, transparent, var(--phoenix-link-ink) 14%, var(--phoenix-link-ink) 62%, transparent) 0 100% / 82% 1px no-repeat; -webkit-box-decoration-break: clone; box-decoration-break: clone; transition: color 0.3s ease, background-size 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
+/* A long link wraps, and every line of it keeps its own stroke. */
+.phoenix-path__entries li { text-wrap: balance; }
+.portfolio-page .phoenix-path:is(.phoenix-path--hands, .phoenix-path--mind) .phoenix-path__entries a { background-position: 100% 100%; }
+.portfolio-page .phoenix-path--heart .phoenix-path__entries a { background-position: 50% 100%; }
+.phoenix-path__entries a > span { display: inline-block; color: var(--phoenix-link-ink); font-size: 0.8em; transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.portfolio-page .phoenix-path__entries a:is(:hover, :focus-visible) { --phoenix-link-ink: var(--phoenix-ember); color: var(--phoenix-ink-hot); background-size: 100% 1px; }
+.phoenix-path__entries a:is(:hover, :focus-visible) > span { transform: translateX(0.3rem); }
 .phoenix-path__note-title { display: block; padding-top: 0.6rem; font-family: var(--font-title); font-size: 1.4rem; }
 .phoenix-path__note-description { display: block; font-size: 0.9rem; line-height: 1.6; color: var(--color-text-muted); }
 .phoenix__ground { grid-area: ground; margin: 0; padding-top: 1.75rem; text-align: center; font-family: var(--font-title); font-style: italic; font-size: clamp(1.75rem, 4vw, 2.75rem); line-height: 1.2 !important; animation: phoenix-settle 1.1s ease 2.9s both; }
@@ -87,7 +97,7 @@
 .phoenix-path:is(:focus-within:not([data-kindling]), [data-caught]) .phoenix-path__rule { transform: none; transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
 .phoenix-path:is(:focus-within:not([data-kindling]), [data-caught]) .phoenix-path__name { animation: phoenix-catch 0.9s ease-out; }
 /* The heart's twin coal: the bird's own ember, set beside the words it belongs to. */
-.phoenix-path__coal { left: auto; right: calc(100% + 0.32em); top: 50%; bottom: auto; width: 0.42em; height: 0.42em; margin-top: -0.17em; }
+.phoenix-path__coal { left: auto; right: calc(100% + 0.32em); top: 50%; bottom: auto; width: 0.5em; height: 0.5em; margin-top: -0.2em; }
 .phoenix-path:is(:focus-within:not([data-kindling]), [data-caught]) .phoenix-path__coal { animation: phoenix-flare 0.7s ease-out; }
 @keyframes phoenix-settle { from { opacity: 0; transform: translateY(0.4rem); } }
 @keyframes phoenix-glint {
@@ -109,6 +119,7 @@
 @keyframes phoenix-catch { from { text-shadow: 0 0 0.12em var(--phoenix-ember-core), 0 0 0.6em var(--phoenix-ember); } to { text-shadow: 0 0 0 transparent, 0 0 0 transparent; } }
 @keyframes phoenix-flare { from { transform: scale(1.9); } }
 @media (prefers-reduced-motion: reduce) {
+  .portfolio-page .phoenix-path__entries a, .phoenix-path__entries a > span { transition: none; }
   .phoenix, .phoenix-path, .phoenix__ground, .phoenix-path .phoenix-path__name, .phoenix-path .phoenix-path__coal { animation: none !important; }
   .phoenix, .phoenix-path .phoenix-path__rule { transition: none; }
 }
@@ -134,7 +145,8 @@
   .phoenix-path--mind, .phoenix-path--heart, .phoenix-path--hands { text-align: center; padding-block: 0; }
   .portfolio-page .phoenix-path .phoenix-path__name { margin-inline: auto; }
   .portfolio-page .phoenix-path--hands .phoenix-path__name { --phoenix-kindle-x: 50%; }
-  .phoenix-path--mind .phoenix-path__entries { grid-auto-flow: row; }
+  .phoenix-path--mind .phoenix-path__entries { grid-auto-flow: row; justify-content: center; text-align: center; }
+  .portfolio-page .phoenix-path .phoenix-path__entries a { background-position: 50% 100%; }
   /* The words sit below the bird here, out of a thread's reach: only what is lodged in it stays. */
   .phoenix-figure__reach { display: none; }
 }

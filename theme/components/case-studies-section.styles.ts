@@ -7,8 +7,8 @@ export default css`
     width: 100vw;
     min-height: 100vh;
     /* Hardcoded — rspress's --color-bg is cream and would beat a var() fallback. */
-    background: #0a0a08;
-    color: #f7efde;
+    background: var(--color-bg);
+    color: var(--color-text);
     font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
     padding: 6rem 1.5rem 5rem;
     box-sizing: border-box;
@@ -41,7 +41,7 @@ export default css`
     text-transform: uppercase;
     letter-spacing: 0.32em;
     font-size: 0.78rem;
-    color: var(--color-gold-primary, #d4af37);
+    color: var(--color-gold-primary);
     margin-bottom: 1rem;
     opacity: 0.85;
   }
@@ -51,8 +51,8 @@ export default css`
     font-size: clamp(2.4rem, 5vw, 3.6rem);
     font-weight: 500;
     margin: 0 0 1rem;
-    color: #f4d77b;
-    text-shadow: 0 0 20px rgba(244, 215, 123, 0.18);
+    color: var(--color-gold-light);
+    text-shadow: 0 0 20px color-mix(in srgb, var(--color-gold-light) 18%, transparent);
     letter-spacing: 0.01em;
     line-height: 1.1;
   }
@@ -62,7 +62,7 @@ export default css`
     margin: 0 auto;
     font-size: 1.05rem;
     line-height: 1.65;
-    color: rgba(247, 239, 222, 0.82);
+    color: color-mix(in srgb, var(--color-text) 82%, transparent);
   }
 
   .grid {
@@ -77,10 +77,10 @@ export default css`
     position: relative;
     background: linear-gradient(
       180deg,
-      rgba(28, 22, 10, 0.65) 0%,
-      rgba(14, 12, 8, 0.85) 100%
+      color-mix(in srgb, var(--color-bg-muted) 65%, transparent) 0%,
+      color-mix(in srgb, var(--color-bg) 85%, transparent) 100%
     );
-    border: 1px solid rgba(244, 215, 123, 0.16);
+    border: 1px solid color-mix(in srgb, var(--color-gold-light) 16%, transparent);
     border-radius: 10px;
     padding: 1.75rem 1.6rem 1.6rem;
     transition: transform 0.35s ease, border-color 0.35s ease,
@@ -94,7 +94,7 @@ export default css`
     border-radius: 10px;
     background: radial-gradient(
       circle at top left,
-      rgba(244, 215, 123, 0.08),
+      color-mix(in srgb, var(--color-gold-light) 8%, transparent),
       transparent 60%
     );
     opacity: 0;
@@ -104,9 +104,9 @@ export default css`
 
   .card:hover {
     transform: translateY(-4px);
-    border-color: rgba(244, 215, 123, 0.4);
+    border-color: color-mix(in srgb, var(--color-gold-light) 40%, transparent);
     box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45),
-      0 0 0 1px rgba(244, 215, 123, 0.12);
+      0 0 0 1px color-mix(in srgb, var(--color-gold-light) 12%, transparent);
   }
 
   .card:hover::before {
@@ -118,7 +118,7 @@ export default css`
     font-size: 1.65rem;
     font-weight: 600;
     margin: 0 0 0.75rem;
-    color: #f4d77b;
+    color: var(--color-gold-light);
     letter-spacing: 0.015em;
   }
 
@@ -126,7 +126,7 @@ export default css`
     margin: 0 0 1.25rem;
     font-size: 0.97rem;
     line-height: 1.6;
-    color: rgba(247, 239, 222, 0.78);
+    color: color-mix(in srgb, var(--color-text) 78%, transparent);
   }
 
   .stack {
@@ -141,9 +141,9 @@ export default css`
     text-transform: uppercase;
     padding: 0.3rem 0.65rem;
     border-radius: 999px;
-    border: 1px solid rgba(244, 215, 123, 0.25);
-    color: rgba(244, 215, 123, 0.85);
-    background: rgba(244, 215, 123, 0.04);
+    border: 1px solid color-mix(in srgb, var(--color-gold-light) 25%, transparent);
+    color: color-mix(in srgb, var(--color-gold-light) 85%, transparent);
+    background: color-mix(in srgb, var(--color-gold-light) 4%, transparent);
   }
 
   @media (max-width: 640px) {

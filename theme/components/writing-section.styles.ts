@@ -7,8 +7,8 @@ export default css`
     width: 100vw;
     min-height: 100vh;
     min-height: 100svh;
-    background: #0a0a08;
-    color: #f7efde;
+    background: var(--color-bg);
+    color: var(--color-text);
     font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
     padding: 6rem 1.5rem 5rem;
     box-sizing: border-box;
@@ -45,17 +45,17 @@ export default css`
     font-size: clamp(2.4rem, 5vw, 3.6rem);
     font-weight: 500;
     line-height: 1.1;
-    color: #f4d77b;
+    color: var(--color-gold-light);
     letter-spacing: 0.01em;
     text-decoration: none;
-    text-shadow: 0 0 20px rgba(244, 215, 123, 0.18);
+    text-shadow: 0 0 20px color-mix(in srgb, var(--color-gold-light) 18%, transparent);
     transition: color 0.3s ease, text-shadow 0.3s ease;
   }
 
   .writing-link:hover,
   .writing-link:focus-visible {
-    color: #ffe8a3;
-    text-shadow: 0 0 28px rgba(244, 215, 123, 0.32);
+    color: color-mix(in srgb, var(--color-gold-light) 60%, var(--color-text));
+    text-shadow: 0 0 28px color-mix(in srgb, var(--color-gold-light) 32%, transparent);
     outline: none;
   }
 

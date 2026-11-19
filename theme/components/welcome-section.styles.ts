@@ -16,7 +16,7 @@ export default css`
       ${skyHorizon} 78%,
       ${skyEdge} 100%
     );
-    color: #faf3df;
+    color: var(--color-text);
     font-family: var(--font-body, 'DM Sans', sans-serif);
   }
 
@@ -44,7 +44,7 @@ export default css`
   .greeting {
     margin: 0 0 1.5rem;
     font-size: 1rem;
-    color: #d9cba9;
+    color: color-mix(in srgb, var(--color-text) 85%, transparent);
   }
 
   .headline {
@@ -57,7 +57,7 @@ export default css`
   }
 
   .headline em {
-    color: #e6c886;
+    color: var(--color-gold-light);
     font-weight: 400;
   }
 
@@ -71,7 +71,7 @@ export default css`
   .intro {
     max-width: 29rem;
     margin: 1.25rem 0 0;
-    color: #c8c0ae;
+    color: color-mix(in srgb, var(--color-text) 85%, transparent);
     font-size: 1rem;
     line-height: 1.75;
   }
@@ -92,19 +92,19 @@ export default css`
     gap: 0.75rem;
     align-items: center;
     min-height: 44px;
-    color: #faf3df;
+    color: var(--color-text);
     text-decoration: underline;
     text-underline-offset: 0.4em;
-    text-decoration-color: #a48a54;
+    text-decoration-color: var(--color-gold-muted);
     font-size: 0.95rem;
   }
 
   .destination-link:hover {
-    color: #e6c886;
+    color: var(--color-gold-light);
   }
 
   .destination-link:focus-visible {
-    outline: 2px solid #e6c886;
+    outline: 2px solid var(--color-gold-light);
     outline-offset: 4px;
   }
 
@@ -114,8 +114,8 @@ export default css`
     gap: 0.75rem;
     min-height: 48px;
     box-sizing: border-box;
-    border-bottom: 1px solid #a48a54;
-    color: #e6c886;
+    border-bottom: 1px solid var(--color-gold-muted);
+    color: var(--color-gold-light);
     text-decoration: none;
     font-size: 0.9rem;
     transition: color 180ms ease;
@@ -126,7 +126,7 @@ export default css`
   }
 
   .explore-link:hover {
-    color: #faf3df;
+    color: var(--color-text);
   }
 
   .explore-link:hover span {
@@ -134,17 +134,17 @@ export default css`
   }
 
   .explore-link:focus-visible {
-    outline: 2px solid #e6c886;
+    outline: 2px solid var(--color-gold-light);
     outline-offset: 6px;
   }
 
   .explore-link:active {
-    color: #d9cba9;
+    color: color-mix(in srgb, var(--color-text) 85%, transparent);
   }
 
   .journey-note {
     margin: 0.75rem 0 0;
-    color: #b9af98;
+    color: var(--color-text-muted);
     font-size: 0.875rem;
     line-height: 1.5;
   }
@@ -165,7 +165,7 @@ export default css`
 
   figcaption {
     margin-top: 1rem;
-    color: #b9af98;
+    color: var(--color-text-muted);
     font-size: 0.875rem;
     line-height: 1.5;
   }
