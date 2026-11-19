@@ -1,4 +1,5 @@
 import { css } from 'lit';
+import { skyEdge, skyHorizon } from './sky.styles';
 
 export default css`
   :host {
@@ -6,7 +7,15 @@ export default css`
     position: relative;
     width: 100%;
     min-height: 100svh;
-    background: #0a0a08;
+    /* Same night as the rose below: it deepens toward the foot of the
+       section and returns to the shared edge colour where the two meet. */
+    background: linear-gradient(
+      to bottom,
+      ${skyEdge} 0%,
+      ${skyEdge} 30%,
+      ${skyHorizon} 78%,
+      ${skyEdge} 100%
+    );
     color: #faf3df;
     font-family: var(--font-body, 'DM Sans', sans-serif);
   }

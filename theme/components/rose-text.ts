@@ -1,27 +1,30 @@
 import * as THREE from 'three';
 import { Text } from 'troika-three-text';
+// Troika parses fonts itself and cannot read woff2, so the scene text loads
+// the same face the page uses (Cormorant Garamond, light) as a .woff.
+import textFontUrl from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-300-normal.woff';
 
 // Position behind the rose so the petals foreground the paragraph instead
 // of the paragraph foregrounding the petals. Y is negative so the first
 // paragraph starts well below the rose — the user scrolls down to bring
 // subsequent paragraphs up into focal range. Z is firmly negative — the
 // rose lives near z≈0, text sits well behind it.
-const TEXT_OFFSET = new THREE.Vector3(0, -0.8, -1.1);
+const TEXT_OFFSET = new THREE.Vector3(0, -0.62, -1.1);
 
-const TEXT_COLOR = 0xf6dc8a;
-const TEXT_FONT_SIZE = 0.105;
-const TEXT_LINE_HEIGHT = 1.35;
-const TEXT_MAX_WIDTH = 3.2;
-const MOBILE_TEXT_FONT_SIZE = 0.056;
-const MOBILE_TEXT_LINE_HEIGHT = 1.16;
+// Flat and quiet: unlit warm ivory, no outline, no glow. It should read like
+// words set on the night, not like an object in the scene.
+const TEXT_COLOR = 0xe6dccb;
+const TEXT_OPACITY = 0.86;
+const TEXT_FONT_SIZE = 0.098;
+const TEXT_LINE_HEIGHT = 1.42;
+const TEXT_LETTER_SPACING = 0.012;
+const TEXT_MAX_WIDTH = 2.5;
+const MOBILE_TEXT_FONT_SIZE = 0.06;
+const MOBILE_TEXT_LINE_HEIGHT = 1.24;
 const MOBILE_TEXT_MAX_WIDTH = 1.45;
-const TEXT_OUTLINE_WIDTH = 0.006;
-const TEXT_OUTLINE_OPACITY = 0.7;
-const TEXT_OUTLINE_COLOR = 0x1a1208;
 
-// World-units between paragraph centers. Each paragraph block is ~0.6–0.9
-// units tall at the current font; ~1.0 of breathing room reads as a clear
-// separator without making the user scroll forever.
+// World-units between paragraph centers: enough air that only one paragraph
+// holds the eye at a time.
 const PARAGRAPH_SPACING = 1.4;
 const MOBILE_PARAGRAPH_SPACING = 1.0;
 const MOBILE_HEIGHT_OFFSET = -0.3;
@@ -70,21 +73,15 @@ export class RoseText {
       text.anchorY = 'middle';
       text.textAlign = 'center';
       text.color = TEXT_COLOR;
-      // Metallic gold to match the rose's petals — same DirectionalLights catch
-      // the letters as catch the petals. Emissive keeps them luminous when the
-      // user orbits to an angle where the lights don't hit them straight on.
-      text.material = new THREE.MeshStandardMaterial({
+      text.font = textFontUrl;
+      text.letterSpacing = TEXT_LETTER_SPACING;
+      text.material = new THREE.MeshBasicMaterial({
         color: TEXT_COLOR,
-        metalness: 0.85,
-        roughness: 0.28,
-        emissive: 0x6b4f1a,
-        emissiveIntensity: 0.55,
         transparent: true,
-        opacity: 1,
+        opacity: TEXT_OPACITY,
+        toneMapped: false,
+        depthWrite: false,
       });
-      text.outlineWidth = TEXT_OUTLINE_WIDTH;
-      text.outlineColor = TEXT_OUTLINE_COLOR;
-      text.outlineOpacity = TEXT_OUTLINE_OPACITY;
       text.frustumCulled = false;
       // Stack each paragraph downward along local Y. Paragraph 0 sits at the
       // top of the stack so the first paragraph is what the user sees first.
@@ -123,9 +120,8 @@ export class RoseText {
     );
 
     for (const mesh of this.meshes) {
-      const material = mesh.material as THREE.MeshStandardMaterial;
-      material.opacity = opacity;
-      mesh.outlineOpacity = TEXT_OUTLINE_OPACITY * opacity;
+      const material = mesh.material as THREE.MeshBasicMaterial;
+      material.opacity = TEXT_OPACITY * opacity;
       mesh.visible = opacity > 0.001;
     }
     this.lastOpacity = opacity;

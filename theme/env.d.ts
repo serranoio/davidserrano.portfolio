@@ -10,12 +10,18 @@ declare module '*.txt?raw' {
   export default content;
 }
 
+declare module '*.woff' {
+  const url: string;
+  export default url;
+}
+
 declare module 'troika-three-text' {
   import { Mesh, Material, ColorRepresentation } from 'three';
   export class Text extends Mesh {
     text: string;
     font?: string;
     fontSize: number;
+    letterSpacing: number;
     lineHeight: number | string;
     maxWidth: number;
     anchorX: number | 'left' | 'center' | 'right' | string;

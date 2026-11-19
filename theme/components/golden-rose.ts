@@ -8,10 +8,27 @@ import styles from './golden-rose.styles';
 import { PoemPanel } from './poem-panel';
 import { RoseText } from './rose-text';
 import { MeteorField } from './meteor-field';
+import { SkyDome } from './sky-dome';
+import { breath } from './breath';
+import { createPetalMaterial, setPetalGold } from './petal-material';
+import {
+  BREATH_MOTION,
+  CAMERA,
+  FOLIAGE,
+  GOLD,
+  HINT,
+  LIGHT,
+  OFFER,
+  PETAL_PAIR_DISTANCE,
+} from './rose-look';
+import { SKY } from './shooting-stars-config';
 import { ACTIVE_PETAL_INDICES, SECTIONS } from './petal-sections';
 import truthStatement from '../../docs/sections/truth-statement.txt?raw';
 
 const ROSE_MODEL_URL = '/models/rose_separated.glb';
+// The light's elevation wanders on a period unrelated to its azimuth so the
+// path never visibly repeats.
+const LIGHT_ELEVATION_PERIOD_RATIO = 0.62;
 
 // Test API interface
 interface RoseTestAPI {
@@ -50,12 +67,14 @@ export class GoldenRoseElement extends LitElement {
     roseState: { type: String, state: true },
     activeSection: { type: String, state: true },
     coarsePointer: { type: Boolean, state: true },
+    hintSeen: { type: Boolean, state: true },
   };
 
   private _loading = true;
   private _roseState: 'idle' | 'blooming' | 'open' | 'closing' = 'idle';
   private _activeSection: string | null = null;
   private _coarsePointer = false;
+  private _hintSeen = false;
 
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
@@ -115,6 +134,27 @@ export class GoldenRoseElement extends LitElement {
   // Shooting stars in the rose's scene. Mirrors the welcome canvas visually
   // so the two sections feel like the same sky.
   private meteorField: MeteorField | null = null;
+  private skyDome: SkyDome | null = null;
+
+  // The one warm light. Drifts slowly and swells with the shared breath.
+  private keyLight: THREE.DirectionalLight | null = null;
+
+  // Per-petal offer level (0 = living flesh at rest, 1 = hovered). It sets
+  // both how gold the petal is and how far it lifts. Hover, the breath
+  // ripple and the pointer's nearness all feed it.
+  private goldLevels: number[] = [];
+  // A sheet mesh and its rim-strip mesh are one petal: `petalGroups` lists
+  // the mesh indices of each, `petalGroupOf` maps a mesh back to its group.
+  private petalGroups: number[][] = [];
+  private petalGroupOf: number[] = [];
+  private offerTargets: number[] = [];
+  // Groups offering themselves this breath, in the order they take turns.
+  private rippleGroups: number[] = [];
+  private rippleCycle = -1;
+  private rippleAngle = -OFFER.rippleArcDegrees;
+  // Pointer position in canvas CSS pixels while a fine pointer is over the
+  // scene; null otherwise.
+  private pointerPx: THREE.Vector2 | null = null;
   private prevFrameTime = 0;
 
   // Pointer type selects text layout and paragraph-button visibility.
@@ -124,7 +164,6 @@ export class GoldenRoseElement extends LitElement {
 
   private sceneViewport: HTMLElement | null = null;
   private viewportObserver: ResizeObserver | null = null;
-  private reducedMotionQuery: MediaQueryList | null = null;
   private previousScrollProgress: number | null = null;
 
   // Each petal's geometry is baked in world-space coords with pivot at origin
@@ -135,7 +174,22 @@ export class GoldenRoseElement extends LitElement {
     center: THREE.Vector3;
     radial: THREE.Vector3;
     tangent: THREE.Vector3;
+    // 0 at the heart of the flower, 1 at its outermost petal.
+    reach: number;
+    // How much of the breath this petal takes (rim > heart) and how many
+    // seconds it trails the heart of the flower.
+    breathWeight: number;
+    breathLag: number;
   }> = [];
+
+  get hintSeen() {
+    return this._hintSeen;
+  }
+  set hintSeen(val: boolean) {
+    const oldVal = this._hintSeen;
+    this._hintSeen = val;
+    this.requestUpdate('hintSeen', oldVal);
+  }
 
   get loading() {
     return this._loading;
@@ -180,6 +234,13 @@ export class GoldenRoseElement extends LitElement {
     // changes to the poem's scroll distance on mobile.
     const steps = Math.max(0, RoseText.parseParagraphs(truthStatement).length - 1);
     this.style.setProperty('--poem-scroll-distance', `${steps * 40}svh`);
+    // Storage can be unavailable (private mode, blocked site data); the hint
+    // then simply shows again next time.
+    try {
+      this.hintSeen = window.sessionStorage.getItem(HINT.storageKey) === '1';
+    } catch {
+      this.hintSeen = false;
+    }
     // Expose test API
     (window as any).__ROSE_TEST_API__ = this.createTestAPI();
   }
@@ -342,11 +403,12 @@ export class GoldenRoseElement extends LitElement {
   private initThreeJS(canvas: HTMLCanvasElement) {
     // Scene
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x0a0a08);
+    // Fallback only — the sky dome paints over it every frame.
+    this.scene.background = new THREE.Color(SKY.edge);
 
     // Camera - positioned for a nice view of the rose
     this.camera = new THREE.PerspectiveCamera(
-      50,
+      CAMERA.fov,
       (this.sceneViewport?.clientWidth || 1) / (this.sceneViewport?.clientHeight || 1),
       0.1,
       1000
@@ -362,20 +424,17 @@ export class GoldenRoseElement extends LitElement {
     });
     this.handleResize();
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.2;
+    // Neutral keeps a saturated red a red as it brightens; ACES skews it
+    // orange and flattens the folds.
+    this.renderer.toneMapping = THREE.NeutralToneMapping;
+    this.renderer.toneMappingExposure = LIGHT.exposure;
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-    this.scene.add(ambientLight);
-
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 10, 7);
-    this.scene.add(directionalLight);
-
-    const backLight = new THREE.DirectionalLight(0xd4af37, 0.3);
-    backLight.position.set(-5, 5, -5);
-    this.scene.add(backLight);
+    // Lighting: a low ambient fill so the shadow side stays flesh, and one
+    // warm light behind the rose that the petals let through.
+    this.scene.add(new THREE.HemisphereLight(LIGHT.skyFill, LIGHT.groundFill, LIGHT.fillIntensity));
+    this.keyLight = new THREE.DirectionalLight(LIGHT.color, LIGHT.intensity);
+    this.scene.add(this.keyLight, this.keyLight.target);
+    this.updateKeyLight(0);
 
     // Orbit Controls
     this.controls = new OrbitControls(this.camera, canvas);
@@ -391,17 +450,20 @@ export class GoldenRoseElement extends LitElement {
 
     // Shooting stars. Created up-front so the sky exists even before the
     // GLB rose model finishes loading.
+    this.skyDome = new SkyDome();
+    this.scene.add(this.skyDome.mesh);
     this.meteorField = new MeteorField();
+    this.meteorField.setPixelRatio(this.renderer.getPixelRatio());
     this.scene.add(this.meteorField.group);
 
     // Adapt text and navigation to the pointer while preserving native scroll.
     this.coarseQuery = window.matchMedia('(pointer: coarse)');
-    this.reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     this.applyTouchConfig();
     this.coarseQuery.addEventListener('change', this.handleCoarseChange);
 
     // Handle mouse move for hover detection
     canvas.addEventListener('mousemove', this.handleMouseMove);
+    canvas.addEventListener('mouseleave', this.handleMouseLeave);
 
     // Handle click/tap for petal selection
     canvas.addEventListener('click', this.handleCanvasClick);
@@ -416,6 +478,8 @@ export class GoldenRoseElement extends LitElement {
     this.controls.touches.ONE = null;
     this.controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
     this.roseText?.setMobileLayout(isCoarse);
+    this.camera.fov = isCoarse ? CAMERA.coarseFov : CAMERA.fov;
+    this.camera.updateProjectionMatrix();
     this.renderer.domElement.style.touchAction = 'pan-y pinch-zoom';
   };
 
@@ -432,7 +496,7 @@ export class GoldenRoseElement extends LitElement {
     const distance = Math.max(0, rect.height - this.sceneViewport.clientHeight);
     const progress = distance > 0 ? THREE.MathUtils.clamp(-rect.top / distance, 0, 1) : 0;
     this.roseText.setScrollProgress(progress);
-    if (this.previousScrollProgress !== null && !this.reducedMotionQuery?.matches) {
+    if (this.previousScrollProgress !== null && !breath.still) {
       const delta = (progress - this.previousScrollProgress) * distance;
       this.scrollDeltaYaw += THREE.MathUtils.clamp(delta, -100, 100) * this.SCROLL_YAW_SENSITIVITY;
     }
@@ -444,7 +508,23 @@ export class GoldenRoseElement extends LitElement {
     const rect = canvas.getBoundingClientRect();
     this.mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     this.mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    // Reach is for pointers that can hover; a touch's synthesized mousemove
+    // must not leave petals reaching toward where a finger was.
+    this.pointerPx = this.coarsePointer
+      ? null
+      : (this.pointerPx ?? new THREE.Vector2()).set(
+          event.clientX - rect.left,
+          event.clientY - rect.top
+        );
     this.updateHover();
+  };
+
+  private handleMouseLeave = () => {
+    this.pointerPx = null;
+    if (this.hoveredPetalIndex !== null) {
+      this.unhighlightPetal(this.hoveredPetalIndex);
+      this.hoveredPetalIndex = null;
+    }
   };
 
   private updateHover() {
@@ -470,31 +550,167 @@ export class GoldenRoseElement extends LitElement {
     }
   }
 
+  private setGold(index: number, level: number) {
+    this.goldLevels[index] = level;
+    setPetalGold(this.petals[index].material as THREE.Material, level);
+  }
+
+  // Gold answers at once: the petal jumps most of the way on the very next
+  // frame and settles the rest, instead of easing up from nothing.
   private highlightPetal(index: number) {
-    const petal = this.petals[index];
-    const material = petal.material as THREE.MeshStandardMaterial;
-    const isActive = petal.userData.isActive;
-
-    material.emissive.setHex(isActive ? 0x6b5a1f : 0x2a250d);
-    material.emissiveIntensity = isActive ? 0.3 : 0.15;
-
-    // Change cursor if active petal
-    if (isActive && this.renderer) {
-      this.renderer.domElement.style.cursor = 'pointer';
+    const isActive = this.petals[index].userData.isActive;
+    if (isActive) {
+      for (const member of this.petalGroups[this.petalGroupOf[index]]) {
+        this.setGold(member, Math.max(this.goldLevels[member], GOLD.instantLevel));
+      }
+    }
+    if (this.renderer) {
+      this.renderer.domElement.style.cursor = isActive ? 'pointer' : 'default';
     }
   }
 
-  private unhighlightPetal(index: number) {
-    const petal = this.petals[index];
-    const material = petal.material as THREE.MeshStandardMaterial;
-    const isActive = petal.userData.isActive;
-
-    material.emissive.setHex(isActive ? 0x3d2f0a : 0x000000);
-    material.emissiveIntensity = isActive ? 0.1 : 0;
-
+  private unhighlightPetal(_index: number) {
+    // The gold itself fades in updateOffers(); only the cursor resets here.
     if (this.renderer) {
       this.renderer.domElement.style.cursor = 'default';
     }
+  }
+
+  // Where the camera sits around the rose, in the rose's own (spinning)
+  // frame — the direction a petal's radial axis is compared against to tell
+  // whether it faces the viewer.
+  private cameraDirectionInRose(): THREE.Vector3 {
+    return this.camera.position
+      .clone()
+      .sub(this.bloomCenter)
+      .setY(0)
+      .normalize()
+      .applyAxisAngle(THREE.Object3D.DEFAULT_UP, -this.roseGroup.rotation.y);
+  }
+
+  // Clickable petals the viewer can actually see, each with its angle
+  // around the rose measured from straight-at-the-camera (degrees, signed).
+  private offerablePetals(toCamera: THREE.Vector3): Array<{ group: number; angle: number }> {
+    const found: Array<{ group: number; angle: number }> = [];
+    this.petalGroups.forEach((members, group) => {
+      const lead = members[0];
+      const o = this.originalPetalTransforms[lead];
+      if (!this.petals[lead].userData.isActive) return;
+      if (o.reach < OFFER.minReach || o.radial.dot(toCamera) < OFFER.facing) return;
+      const cross = toCamera.z * o.radial.x - toCamera.x * o.radial.z;
+      found.push({
+        group,
+        angle: Math.atan2(cross, o.radial.dot(toCamera)) * THREE.MathUtils.RAD2DEG,
+      });
+    });
+    return found;
+  }
+
+  // The petals nearest `angle` around the rose, ordered along the sweep so
+  // they take their turns in the direction the ripple is travelling.
+  private petalsNearAngle(toCamera: THREE.Vector3, angle: number, count: number): number[] {
+    return this.offerablePetals(toCamera)
+      .sort((a, b) => Math.abs(a.angle - angle) - Math.abs(b.angle - angle))
+      .slice(0, count)
+      .sort((a, b) => a.angle - b.angle)
+      .map((entry) => entry.group);
+  }
+
+  // Ripple: once per breath a few camera-facing petals are chosen a little
+  // further round the rose than last time. Each lifts and warms on the
+  // inhale, one after another, and settles on the exhale.
+  private addRippleOffers(toCamera: THREE.Vector3) {
+    if (breath.still) {
+      // Held cue: the same few petals, faintly gold, not moving.
+      if (this.rippleGroups.length === 0) {
+        this.rippleGroups = this.petalsNearAngle(toCamera, 0, OFFER.stillCount);
+      }
+      for (const group of this.rippleGroups) this.offerTargets[group] = OFFER.stillLevel;
+      return;
+    }
+    const cycle = breath.cycleIndex();
+    if (cycle !== this.rippleCycle) {
+      this.rippleCycle = cycle;
+      this.rippleAngle += OFFER.rippleStepDegrees;
+      if (this.rippleAngle > OFFER.rippleArcDegrees) this.rippleAngle = -OFFER.rippleArcDegrees;
+      this.rippleGroups = this.petalsNearAngle(toCamera, this.rippleAngle, OFFER.rippleCount);
+    }
+    this.rippleGroups.forEach((group, turn) => {
+      this.offerTargets[group] =
+        OFFER.rippleLevel * breath.level(turn * OFFER.rippleStaggerSeconds);
+    });
+  }
+
+  // Reach: petals near the pointer begin to offer themselves before they are
+  // touched — strongest for the nearest, fading with screen distance.
+  private addReachOffers(toCamera: THREE.Vector3) {
+    if (!this.pointerPx || breath.still) return;
+    const size = this.renderer.getSize(new THREE.Vector2());
+    const projected = new THREE.Vector3();
+    for (const { group } of this.offerablePetals(toCamera)) {
+      this.petals[this.petalGroups[group][0]].getWorldPosition(projected).project(this.camera);
+      const distance = Math.hypot(
+        ((projected.x + 1) / 2) * size.x - this.pointerPx.x,
+        ((1 - projected.y) / 2) * size.y - this.pointerPx.y
+      );
+      const nearness = Math.max(0, 1 - distance / OFFER.reachRadiusPx);
+      this.offerTargets[group] = Math.max(this.offerTargets[group], OFFER.reachLevel * nearness);
+    }
+  }
+
+  // One level per petal drives both its gold and its lift. Hover is the
+  // strongest source; the ripple and the pointer's nearness are quieter
+  // versions of the same answer.
+  private updateOffers(dt: number) {
+    this.offerTargets.fill(0);
+    if (this.roseState === 'idle') {
+      const toCamera = this.cameraDirectionInRose();
+      this.addRippleOffers(toCamera);
+      this.addReachOffers(toCamera);
+    }
+    const hovered = this.hoveredPetalIndex;
+    if (hovered !== null && this.petals[hovered].userData.isActive) {
+      this.offerTargets[this.petalGroupOf[hovered]] = 1;
+    }
+
+    this.petals.forEach((_petal, index) => {
+      const target = this.offerTargets[this.petalGroupOf[index]];
+      const level = this.goldLevels[index];
+      if (level === target) return;
+      const rate = target > level ? GOLD.attackPerSecond : GOLD.releasePerSecond;
+      const next = level + (target - level) * (1 - Math.exp(-rate * dt));
+      this.setGold(index, Math.abs(next - target) < 0.001 ? target : next);
+    });
+  }
+
+  // The hint has done its work once any petal has been chosen.
+  private markHintSeen() {
+    if (this.hintSeen) return;
+    this.hintSeen = true;
+    try {
+      window.sessionStorage.setItem(HINT.storageKey, '1');
+    } catch {
+      // Not remembered beyond this page view; nothing else depends on it.
+    }
+  }
+
+  private updateKeyLight(nowSec: number) {
+    if (!this.keyLight) return;
+    const turn = breath.still ? 0 : (nowSec / LIGHT.driftSeconds) * Math.PI * 2;
+    const azimuth = (LIGHT.azimuth + LIGHT.azimuthDrift * Math.sin(turn)) * THREE.MathUtils.DEG2RAD;
+    const elevation =
+      (LIGHT.elevation + LIGHT.elevationDrift * Math.sin(turn * LIGHT_ELEVATION_PERIOD_RATIO)) *
+      THREE.MathUtils.DEG2RAD;
+    this.keyLight.position
+      .set(
+        Math.sin(azimuth) * Math.cos(elevation),
+        Math.sin(elevation),
+        Math.cos(azimuth) * Math.cos(elevation)
+      )
+      .multiplyScalar(LIGHT.distance)
+      .add(this.bloomCenter);
+    this.keyLight.target.position.copy(this.bloomCenter);
+    this.keyLight.intensity = LIGHT.intensity * (1 - LIGHT.swell * (1 - breath.level()));
   }
 
   private handlePetalClick(petalIndex: number) {
@@ -512,6 +728,7 @@ export class GoldenRoseElement extends LitElement {
     }
 
     this.beginCameraFlyToTop();
+    this.markHintSeen();
 
     this.activeSection = section;
     this.roseState = 'blooming';
@@ -611,7 +828,7 @@ export class GoldenRoseElement extends LitElement {
       if (!section) return;
       top = section.getBoundingClientRect().top + window.scrollY;
     }
-    window.scrollTo({ top, behavior: this.reducedMotionQuery?.matches ? 'instant' : 'smooth' });
+    window.scrollTo({ top, behavior: breath.still ? 'instant' : 'smooth' });
   }
 
   private handleTruthPrev = () => this.handleTruthNav(-1);
@@ -642,22 +859,28 @@ export class GoldenRoseElement extends LitElement {
     model.scale.set(1.5, 1.5, 1.5);
     model.updateMatrixWorld(true);
 
-    const goldMaterial = new THREE.MeshStandardMaterial({
-      color: 0xd4af37,
-      metalness: 0.9,
-      roughness: 0.3,
-      side: THREE.DoubleSide,
-    });
-
+    // Keep what the model ships with: every mesh arrives with its own
+    // base-colour, normal and occlusion/roughness maps. Petals get the living
+    // material built from those maps; stem, leaves and thorns keep their own
+    // material, quietened so colour gathers in the bloom.
     const petalMeshes: THREE.Mesh[] = [];
     const allMeshes: THREE.Mesh[] = [];
     model.traverse((child) => {
-      if (child instanceof THREE.Mesh) {
-        child.material = goldMaterial.clone();
-        allMeshes.push(child);
-        if (child.name.startsWith('petal_')) {
-          petalMeshes.push(child);
-        }
+      if (!(child instanceof THREE.Mesh)) return;
+      const source = child.material as THREE.MeshStandardMaterial;
+      allMeshes.push(child);
+      if (child.name.startsWith('petal_')) {
+        child.material = createPetalMaterial({
+          map: source.map,
+          normalMap: source.normalMap,
+          ormMap: source.aoMap ?? source.roughnessMap,
+        });
+        petalMeshes.push(child);
+      } else {
+        source.metalness = 0;
+        source.metalnessMap = null;
+        source.roughness = FOLIAGE.roughness;
+        source.color.set(FOLIAGE.tint);
       }
     });
     petalMeshes.sort((a, b) => a.name.localeCompare(b.name));
@@ -703,12 +926,8 @@ export class GoldenRoseElement extends LitElement {
         isActive,
         section: isActive ? SECTIONS[activeSlot] : null,
       };
-      if (isActive) {
-        const mat = petal.material as THREE.MeshStandardMaterial;
-        mat.emissive.setHex(0x6b4f1a);
-        mat.emissiveIntensity = 0.25;
-      }
       this.petals.push(petal);
+      this.goldLevels.push(0);
 
       const center = centers[i];
       petal.geometry.translate(-center.x, -center.y, -center.z);
@@ -720,8 +939,56 @@ export class GoldenRoseElement extends LitElement {
       const radial = new THREE.Vector3(dx / len, 0, dz / len);
       const tangent = new THREE.Vector3(-radial.z, 0, radial.x);
 
-      this.originalPetalTransforms.push({ center: center.clone(), radial, tangent });
+      this.originalPetalTransforms.push({
+        center: center.clone(),
+        radial,
+        tangent,
+        reach: len,
+        breathWeight: 0,
+        breathLag: 0,
+      });
     });
+
+    // Pair each sheet with its rim strip: two meshes that are each other's
+    // nearest neighbour and all but concentric are one petal.
+    const nearest = centers.map((center, i) => {
+      let best = -1;
+      centers.forEach((other, k) => {
+        if (k !== i && (best === -1 || center.distanceTo(other) < center.distanceTo(centers[best]))) {
+          best = k;
+        }
+      });
+      return best;
+    });
+    this.petalGroupOf = centers.map(() => -1);
+    centers.forEach((center, i) => {
+      if (this.petalGroupOf[i] !== -1) return;
+      const partner = nearest[i];
+      const paired =
+        partner !== -1 &&
+        nearest[partner] === i &&
+        center.distanceTo(centers[partner]) < PETAL_PAIR_DISTANCE;
+      const members = paired ? [i, partner] : [i];
+      members.forEach((member) => (this.petalGroupOf[member] = this.petalGroups.length));
+      this.petalGroups.push(members);
+    });
+    this.offerTargets = this.petalGroups.map(() => 0);
+
+    // Normalise each petal's distance from the heart into its share of the
+    // breath: the rim moves most and slightly later than the centre. A sheet
+    // and its rim strip share one set of numbers so they move as one.
+    const rim = Math.max(...this.originalPetalTransforms.map((o) => o.reach), 1e-6);
+    for (const members of this.petalGroups) {
+      const reach = this.originalPetalTransforms[members[0]].reach / rim;
+      const breathLag =
+        reach * BREATH_MOTION.outerLagSeconds + Math.random() * BREATH_MOTION.lagJitterSeconds;
+      for (const member of members) {
+        const o = this.originalPetalTransforms[member];
+        o.reach = reach;
+        o.breathWeight = THREE.MathUtils.lerp(BREATH_MOTION.innerWeight, 1, reach);
+        o.breathLag = breathLag;
+      }
+    }
 
     if (this.controls) {
       this.controls.target.copy(this.bloomCenter);
@@ -779,9 +1046,7 @@ export class GoldenRoseElement extends LitElement {
         this.roseState = 'open';
         if (this.controls) this.controls.enabled = true; // user can orbit at top-down
       }
-      const eased = this.easeOutCubic(this.bloomProgress);
-      this.updatePetalPositions(eased);
-      this.updateCameraFly(eased);
+      this.updateCameraFly(this.easeOutCubic(this.bloomProgress));
     }
 
     if (this.roseState === 'closing') {
@@ -792,24 +1057,26 @@ export class GoldenRoseElement extends LitElement {
         this.activeSection = null;
         if (this.controls) this.controls.enabled = true;
       }
-      const eased = this.easeOutCubic(this.bloomProgress);
-      this.updatePetalPositions(eased);
       // During close, bloomProgress goes 1→0 so we want the fly-back to track
       // (1 - bloomProgress)' worth — but beginCameraFlyBack already swapped
       // start/target, so we just lerp by (1 - eased).
-      this.updateCameraFly(1 - eased);
+      this.updateCameraFly(1 - this.easeOutCubic(this.bloomProgress));
     }
 
     // Gentle auto-spin + scroll-driven yaw impulse (decays each frame).
     if (this.roseState === 'idle' && this.roseGroup) {
-      const spin = this.autoRotateEnabled && !this.reducedMotionQuery?.matches ? 0.002 : 0;
+      const spin = this.autoRotateEnabled && !breath.still ? 0.002 : 0;
       this.roseGroup.rotation.y += spin + this.scrollDeltaYaw;
       this.scrollDeltaYaw *= this.SCROLL_YAW_DECAY;
     }
 
-    if (this.roseState === 'idle') {
-      this.bobActivePetals(now);
-    }
+    // Bloom and breath share one pose: the breath keeps moving the petals
+    // in every state, the bloom is laid over it. Offers are settled first
+    // because an offered petal also lifts.
+    if (this.petals.length > 0) this.updateOffers(dt);
+    this.posePetals(this.easeOutCubic(this.bloomProgress));
+    this.updateKeyLight(now / 1000);
+    this.skyDome?.update(now / 1000);
 
     if (this.roseText) {
       // One formula across all states: idle→1, blooming/closing→linear,
@@ -829,43 +1096,42 @@ export class GoldenRoseElement extends LitElement {
     this.renderer?.render(this.scene, this.camera);
   };
 
-  // Soft "I'm clickable" bounce + glow pulse on the active petals while idle.
-  // Bounce uses |sin| so the petal lifts off its rest position and lands again,
-  // never sinking below it. Glow pulses on the same clock with a phase offset.
-  private bobActivePetals(now: number) {
-    const t = now * 0.0016;
-    ACTIVE_PETAL_INDICES.forEach((idx, slot) => {
-      const petal = this.petals[idx];
-      const o = this.originalPetalTransforms[idx];
-      if (!petal || !o) return;
-
-      const phase = slot * (Math.PI * 2 / 3);
-      const bounce = Math.abs(Math.sin(t + phase)) * 0.032;
-      petal.position.copy(o.center);
-      petal.position.y += bounce;
-
-      const mat = petal.material as THREE.MeshStandardMaterial;
-      mat.emissiveIntensity = 0.18 + Math.sin(t * 1.1 + phase) * 0.08;
-    });
-  }
-
   private easeOutCubic(t: number): number {
     return 1 - Math.pow(1 - t, 3);
   }
 
-  private updatePetalPositions(progress: number) {
+  // `bloom` is the eased open amount (0 closed, 1 fully flared). On top of
+  // it every petal loosens and tightens a few degrees with the shared breath,
+  // around the same per-petal axes the bloom uses. The breath turns the
+  // other way from the bloom: a positive turn about the tangent tips a
+  // petal's lip in over the heart (the bloom then carries it right over),
+  // whereas a breath should lean the lip outward.
+  private posePetals(bloom: number) {
     this.petals.forEach((petal, index) => {
       const o = this.originalPetalTransforms[index];
       if (!o) return;
+      const air = breath.level(o.breathLag) * o.breathWeight;
+      // An offered petal rises out of the bloom toward the viewer's hand;
+      // the gesture belongs to the closed rose and fades as it opens.
+      const offer = this.goldLevels[index] * (1 - bloom);
 
       // Geometry is re-centered at load so each petal's local origin = its
       // centroid. Rotating `petal.quaternion` therefore pivots the petal
       // around its own centroid with no translation compensation needed.
-      petal.quaternion.setFromAxisAngle(o.tangent, this.BLOOM_FLARE * progress);
-      petal.position.copy(o.center);
-      petal.position.x += o.radial.x * this.BLOOM_SPREAD * progress;
-      petal.position.z += o.radial.z * this.BLOOM_SPREAD * progress;
-      petal.position.y += this.BLOOM_LIFT * progress;
+      petal.quaternion.setFromAxisAngle(
+        o.tangent,
+        this.BLOOM_FLARE * bloom -
+          (BREATH_MOTION.petalFlareDegrees * air + OFFER.tiltDegrees * offer) *
+            THREE.MathUtils.DEG2RAD
+      );
+      petal.position
+        .copy(o.center)
+        .addScaledVector(
+          o.radial,
+          this.BLOOM_SPREAD * bloom + BREATH_MOTION.petalSpread * air + OFFER.liftOut * offer
+        );
+      petal.position.y +=
+        this.BLOOM_LIFT * bloom + BREATH_MOTION.petalLift * air + OFFER.lift * offer;
     });
   }
 
@@ -881,6 +1147,7 @@ export class GoldenRoseElement extends LitElement {
     const canvas = this.renderer?.domElement;
     if (canvas) {
       canvas.removeEventListener('mousemove', this.handleMouseMove);
+      canvas.removeEventListener('mouseleave', this.handleMouseLeave);
       canvas.removeEventListener('click', this.handleCanvasClick);
     }
     this.coarseQuery?.removeEventListener('change', this.handleCoarseChange);
@@ -897,6 +1164,9 @@ export class GoldenRoseElement extends LitElement {
     this.roseText = null;
     this.meteorField?.dispose();
     this.meteorField = null;
+    this.skyDome?.dispose();
+    this.skyDome = null;
+    this.keyLight = null;
     this.renderer?.dispose();
   }
 
@@ -906,11 +1176,21 @@ export class GoldenRoseElement extends LitElement {
 
   render() {
     return html`
-      <div class="scene-viewport" data-testid="rose-viewport">
+      <div
+        class="scene-viewport ${this.roseState === 'open' ? 'reading' : ''}"
+        data-testid="rose-viewport"
+      >
         ${this.loading
           ? html`<div class="loading-shimmer" data-testid="loading-shimmer"></div>`
           : null}
         <canvas data-testid="rose-canvas"></canvas>
+        <p
+          class="petal-hint ${this.hintSeen || this.loading ? 'gone' : ''}"
+          data-testid="petal-hint"
+          aria-hidden=${this.hintSeen ? 'true' : 'false'}
+        >
+          ${HINT.text}
+        </p>
         <div id="content-root" class="${this.roseState === 'open' ? 'visible' : ''}">
           <button
             class="close-button"

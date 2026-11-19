@@ -10,7 +10,8 @@ export class WelcomeSectionElement extends LitElement {
   firstUpdated(_changed: PropertyValues) {
     super.firstUpdated(_changed);
     const canvas = this.renderRoot.querySelector<HTMLCanvasElement>('.stars-canvas');
-    if (canvas && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // The renderer holds the sky still on its own when motion is reduced.
+    if (canvas) {
       this.starsRenderer = new ShootingStarsCanvas(canvas);
       this.starsRenderer.start();
     }

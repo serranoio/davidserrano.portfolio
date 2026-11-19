@@ -9,6 +9,7 @@
     "preview": "rspress preview"
   },
   "dependencies": {
+    "@fontsource/cormorant-garamond": "^5.3.0",
     "@lit/react": "^1.0.8",
     "@rspress/core": "^2.0.9",
     "lit": "^3.3.2",

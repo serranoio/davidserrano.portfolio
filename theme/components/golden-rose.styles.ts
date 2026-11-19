@@ -1,4 +1,8 @@
-import { css } from 'lit';
+import { css, unsafeCSS } from 'lit';
+import { BREATH_CYCLE_SECONDS } from './breath';
+import { skyEdge } from './sky.styles';
+
+const breathCycle = unsafeCSS(`${BREATH_CYCLE_SECONDS}s`);
 
 export default css`
   :host {
@@ -9,7 +13,12 @@ export default css`
     /* Hardcoded dark — rspress sets --color-bg to a light cream in its
        light theme, which would win over a var() fallback and leave the
        night sky behind the rose looking like a blank cream rectangle. */
-    background-color: #0a0a08;
+    background-color: ${skyEdge};
+    /* Quiet ivory for everything set over the night; gold is kept for the
+       moment something is chosen. */
+    --rose-ink: #e6dccb;
+    --rose-ink-quiet: rgba(230, 220, 203, 0.55);
+    --rose-gold: #e9c46a;
   }
 
   .scene-viewport {
@@ -26,60 +35,99 @@ export default css`
     height: 100%;
   }
 
+  /* The scene has no frame: its sky dissolves into the sections above and
+     below instead of ending at an edge. */
+  .scene-viewport::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background: linear-gradient(
+      to bottom,
+      ${skyEdge} 0%,
+      transparent 16%,
+      transparent 84%,
+      ${skyEdge} 100%
+    );
+  }
+
+  /* While a poem is open the night deepens behind the words — a pool of
+     dark with no edge, in place of a panel. */
+  .scene-viewport::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background: radial-gradient(
+      ellipse 62% 78% at 50% 50%,
+      rgba(6, 5, 7, 0.94) 0%,
+      rgba(6, 5, 7, 0.88) 45%,
+      rgba(6, 5, 7, 0) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.7s ease;
+  }
+
+  .scene-viewport.reading::after {
+    opacity: 1;
+  }
+
+  /* The one line of words under the rose. No box, no glow: starlight-coloured
+     type that leaves for good once a petal has been chosen. */
+  .petal-hint {
+    position: absolute;
+    left: 50%;
+    top: calc(50% + 13svh);
+    transform: translateX(-50%);
+    margin: 0;
+    z-index: 3;
+    pointer-events: none;
+    white-space: nowrap;
+    font-family: var(--font-title, 'Cormorant Garamond', Georgia, serif);
+    font-weight: 300;
+    font-size: 1.3rem;
+    letter-spacing: 0.14em;
+    color: var(--rose-ink);
+    opacity: 0.85;
+    transition: opacity 1.4s ease, visibility 0s;
+  }
+
+  .petal-hint.gone {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 1.4s ease, visibility 0s linear 1.4s;
+  }
+
   .loading-shimmer {
     position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(
-      135deg,
-      var(--color-bg, #0a0a08) 0%,
-      #1a1a16 50%,
-      var(--color-bg, #0a0a08) 100%
-    );
-    background-size: 200% 200%;
-    animation: shimmer 2s ease-in-out infinite;
+    background: ${skyEdge};
   }
 
+  /* One slow breath of rose light where the flower will be. */
   .loading-shimmer::after {
     content: '';
-    width: 100px;
-    height: 100px;
+    width: 9rem;
+    height: 9rem;
     border-radius: 50%;
-    background: radial-gradient(
-      circle,
-      var(--color-gold-primary, #d4af37) 0%,
-      transparent 70%
-    );
-    opacity: 0.3;
-    animation: pulse 1.5s ease-in-out infinite;
+    background: radial-gradient(circle, rgba(178, 58, 85, 0.5) 0%, transparent 68%);
+    animation: breathe ${breathCycle} ease-in-out infinite;
   }
 
-  @keyframes shimmer {
+  @keyframes breathe {
     0%, 100% {
-      background-position: 0% 50%;
+      transform: scale(0.9);
+      opacity: 0.35;
     }
-    50% {
-      background-position: 100% 50%;
+    40% {
+      transform: scale(1.12);
+      opacity: 0.7;
     }
-  }
-
-  @keyframes pulse {
-    0%, 100% {
-      transform: scale(1);
-      opacity: 0.3;
-    }
-    50% {
-      transform: scale(1.2);
-      opacity: 0.5;
-    }
-  }
-
-  .loading-shimmer.fade-out {
-    opacity: 0;
-    transition: opacity 0.5s ease-out;
-    pointer-events: none;
   }
 
   #content-root {
@@ -88,52 +136,50 @@ export default css`
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 90%;
-    max-width: 600px;
-    max-height: 70vh;
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
-    background: rgba(8, 8, 6, 0.985);
-    border: 1px solid rgba(244, 215, 123, 0.35);
-    border-radius: 8px;
-    padding: 2.25rem 2.5rem;
-    color: #faf3df;
+    width: 88%;
+    max-width: 34rem;
+    color: var(--rose-ink);
     font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
     font-size: 1.02rem;
-    display: none;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.6s ease, visibility 0s linear 0.6s;
     z-index: 10;
   }
 
+  .content-body::-webkit-scrollbar {
+    display: none;
+  }
+
   #content-root.visible {
-    display: block;
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.6s ease 0.15s, visibility 0s;
   }
 
   #content-root h1,
   #content-root h2,
   #content-root h3 {
     font-family: var(--font-title, 'Cormorant Garamond', Georgia, serif);
-    color: #f4d77b;
-    text-shadow: 0 0 14px rgba(244, 215, 123, 0.25);
-    font-weight: 600;
-    letter-spacing: 0.015em;
+    color: var(--rose-ink);
+    font-weight: 400;
+    letter-spacing: 0.01em;
     margin-top: 0;
   }
 
   #content-root h1 {
-    font-size: 2.4rem;
-    line-height: 1.15;
-    margin-bottom: 0.75rem;
-    letter-spacing: 0.025em;
+    font-size: 2.6rem;
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 1.75rem;
   }
 
   #content-root h2 {
-    font-size: 1.45rem;
-    color: #ecd58a;
+    font-size: 1.5rem;
   }
 
   #content-root h3 {
-    font-size: 1.2rem;
-    color: #e6cd84;
+    font-size: 1.25rem;
   }
 
   /* Rspress's MDX renderer injects anchor links inside headings; hide them */
@@ -144,40 +190,50 @@ export default css`
     display: none;
   }
 
+  /* A bare glyph with a full-size hit target and no ring around it, set
+     above the column where the words have already faded out. */
   .close-button {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 2.5rem;
-    height: 2.5rem;
-    border: 1px solid var(--color-gold-muted, rgba(212, 175, 55, 0.3));
-    border-radius: 50%;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: none;
     background: transparent;
-    color: var(--color-gold-primary, #d4af37);
-    font-size: 1.5rem;
+    color: var(--rose-ink-quiet);
+    font-family: var(--font-title, 'Cormorant Garamond', Georgia, serif);
+    font-size: 2.6rem;
+    font-weight: 300;
     line-height: 1;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: color 0.12s ease;
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
   .close-button:hover {
-    background: var(--color-gold-primary, #d4af37);
-    color: var(--color-bg, #0a0a08);
-    border-color: var(--color-gold-primary, #d4af37);
+    color: var(--rose-gold);
   }
 
-  .close-button:focus {
-    outline: 2px solid var(--color-gold-primary, #d4af37);
+  .close-button:focus-visible {
+    outline: 1px solid var(--rose-gold);
     outline-offset: 2px;
   }
 
   .content-body {
-    margin-top: 1.5rem;
-    line-height: 1.7;
-    color: #f7efde;
+    box-sizing: border-box;
+    max-height: 74vh;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: none;
+    padding: 4.5rem 0.5rem 4rem;
+    /* Lines fade in and out at the top and bottom instead of being cut. */
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 4rem, #000 calc(100% - 3.5rem), transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 4rem, #000 calc(100% - 3.5rem), transparent 100%);
+    line-height: 1.8;
+    color: var(--rose-ink);
   }
 
   .content-body p {
@@ -200,18 +256,17 @@ export default css`
 
   .content-body hr {
     border: none;
-    border-top: 1px solid rgba(244, 215, 123, 0.3);
-    margin: 1.75rem 0;
+    border-top: 1px solid rgba(230, 220, 203, 0.16);
+    width: 3rem;
+    margin: 2.5rem 0;
   }
 
   .content-body em {
     font-style: italic;
-    color: #f0d995;
   }
 
   .content-body strong {
-    color: #f4d77b;
-    font-weight: 600;
+    font-weight: 500;
   }
 
   .attribution {
@@ -228,17 +283,16 @@ export default css`
 
   .attribution a {
     pointer-events: auto;
-    color: var(--color-gold-primary, #d4af37);
-    opacity: 0.55;
+    color: var(--rose-ink);
+    opacity: 0.38;
     text-decoration: none;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.12s ease, color 0.12s ease;
   }
 
   .attribution a:hover,
   .attribution a:focus-visible {
     opacity: 1;
-    text-decoration: underline;
-    text-underline-offset: 0.2em;
+    color: var(--rose-gold);
     outline: none;
   }
 
@@ -276,30 +330,37 @@ export default css`
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     line-height: 1;
-    color: var(--color-gold-primary, #d4af37);
-    background: rgba(8, 8, 6, 0.7);
-    border: 1px solid rgba(244, 215, 123, 0.45);
-    border-radius: 999px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+    color: var(--rose-ink-quiet);
+    background: transparent;
+    border: none;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    transition: color 0.12s ease;
   }
 
   .truth-nav-button:active {
-    background: rgba(244, 215, 123, 0.14);
-    border-color: rgba(244, 215, 123, 0.75);
+    color: var(--rose-gold);
   }
 
   .truth-nav-button:focus-visible {
-    outline: 2px solid var(--color-gold-primary, #d4af37);
+    outline: 1px solid var(--rose-gold);
     outline-offset: 2px;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .truth-nav {
+    .truth-nav,
+    .petal-hint,
+    .petal-hint.gone,
+    #content-root,
+    #content-root.visible,
+    .scene-viewport::after {
       transition: none;
+    }
+
+    .loading-shimmer::after {
+      animation: none;
     }
   }
 `;
