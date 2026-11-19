@@ -1,0 +1,2 @@
+.arcana-speed { margin-top: clamp(3rem, 7vw, 5rem); }
+.arcana-speed__frame { display: block; width: 100%; height: 22rem; border: 0; background: transparent; }

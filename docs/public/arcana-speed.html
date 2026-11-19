@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arcana speed</title>
+<style>
+:root { color-scheme: light;
+	--card: rgba(160, 128, 80, 0.06); --ink: #2a2520; --muted: rgba(42, 37, 32, 0.7); --rule: rgba(160, 128, 80, 0.25); --accent: #7a6040; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: dark;
+	--card: rgba(212, 175, 55, 0.06); --ink: #f5f0e6; --muted: rgba(245, 240, 230, 0.7); --rule: rgba(212, 175, 55, 0.25); --accent: #d4af37; } }
+:root[data-theme="dark"] { color-scheme: dark;
+	--card: rgba(212, 175, 55, 0.06); --ink: #f5f0e6; --muted: rgba(245, 240, 230, 0.7); --rule: rgba(212, 175, 55, 0.25); --accent: #d4af37; }
+* { box-sizing: border-box; }
+body {
+	margin: 0; padding: 4px 0; background: transparent; color: var(--ink);
+	font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.stats { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin: 0; }
+.stat { background: var(--card); border: 1px solid var(--rule); border-radius: 10px; padding: 16px; }
+.stat dt { color: var(--muted); font-size: 13px; letter-spacing: 0.02em; }
+.stat dd { margin: 4px 0 0; font-size: 32px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--accent); }
+.stat dd small { display: block; font-size: 13px; font-weight: 400; color: var(--muted); }
+.data { margin: 16px 0 4px; font-weight: 500; }
+.context { margin: 0; color: var(--muted); font-size: 13px; }
+</style>
+<script>
+const theme = new URLSearchParams(location.search).get("theme");
+if (theme === "light" || theme === "dark") document.documentElement.dataset.theme = theme;
+</script>
+</head>
+<body>
+<dl class="stats">
+<div class="stat"><dt>One forecast</dt><dd>5.24 s<small>hot run</small></dd></div>
+<div class="stat"><dt>One backtest</dt><dd>107.4 s<small>hot run</small></dd></div>
+<div class="stat"><dt>Lines of code</dt><dd>217,804<small>91,141 production · 126,663 tests</small></dd></div>
+</dl>
+<p class="data">5.4M order-book updates · 21 markets · 197K trades</p>
+<p class="context">Apple M4 Pro, 14 cores, 24 GB · commit 2cf3446 · 2026-11-19</p>
+</body>
+</html>
