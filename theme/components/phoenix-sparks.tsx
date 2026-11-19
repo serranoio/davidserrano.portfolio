@@ -3,15 +3,16 @@ import type { PhoenixPoint } from './phoenix-drawing';
 import { PhoenixCoal } from './phoenix-ember';
 import './phoenix-sparks.css';
 
-/** One press sends a short run from each source: a lead coal and what trails it. */
+/** Each sending is a short run from each source: a lead coal and what trails it. */
 const SPARK_RUN: readonly { size: number; lag: number; lift: number }[] = [
   { size: 1, lag: 0, lift: 0.16 },
-  { size: 0.62, lag: 60, lift: 0.25 },
-  { size: 0.42, lag: 115, lift: 0.08 },
+  { size: 0.62, lag: 140, lift: 0.25 },
+  { size: 0.42, lag: 270, lift: 0.08 },
 ];
-const FLIGHT_MS_PER_PX = 1.05;
-const SHORTEST_FLIGHT_MS = 380;
-const LONGEST_FLIGHT_MS = 640;
+/* Slow enough to follow with the eye: fire drifting, not a spark thrown. */
+const FLIGHT_MS_PER_PX = 2.6;
+const SHORTEST_FLIGHT_MS = 950;
+const LONGEST_FLIGHT_MS = 1600;
 const FLIGHT_STEPS = 10;
 const SPARK_GLOW = 2.6;
 

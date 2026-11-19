@@ -46,16 +46,18 @@ const KINDLE_POINT = 'phoenix-path__kindle';
  * One path's words. The heading is where its fire lands: the heart keeps a
  * twin of the bird's ember there, the others a point on the rule beneath.
  */
-function PhoenixPathSection({ path, kindling, ref }: {
+function PhoenixPathSection({ path, kindling, caught, ref }: {
   path: PhoenixPath;
   /** A spark is on its way here and has not landed yet. */
   kindling: boolean;
+  /** Fire sent by a resting pointer has landed, and the pointer is still there. */
+  caught: boolean;
   ref: Ref<HTMLElement>;
 }) {
   const headingId = `phoenix-${path.id}-heading`;
   return (
     <section ref={ref} className={`phoenix-path phoenix-path--${path.id}`} aria-labelledby={headingId}
-      tabIndex={-1} data-kindling={kindling || undefined}>
+      tabIndex={-1} data-kindling={kindling || undefined} data-caught={caught || undefined}>
       <h2 className="phoenix-path__name" id={headingId}>
         {path.name}
         <span className="phoenix-path__rule" aria-hidden="true" />
@@ -94,23 +96,45 @@ export function EngineeringPage() {
   const sparks = useRef<PhoenixSparksHandle>(null);
   const [kindling, setKindling] = useState<PhoenixPathId | null>(null);
 
-  /** Pressing a part of the bird hands the visitor, and its fire, to that part's words. */
-  const sendFire = (id: PhoenixPathId, sources: PhoenixPoint[]) => {
+  const [caught, setCaught] = useState<PhoenixPathId | null>(null);
+  const hovered = useRef<PhoenixPathId | null>(null);
+
+  /** Send a part's fire to its words. One flight at a time per part. */
+  const sendFire = (id: PhoenixPathId, sources: PhoenixPoint[], onLanded?: () => void) => {
+    const landing = sections.current[id]?.querySelector(`.${KINDLE_POINT}`);
+    if (!landing || kindling === id) return;
+    setKindling(id);
+    sparks.current?.send(sources, landing, () => {
+      setKindling((flying) => (flying === id ? null : flying));
+      onLanded?.();
+    });
+  };
+
+  /** Resting a pointer on a part sends its fire; the words stay caught while it rests there. */
+  const hover = (id: PhoenixPathId, sources: PhoenixPoint[]) => {
+    hovered.current = id;
+    sendFire(id, sources, () => { if (hovered.current === id) setCaught(id); });
+  };
+  const leave = (id: PhoenixPathId) => {
+    if (hovered.current === id) hovered.current = null;
+    setCaught((held) => (held === id ? null : held));
+  };
+
+  /** Pressing a part hands the visitor to its words. A finger sends the fire now; a mouse already has. */
+  const press = (id: PhoenixPathId, sources: PhoenixPoint[], hovering: boolean) => {
     const section = sections.current[id];
-    const landing = section?.querySelector(`.${KINDLE_POINT}`);
-    if (!section || !landing) return;
+    if (!section) return;
     section.focus({ preventScroll: true });
     _bringIntoView(section);
-    setKindling(id);
-    sparks.current?.send(sources, landing, () => setKindling((flying) => (flying === id ? null : flying)));
+    if (!hovering) sendFire(id, sources);
   };
 
   return (
     <PortfolioPage>
       <div className="phoenix" style={{ '--phoenix-written': `${PHOENIX_WRITTEN_AT.toFixed(2)}s` } as CSSProperties}>
-        <div className="phoenix__figure"><PhoenixFigure onPress={sendFire} /></div>
+        <div className="phoenix__figure"><PhoenixFigure onHover={hover} onLeave={leave} onPress={press} /></div>
         {profile.paths.map((path) => (
-          <PhoenixPathSection key={path.id} path={path} kindling={kindling === path.id}
+          <PhoenixPathSection key={path.id} path={path} kindling={kindling === path.id} caught={caught === path.id}
             ref={(section) => { sections.current[path.id] = section; }} />
         ))}
         <p className="phoenix__ground">{profile.groundingLine}</p>

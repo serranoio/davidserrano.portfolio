@@ -84,11 +84,11 @@
 /* Where a spark lands, and the ember rule that is drawn from that point once it has. */
 .phoenix-path__kindle { position: absolute; left: var(--phoenix-kindle-x); bottom: -0.12em; }
 .phoenix-path__rule { position: absolute; inset: auto 0 -0.12em; height: 1px; background: linear-gradient(90deg, transparent, var(--phoenix-ember) 16%, var(--phoenix-ember) 84%, transparent); transform: scaleX(0); transform-origin: var(--phoenix-kindle-x) 50%; transition: transform 0.2s ease-in; }
-.phoenix-path:focus-within:not([data-kindling]) .phoenix-path__rule { transform: none; transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
-.phoenix-path:focus-within:not([data-kindling]) .phoenix-path__name { animation: phoenix-catch 0.9s ease-out; }
+.phoenix-path:is(:focus-within:not([data-kindling]), [data-caught]) .phoenix-path__rule { transform: none; transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.phoenix-path:is(:focus-within:not([data-kindling]), [data-caught]) .phoenix-path__name { animation: phoenix-catch 0.9s ease-out; }
 /* The heart's twin coal: the bird's own ember, set beside the words it belongs to. */
 .phoenix-path__coal { left: auto; right: calc(100% + 0.32em); top: 50%; bottom: auto; width: 0.42em; height: 0.42em; margin-top: -0.17em; }
-.phoenix-path:focus-within:not([data-kindling]) .phoenix-path__coal { animation: phoenix-flare 0.7s ease-out; }
+.phoenix-path:is(:focus-within:not([data-kindling]), [data-caught]) .phoenix-path__coal { animation: phoenix-flare 0.7s ease-out; }
 @keyframes phoenix-settle { from { opacity: 0; transform: translateY(0.4rem); } }
 @keyframes phoenix-glint {
   0%, 28% { --phoenix-lit-mind: 0; }

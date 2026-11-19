@@ -13,26 +13,33 @@ const INK_REACH = 120;
 const INKS = [...new Set(PHOENIX_PARTS.map((part) => part.id))];
 const inkId = (part: string) => `phoenix-ink-${part}`;
 
+export type PhoenixTouchHandler = (part: PhoenixPathId, sources: PhoenixPoint[]) => void;
+
+/** A click is a pointer event too; only a mouse can have been hovering first. */
+const _isMouse = (event: { nativeEvent: Event }) => (event.nativeEvent as PointerEvent).pointerType === 'mouse';
+
 /**
  * The phoenix, flourished with a pointed pen. Each stroke is a filled shape
  * with real thick-and-thin; a mask carrying its centreline is drawn on load,
  * so the bird appears to be written. The heart is the one warm point: an
  * ember that breathes, and tints the ink nearest to it.
  *
- * The head, the wings and the heart can be touched. A press reports which
- * part, and where on the screen its fire leaves from.
+ * The head, the wings and the heart can be touched. Resting a pointer on one,
+ * or pressing it, reports which part and where on the screen its fire leaves
+ * from. A finger cannot hover, so its press is told apart from a mouse's.
  */
-export function PhoenixFigure({ onPress }: {
-  onPress?: (part: PhoenixPathId, sources: PhoenixPoint[]) => void;
+export function PhoenixFigure({ onHover, onLeave, onPress }: {
+  onHover?: PhoenixTouchHandler;
+  onLeave?: (part: PhoenixPathId) => void;
+  onPress?: (part: PhoenixPathId, sources: PhoenixPoint[], hovering: boolean) => void;
 }) {
   const figure = useRef<SVGSVGElement>(null);
-  const press = ({ id, sources }: PhoenixTouch) => {
+  const onScreen = ({ sources }: PhoenixTouch): PhoenixPoint[] => {
     const toScreen = figure.current?.getScreenCTM();
-    if (!toScreen) return;
-    onPress?.(id, sources.map(({ x, y }) => {
+    return toScreen ? sources.map(({ x, y }) => {
       const point = new DOMPoint(x, y).matrixTransform(toScreen);
       return { x: point.x, y: point.y };
-    }));
+    }) : [];
   };
   return (
     <svg ref={figure} className="phoenix-figure" viewBox="0 0 300 400" role="presentation" aria-hidden="true">
@@ -73,7 +80,10 @@ export function PhoenixFigure({ onPress }: {
       ))}
       <EmberCoal {...EMBER} />
       {PHOENIX_TOUCH.map((touch) => (
-        <g key={touch.id} className={`phoenix-figure__touch phoenix-figure__touch--${touch.id}`} onClick={() => press(touch)}>
+        <g key={touch.id} className={`phoenix-figure__touch phoenix-figure__touch--${touch.id}`} 
+          onPointerEnter={(event) => { if (_isMouse(event)) onHover?.(touch.id, onScreen(touch)); }}
+          onPointerLeave={() => onLeave?.(touch.id)}
+          onClick={(event) => onPress?.(touch.id, onScreen(touch), _isMouse(event))}>
           {touch.shapes.map((shape) => <path key={shape} d={shape} />)}
         </g>
       ))}
