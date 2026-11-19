@@ -27,7 +27,7 @@ export interface PenStroke {
   length: number;
 }
 
-type Point = readonly [number, number];
+export type Point = readonly [number, number];
 type Cubic = readonly [Point, Point, Point, Point];
 
 const HAIRLINE = 0.55;
@@ -113,16 +113,23 @@ const toRadians = (degrees: number) => (degrees * Math.PI) / 180;
 const heading = (degrees: number): Point => [Math.cos(toRadians(degrees)), Math.sin(toRadians(degrees))];
 const reach = ([x, y]: Point, [dx, dy]: Point, distance: number): Point => [x + dx * distance, y + dy * distance];
 
+/** Where the pen arrives after travelling `distance` from `from` towards `angle` degrees. */
+export const landing = (from: Point, angle: number, distance: number): Point => reach(from, heading(angle), distance);
+
+/** A centreline through the given points: a start, then cubic triples. */
+export const curvePath = ([start, ...rest]: readonly Point[]): string =>
+  `M${formatPoint(start)} C${rest.map(formatPoint).join(' ')}`;
+
 /**
  * A plume: one sweep of the pen from `from`, travelling `length` towards
  * `angle` (degrees, 0 = right, 90 = down). It sets off leaning `lead` degrees
  * off course and lifts away by `curl` degrees at the tip, like a flame.
  */
 export function plumePath(from: Point, angle: number, length: number, lead: number, curl: number): string {
-  const tip = reach(from, heading(angle), length);
-  const first = reach(from, heading(angle + lead), length * 0.4);
-  const second = reach(tip, heading(angle + curl), -length * 0.32);
-  return `M${formatPoint(from)} C${[first, second, tip].map(formatPoint).join(' ')}`;
+  const tip = landing(from, angle, length);
+  const first = landing(from, angle + lead, length * 0.4);
+  const second = landing(tip, angle + curl, -length * 0.32);
+  return curvePath([from, first, second, tip]);
 }
 
 /**

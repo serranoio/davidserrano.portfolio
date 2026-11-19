@@ -135,6 +135,8 @@
   .portfolio-page .phoenix-path .phoenix-path__name { margin-inline: auto; }
   .portfolio-page .phoenix-path--hands .phoenix-path__name { --phoenix-kindle-x: 50%; }
   .phoenix-path--mind .phoenix-path__entries { grid-auto-flow: row; }
+  /* The words sit below the bird here, out of a thread's reach: only what is lodged in it stays. */
+  .phoenix-figure__reach { display: none; }
 }
 @media (max-width: 640px) {
   .about-composition { grid-template-columns: 1fr; }
