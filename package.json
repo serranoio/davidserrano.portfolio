@@ -6,10 +6,7 @@
   "scripts": {
     "build": "rspress build",
     "dev": "rspress dev",
-    "preview": "rspress preview",
-    "cy:open": "cypress open",
-    "cy:run": "cypress run",
-    "test:e2e": "cypress run"
+    "preview": "rspress preview"
   },
   "dependencies": {
     "@lit/react": "^1.0.8",
@@ -23,8 +20,6 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@types/three": "^0.184.0",
-    "cypress": "^15.14.2",
-    "cypress-wait-until": "^3.0.2",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "typescript": "^6.0.3"

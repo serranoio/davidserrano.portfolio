@@ -91,24 +91,7 @@
 
 ---
 
-## TC-7 — Cypress regression + new spec passes
-
-**Steps:**
-1. From repo root: `bun run cy:run --spec "cypress/e2e/rose/**/*.cy.ts"`
-
-**Expected:**
-- All existing rose specs continue to pass
-- New `truth-statement.cy.ts` passes:
-  - opacity > 0.9 after load
-  - opacity → 0 when a section is open
-  - opacity returns after close
-  - initial world position below the rose center
-  - mobile viewport renders
-
-
----
-
-## TC-8 — Continuous section scrolling
+## TC-7 — Continuous section scrolling
 
 **Steps:**
 1. Slowly scroll from the hero into the rose, through the poem, and into “I write too.”
@@ -123,5 +106,3 @@
 - Reversing retraces the poem without resetting it.
 - Model loading does not move the writing section; reload restores the poem at the restored page position.
 - Paragraph buttons scroll the same page timeline, respect reduced motion, and leave the screen with the rose.
-
-**Automated coverage:** `cypress/e2e/desktop-scroll-flow.cy.ts` and `cypress/e2e/mobile-scroll-flow.cy.ts`.

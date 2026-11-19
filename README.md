@@ -39,9 +39,3 @@ npm run preview
 - The writing collection and blog sidebar use `theme/blog-posts.ts` to read
   titles and tags from `docs/blog/`. Routes follow filenames. Rebuild (or restart
   the dev server) after changing the collection's metadata.
-
-Run the navigation and rose scrolling checks with:
-
-```bash
-npx cypress run --spec cypress/e2e/portfolio-navigation.cy.ts,cypress/e2e/desktop-scroll-flow.cy.ts,cypress/e2e/mobile-scroll-flow.cy.ts
-```

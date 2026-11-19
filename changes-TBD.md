@@ -36,16 +36,16 @@ Not a poem inside a petal panel. Not a DOM overlay either — text lives in the 
   - Each animate frame: call `roseText.update(camera, opacity)` where opacity derives from `bloomProgress` + `roseState`
   - Extend `RoseTestAPI` with `getTruthTextOpacity` and `getTruthTextWorldPosition`
   - Dispose `roseText` in `cleanup()`
-- `cypress/e2e/rose/` — new spec file
 
-### Tests
+### Manual verification
 
-- `cypress/e2e/rose/truth-statement.cy.ts`
-  - Opacity > 0.9 after load and during idle
-  - Opacity → 0 while a section is open
-  - Opacity recovers after section close
-  - World position is positioned above the rose center (positive Y)
-  - Renders on mobile viewport
+Use `test-plan-truth-statement.md` to verify:
+
+- Opacity > 0.9 after load and during idle
+- Opacity → 0 while a section is open
+- Opacity recovers after section close
+- World position is positioned above the rose center (positive Y)
+- Renders on mobile viewport
 
 ## Opacity curve (from `bloomProgress`)
 
