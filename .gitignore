@@ -1,17 +1,38 @@
-# Local
+# OS
 .DS_Store
-*.local
-*.log*
+Thumbs.db
 
-# Dist
-node_modules
+# Dependencies
+node_modules/
+
+# Build output and caches
 dist/
 doc_build/
+.rspress/
+.cache/
+*.tsbuildinfo
 
-# IDE
+# Logs
+*.log*
+
+# Local config and secrets
+*.local
+.env
+.env.*
+!.env.example
+
+# Claude Code: agent worktrees and per-machine settings
+.claude/worktrees/
+.claude/settings.local.json
+
+# Auto-generated agent feedback reports
+feedback_*.md
+
+# Editors
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
+*.swp
 
 # Blender autosave backups
 *.blend1
