@@ -28,16 +28,17 @@
 .portfolio-page__title-row { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
 .portfolio-page__title-row h1 { margin-bottom: 0; }
 .portfolio-page__inner:has(> .phoenix) { width: min(1180px, 90%); padding-top: clamp(1.5rem, 3vw, 2.5rem); }
-.phoenix { display: grid; grid-template-columns: 1fr minmax(0, 30rem) 1fr; grid-template-rows: auto auto auto; grid-template-areas: 'hands figure mind' 'hands figure heart' 'ground ground ground'; column-gap: clamp(1rem, 2.5vw, 2rem); align-items: center; }
+/* The side paths sit level with the heart, which is above the figure's middle. */
+.phoenix { --phoenix-heart-lift: clamp(3rem, 9vw, 7rem); display: grid; grid-template-columns: 1fr minmax(0, 26rem) 1fr; grid-template-areas: 'mind mind mind' 'hands figure heart' 'ground ground ground'; column-gap: clamp(1rem, 2.5vw, 2rem); align-items: center; }
 .phoenix__figure { grid-area: figure; align-self: start; }
 .phoenix-path { animation: phoenix-settle 0.9s ease both; }
-.phoenix-path--mind { grid-area: mind; align-self: start; padding-top: 1.5rem; animation-delay: 0.9s; }
-.phoenix-path--heart { grid-area: heart; align-self: start; padding-top: 2.5rem; animation-delay: 1.9s; }
-.phoenix-path--hands { grid-area: hands; align-self: start; padding-top: 22%; text-align: right; animation-delay: 1.5s; }
+.phoenix-path--mind { grid-area: mind; text-align: center; padding-bottom: 1rem; animation-delay: 0.9s; }
+.phoenix-path--heart { grid-area: heart; padding-bottom: var(--phoenix-heart-lift); animation-delay: 1.9s; }
+.phoenix-path--hands { grid-area: hands; padding-bottom: var(--phoenix-heart-lift); text-align: right; animation-delay: 1.5s; }
 .phoenix-path__verse { font-family: var(--font-title); font-style: italic; font-size: clamp(1.3rem, 2.2vw, 1.6rem); line-height: 1.35 !important; margin: 0 0 1rem; text-wrap: balance; }
 .portfolio-page .phoenix-path__name { font-family: var(--font-title); font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 400; letter-spacing: normal; text-transform: none; color: var(--color-text); margin: 0 0 1rem; }
 .phoenix-path__verse + .phoenix-path__entries { margin-top: 2rem; }
-.phoenix-path--mind .phoenix-path__entries { display: grid; gap: 1.25rem; }
+.phoenix-path--mind .phoenix-path__entries { display: grid; grid-auto-flow: column; justify-content: center; gap: 1.25rem 2.5rem; }
 .phoenix-path__entries { list-style: none; padding: 0; margin: 0; }
 .phoenix-path__entries a { display: inline-flex; align-items: center; gap: 0.75rem; min-height: 44px; color: var(--color-text); text-decoration: underline !important; text-decoration-color: var(--color-gold-primary) !important; text-underline-offset: 0.4em; }
 .phoenix-path__note-title { display: block; padding-top: 0.6rem; font-family: var(--font-title); font-size: 1.4rem; }
@@ -47,7 +48,7 @@
 .phoenix:has(.phoenix-path--mind:hover, .phoenix-path--mind:focus-within) .phoenix-figure__part--mind,
 .phoenix:has(.phoenix-path--heart:hover, .phoenix-path--heart:focus-within) .phoenix-figure__part--heart,
 .phoenix:has(.phoenix-path--hands:hover, .phoenix-path--hands:focus-within) .phoenix-figure__part--hands { opacity: 1; fill: var(--phoenix-ink-lit); }
-.phoenix:has(.phoenix-path--heart:hover, .phoenix-path--heart:focus-within) .phoenix-figure__glow { opacity: 0.6; }
+.phoenix:has(.phoenix-path--heart:hover, .phoenix-path--heart:focus-within) .phoenix-figure__halo { opacity: calc(var(--phoenix-halo-strength) * 1.6); }
 @keyframes phoenix-settle { from { opacity: 0; transform: translateY(0.4rem); } }
 @media (prefers-reduced-motion: reduce) { .phoenix-path, .phoenix__ground { animation: none; } }
 .portfolio-page__footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; margin-top: 5rem; padding-top: 1.5rem; border-top: 1px solid var(--rp-c-divider); font-size: 0.875rem; color: var(--color-text-muted); }
@@ -70,6 +71,7 @@
   .phoenix { grid-template-columns: 1fr; grid-template-areas: 'figure' 'mind' 'heart' 'hands' 'ground'; row-gap: 2.5rem; }
   .phoenix__figure { width: min(19rem, 82%); margin-inline: auto; }
   .phoenix-path--mind, .phoenix-path--heart, .phoenix-path--hands { text-align: center; padding-block: 0; }
+  .phoenix-path--mind .phoenix-path__entries { grid-auto-flow: row; }
 }
 @media (max-width: 640px) {
   .about-composition { grid-template-columns: 1fr; }

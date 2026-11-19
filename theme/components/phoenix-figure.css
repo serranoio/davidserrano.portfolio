@@ -1,18 +1,44 @@
-.phoenix-figure { display: block; width: 100%; height: auto; overflow: visible; --phoenix-ink: var(--color-gold-primary); --phoenix-ink-lit: var(--color-gold-dark); }
-.dark .phoenix-figure { --phoenix-ink-lit: var(--color-gold-light); }
+.phoenix-figure {
+  --phoenix-ink-lit: var(--color-gold-dark);
+  --phoenix-ember: #d8501c;
+  --phoenix-ember-core: #ffd9a3;
+  --phoenix-ink-hot: color-mix(in srgb, var(--phoenix-ember) 62%, var(--color-gold-dark));
+  --phoenix-ink-warm: var(--color-gold-primary);
+  --phoenix-ink-cool: var(--color-gold-primary);
+  --phoenix-halo-strength: 0.42;
+  display: block; width: 100%; height: auto; overflow: visible;
+}
+.dark .phoenix-figure {
+  --phoenix-ink-lit: var(--color-gold-light);
+  --phoenix-ember: #ff6a1f;
+  --phoenix-ember-core: #fff3cf;
+  --phoenix-ink-hot: color-mix(in srgb, var(--phoenix-ember) 55%, var(--color-gold-light));
+  --phoenix-halo-strength: 1;
+}
+.phoenix-figure__ink-hot { stop-color: var(--phoenix-ink-hot); }
+.phoenix-figure__ink-warm { stop-color: var(--phoenix-ink-warm); }
+.phoenix-figure__ink-cool { stop-color: var(--phoenix-ink-cool); }
+.phoenix-figure__halo-stop, .phoenix-figure__coal-edge { stop-color: var(--phoenix-ember); }
+.phoenix-figure__coal-core { stop-color: var(--phoenix-ember-core); }
 
-.phoenix-figure__part { fill: var(--phoenix-ink); transition: fill 0.4s ease, opacity 0.4s ease; }
+.phoenix-figure__part { fill: url(#phoenix-ink); transition: fill 0.4s ease, opacity 0.4s ease; }
 /* Everything rests fully drawn; the animations only describe how it arrives. */
 .phoenix-figure__pen { fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 2; animation: phoenix-write var(--pen-duration) cubic-bezier(0.45, 0.05, 0.3, 1) var(--pen-delay) backwards; }
 .phoenix-figure__eye { animation: phoenix-appear 0.3s ease 1s backwards; }
-.phoenix-figure__ember { fill: var(--phoenix-ink-lit); transform-origin: 150px 170px; transform-box: view-box; animation: phoenix-spark 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) backwards; transition: fill 0.4s ease; }
-.phoenix-figure__glow { fill: var(--color-gold-primary); opacity: 0.3; filter: blur(7px); animation: phoenix-appear 1.2s ease 0.1s backwards; transition: opacity 0.4s ease; }
+/* The ember: lit first, then it breathes. */
+.phoenix-figure__ember, .phoenix-figure__halo { transform-box: fill-box; transform-origin: center; }
+.phoenix-figure__ember { filter: drop-shadow(0 0 3px var(--phoenix-ember)); animation: phoenix-ignite 0.55s cubic-bezier(0.2, 1.6, 0.4, 1) backwards, phoenix-breathe 4.6s ease-in-out 0.6s infinite alternate; }
+.dark .phoenix-figure__ember { filter: drop-shadow(0 0 5px var(--phoenix-ember)) drop-shadow(0 0 12px var(--phoenix-ember)); }
+.phoenix-figure__halo { opacity: var(--phoenix-halo-strength); transition: opacity 0.4s ease; animation: phoenix-ignite 0.9s ease-out backwards, phoenix-glow 4.6s ease-in-out 0.9s infinite alternate; }
+.dark .phoenix-figure__halo { mix-blend-mode: screen; }
 
 @keyframes phoenix-write { from { stroke-dashoffset: 1; } }
 @keyframes phoenix-appear { from { opacity: 0; } }
-@keyframes phoenix-spark { from { transform: scale(0); opacity: 0; } 60% { transform: scale(1.5); opacity: 1; } }
+@keyframes phoenix-ignite { from { transform: scale(0); opacity: 0; } }
+@keyframes phoenix-breathe { to { transform: scale(1.16); } }
+@keyframes phoenix-glow { to { transform: scale(1.22); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .phoenix-figure__pen, .phoenix-figure__eye, .phoenix-figure__ember, .phoenix-figure__glow { animation: none; }
-  .phoenix-figure__part, .phoenix-figure__ember, .phoenix-figure__glow { transition: none; }
+  .phoenix-figure__pen, .phoenix-figure__eye, .phoenix-figure__ember, .phoenix-figure__halo { animation: none; }
+  .phoenix-figure__part, .phoenix-figure__halo { transition: none; }
 }
