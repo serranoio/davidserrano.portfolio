@@ -6,6 +6,8 @@ import './components/golden-rose';
 import './components/writing-section';
 import './components/music-player';
 import { createElement, useEffect } from 'react';
+import { Layout as OriginalLayout, type LayoutProps } from '@rspress/core/theme-original';
+import { useSocialPreviewHead } from './social-preview-head';
 
 // Music player lives at the body level so it survives rspress page nav and
 // keeps playing across routes. Mount exactly one instance.
@@ -24,6 +26,12 @@ if (typeof document !== 'undefined') {
 
 // Re-export everything from the original theme
 export * from '@rspress/core/theme-original';
+
+// Every page's head gets its link preview tags (social-preview.ts).
+export function Layout(props: LayoutProps) {
+  useSocialPreviewHead();
+  return createElement(OriginalLayout, props);
+}
 
 // Home page composes top-level sections vertically. Each section is its
 // own Lit element so they can own their own DOM, lifecycle, and styles

@@ -50,7 +50,9 @@ const CAPTURE_CSS = `
   .portfolio-page .arcana-card__headline { flex-direction: column; align-items: flex-start; align-self: end; }
   .arcana-card__headline-value { font-size: 76px; }
   .arcana-card__headline-label { font-size: 17px; }
-  .arcana-card__video { grid-column: 2; grid-row: 3 / span 3; align-self: end; }
+  .arcana-card .arcana-video { grid-column: 2; grid-row: 3 / span 3; align-self: end; }
+  /* A still image cannot be played: no play button over the poster. */
+  .arcana-video .arcana-video__play { display: none !important; }
   .arcana-card__footer { justify-content: flex-start; }
   .arcana-card__spiral { width: 52%; top: -30%; right: -10%; }
 `;
