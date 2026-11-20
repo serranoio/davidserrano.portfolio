@@ -12,7 +12,6 @@ export default defineConfig({
     nav: [
       { text: 'Engineering', link: '/engineering' },
       { text: 'Writing', link: '/writing', activeMatch: '^/(writing(?:\\.html)?$|blog/)' },
-      { text: 'About', link: '/about' },
     ],
     socialLinks: [
       {

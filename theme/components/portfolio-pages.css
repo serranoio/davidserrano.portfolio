@@ -21,8 +21,6 @@
 .portfolio-page a { text-decoration: none; }
 .portfolio-page a:focus-visible, .portfolio-page button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 5px; }
 .portfolio-page a:hover { color: var(--color-primary); }
-.portfolio-links { display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; }
-.portfolio-links a, .portfolio-text-link { display: inline-flex; align-items: center; gap: 1rem; min-height: 44px; color: var(--color-text); text-decoration: underline !important; text-decoration-color: var(--color-gold-primary) !important; text-underline-offset: 0.4em; }
 .portfolio-page__title-row { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
 .portfolio-page__title-row h1 { margin-bottom: 0; }
 .portfolio-page__inner:has(> .phoenix) { width: min(1180px, 90%); padding-top: clamp(1.5rem, 3vw, 2.5rem); }
@@ -134,9 +132,6 @@
 .writing-list a { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding: 1.5rem 0; color: var(--color-text); }
 .writing-list__title { display: block; font-family: var(--font-title); font-size: clamp(1.6rem, 3vw, 2rem); line-height: 1.2; }
 .writing-list__topics { display: block; margin-top: 0.5rem; font-size: 0.8rem; color: var(--color-text-muted); }
-.about-composition { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: clamp(2rem, 6vw, 5rem); align-items: start; margin-top: 3rem; margin-bottom: 3rem; }
-.about-composition img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: center 30%; }
-.about-story p { color: var(--color-text-muted); margin: 0 0 1.25rem; }
 @media (max-width: 768px) {
   .phoenix { grid-template-columns: 1fr; grid-template-areas: 'figure' 'mind' 'heart' 'hands' 'ground'; row-gap: 2.5rem; }
   .phoenix__figure { width: min(19rem, 82%); margin-inline: auto; }
@@ -149,7 +144,5 @@
   .phoenix-figure__reach { display: none; }
 }
 @media (max-width: 640px) {
-  .about-composition { grid-template-columns: 1fr; }
-  .about-composition img { max-width: 16rem; }
   .portfolio-page__footer { margin-top: 3rem; }
 }

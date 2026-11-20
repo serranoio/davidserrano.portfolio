@@ -31,7 +31,7 @@ npm run preview
 ## Portfolio content
 
 - The homepage introduction lives in `theme/components/welcome-section.ts`.
-- Engineering, Writing, and About have entry pages in `docs/` and layouts in
+- Engineering and Writing have entry pages in `docs/` and layouts in
   `theme/components/portfolio-pages.tsx`.
 - Add experience, a résumé URL, and a contact URL in
   `theme/engineering-profile.ts`. Unfilled fields stay hidden. Add future

@@ -190,30 +190,3 @@ export function WritingPage() {
     </PortfolioPage>
   );
 }
-
-export function AboutPage() {
-  return (
-    <PortfolioPage eyebrow="About David" title="One life. Many ways to create."
-      introduction="I write code, dance bachata, and write poems. Each is a way of discovering beauty — in what I build, in what I feel, and in the people I share it with.">
-      <div className="about-composition">
-        <img src="/img/david-hero.jpg" alt="David near the Golden Gate Bridge" width="400" height="500" />
-        <section className="about-story" aria-labelledby="purpose-heading">
-          <h2 id="purpose-heading">Your life is art.</h2>
-          <p>Where every step is another brushstroke you paint. Your heart is an
-            endless paintbucket. It has the potential to radiate colors in every
-            facet of your life.</p>
-          <p>I'm here to help you discover this source of life, or rather, return
-            to this oasis that already exists inside of you.</p>
-          <p>The good steps, the bad steps, and everything in between all belong
-            in the picture. This site is a place for the different parts of my life
-            to meet.</p>
-          <a className="portfolio-text-link" href="/blog/about-the-founder.html">Read my story <span aria-hidden="true">↗</span></a>
-        </section>
-      </div>
-      <nav className="portfolio-links" aria-label="More of my life">
-        <a href="/engineering.html">Explore my engineering <span aria-hidden="true">↗</span></a>
-        <a href="/writing.html">Read my writing <span aria-hidden="true">↗</span></a>
-      </nav>
-    </PortfolioPage>
-  );
-}
