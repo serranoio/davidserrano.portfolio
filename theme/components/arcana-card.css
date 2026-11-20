@@ -166,3 +166,41 @@ html:has(.arcana-card-section) { scroll-behavior: smooth; }
   .portfolio-page a.arcana-card, .arcana-card__open > span { transition: none; }
   .arcana-card__live > span { animation: none; }
 }
+
+/* The demo recording and its play button, shared by this card and /house-of-arcana. The button shows whenever the
+ * recording is not playing (reduced motion, refused autoplay), so a visitor is never left on the poster. */
+.arcana-video { position: relative; }
+.arcana-video .arcana-video__play {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.6875rem 1.3125rem 0.6875rem 1rem;
+  border: 1px solid var(--arcana-green);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--arcana-canvas) 82%, transparent);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: var(--arcana-text);
+  font-family: var(--arcana-font-brand);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 12px 32px -16px color-mix(in srgb, var(--arcana-green) 70%, transparent);
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+.arcana-video__play svg { width: 1.25rem; height: 1.25rem; fill: var(--arcana-green); }
+.arcana-video .arcana-video__play:hover {
+  background: color-mix(in srgb, var(--arcana-canvas) 92%, transparent);
+  box-shadow: 0 16px 40px -14px color-mix(in srgb, var(--arcana-green) 90%, transparent);
+}
+.arcana-video .arcana-video__play:focus-visible { outline: 2px solid var(--arcana-accent); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .arcana-video .arcana-video__play { transition: none; }
+}

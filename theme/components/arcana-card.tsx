@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { arcanaDemo } from '../arcana-demo';
 import './arcana-fonts.css';
 import './arcana-spiral';
@@ -7,17 +7,94 @@ import './arcana-card.css';
 
 const percent = new Intl.NumberFormat('en-US', { style: 'percent', minimumFractionDigits: 2, maximumFractionDigits: 2, signDisplay: 'exceptZero' });
 
-/** The demo recording. It plays muted and looping unless the visitor prefers stillness, then rests on its poster. */
+/** How long an autoplay attempt may stay silent before the visitor is offered the play button instead. */
+const AUTOPLAY_GRACE_MS = 2500;
+
+/**
+ * The demo recording, muted and looping. It autoplays unless the visitor prefers stillness. Whenever it is not
+ * playing — reduced motion, autoplay refused (iOS Low Power Mode, data saver) or still loading past the grace
+ * period — a play button over the poster starts it, since a tap always permits playback. Offscreen, it pauses.
+ */
 export function ArcanaDemoVideo({ className }: { className?: string }) {
   const video = useRef<HTMLVideoElement>(null);
+  // Whether the recording should be running: autoplay was allowed, or the visitor pressed play.
+  const wanted = useRef(false);
+  const [playing, setPlaying] = useState(false);
+  // Until the autoplay attempt settles, the poster rests without a button, so an autoplaying video never flashes one.
+  const [settling, setSettling] = useState(true);
+
+  const start = (element: HTMLVideoElement) => {
+    // iOS only plays inline without a gesture when these are set as properties, not merely as React props.
+    element.muted = true;
+    element.defaultMuted = true;
+    element.playsInline = true;
+    element.setAttribute('muted', '');
+    element.setAttribute('playsinline', '');
+    element.setAttribute('webkit-playsinline', '');
+    const grace = window.setTimeout(() => setSettling(false), AUTOPLAY_GRACE_MS);
+    setSettling(true);
+    element.play().then(
+      () => window.clearTimeout(grace),
+      () => {
+        window.clearTimeout(grace);
+        setSettling(false);
+      },
+    );
+  };
+
   useEffect(() => {
-    if (!prefersStillness()) void video.current?.play().catch(() => undefined);
+    const element = video.current;
+    if (!element) return;
+    const onPlaying = () => {
+      setPlaying(true);
+      setSettling(false);
+    };
+    const onPause = () => setPlaying(false);
+    element.addEventListener('playing', onPlaying);
+    element.addEventListener('pause', onPause);
+
+    // No autoplay attribute: it would start the recording before this check, and offscreen.
+    if (prefersStillness()) setSettling(false);
+    else wanted.current = true;
+
+    // On screen, the recording runs if it is meant to (autoplay starts here); offscreen, it rests to save battery.
+    const watcher = new IntersectionObserver(([entry]) => {
+      if (!entry) return;
+      if (!entry.isIntersecting) {
+        if (!element.paused) element.pause();
+      } else if (wanted.current && element.paused) start(element);
+    });
+    watcher.observe(element);
+
+    return () => {
+      watcher.disconnect();
+      element.removeEventListener('playing', onPlaying);
+      element.removeEventListener('pause', onPause);
+    };
   }, []);
+
+  const onPlay = (event: MouseEvent<HTMLButtonElement>) => {
+    // On the Engineering card the video sits inside the card's link: this control plays, it does not navigate.
+    event.preventDefault();
+    event.stopPropagation();
+    if (!video.current) return;
+    wanted.current = true;
+    start(video.current);
+  };
+
   return (
-    <video ref={video} className={className} muted loop playsInline preload="metadata"
-      poster={arcanaDemo.video.poster} aria-label={`Arcana replaying a trading backtest on ${arcanaDemo.market}`}>
-      <source src={arcanaDemo.video.mp4} type="video/mp4" />
-    </video>
+    <div className="arcana-video">
+      <video ref={video} className={className} muted loop playsInline preload="metadata"
+        poster={arcanaDemo.video.poster} aria-label={`Arcana replaying a trading backtest on ${arcanaDemo.market}`}>
+        <source src={arcanaDemo.video.mp4} type="video/mp4" />
+      </video>
+      {!playing && !settling && (
+        <button type="button" className="arcana-video__play" onClick={onPlay} aria-label="Play the demo replay">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z" /></svg>
+          <span aria-hidden="true">Play replay</span>
+        </button>
+      )}
+    </div>
   );
 }
 
