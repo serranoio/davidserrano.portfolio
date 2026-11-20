@@ -33,6 +33,17 @@ export default defineConfig({
     },
   },
   builderConfig: {
+    html: {
+      tags: [
+        // Default to the dark theme. Rspress otherwise falls back to the OS
+        // setting; a visitor's own toggle choice is stored and still wins.
+        {
+          tag: 'script',
+          children: `{const k='rspress-theme-appearance';if(!localStorage.getItem(k)){localStorage.setItem(k,'dark');const r=document.documentElement;r.classList.add('dark','rp-dark');r.style.colorScheme='dark';}}`,
+          append: false,
+        },
+      ],
+    },
     source: {
       define: {
         __WRITING_CATALOG__: JSON.stringify({
