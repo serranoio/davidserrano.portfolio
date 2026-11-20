@@ -1,0 +1,168 @@
+/*
+ * The House of Arcana as an exchange market card, in Arcana's own dress: night surface, Quantico lockup, the
+ * homepage spiral, then an exchange card's anatomy — a headline number, the replay and a solid call to action. Tokens: theme/index.css (--arcana-*); fonts: arcana-fonts.css.
+ */
+.arcana-card-section {
+  margin-top: clamp(3rem, 7vw, 5rem);
+  display: flex;
+  justify-content: center;
+  scroll-margin-top: calc(var(--rp-nav-height, 64px) + 1.5rem);
+}
+html:has(.arcana-card-section) { scroll-behavior: smooth; }
+
+.portfolio-page a.arcana-card {
+  --arcana-card-lift: 0;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  gap: 1.3125rem;
+  width: min(100%, 46rem);
+  padding: clamp(1.3125rem, 4vw, 2.125rem);
+  border: 1px solid var(--arcana-border-strong);
+  border-radius: 0.75rem;
+  background:
+    radial-gradient(120% 80% at 100% 0%, color-mix(in srgb, var(--arcana-green) 14%, transparent), transparent 60%),
+    var(--arcana-canvas);
+  color: var(--arcana-text);
+  font-family: var(--arcana-font-ui);
+  text-decoration: none;
+  box-shadow: 0 1px 0 var(--arcana-border) inset, 0 24px 60px -32px color-mix(in srgb, var(--arcana-green) 45%, transparent);
+  transform: translateY(calc(var(--arcana-card-lift) * -4px));
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.portfolio-page a.arcana-card:is(:hover, :focus-visible) {
+  --arcana-card-lift: 1;
+  color: var(--arcana-text);
+  border-color: var(--arcana-green);
+  box-shadow: 0 1px 0 var(--arcana-border) inset, 0 32px 80px -28px color-mix(in srgb, var(--arcana-green) 70%, transparent);
+}
+.portfolio-page a.arcana-card:focus-visible { outline: 2px solid var(--arcana-accent); outline-offset: 4px; }
+.arcana-card > :not(.arcana-card__spiral) { position: relative; z-index: 1; }
+
+/* The homepage spiral, bleeding off the top-right corner behind the lockup. */
+.arcana-card__spiral {
+  position: absolute;
+  z-index: 0;
+  top: -18%;
+  right: -16%;
+  width: 72%;
+  aspect-ratio: 5 / 4;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.arcana-card__header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.arcana-card__ticker {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--arcana-border-strong);
+  border-radius: 0.25rem;
+  background: var(--arcana-canvas-raised);
+  font-family: var(--arcana-font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.arcana-card__live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--arcana-font-brand);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--arcana-green);
+}
+.arcana-card__live > span {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--arcana-green);
+  box-shadow: 0 0 0 0 var(--arcana-green);
+  animation: arcana-card-pulse 1.8s ease-out infinite;
+}
+
+/* The lockup, as on Arcana's homepage. */
+.portfolio-page .arcana-card__title {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+  font-family: var(--arcana-font-brand);
+  font-style: italic;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.arcana-card__title-lead { font-size: clamp(0.875rem, 2.2vw, 1.0625rem); letter-spacing: 0.21em; color: var(--arcana-text-muted); }
+.arcana-card__title-mark {
+  width: fit-content;
+  padding-inline-end: 0.75rem;
+  font-size: clamp(2.75rem, 9vw, 4.75rem);
+  letter-spacing: 0.08em;
+  background: linear-gradient(to right, var(--arcana-text), var(--arcana-accent) 55%, var(--arcana-green));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.portfolio-page .arcana-card__tagline {
+  margin: -0.5rem 0 0;
+  font-family: var(--arcana-font-brand);
+  font-size: 0.8125rem;
+  letter-spacing: 0.21em;
+  text-transform: uppercase;
+  color: var(--arcana-text-subtle);
+}
+
+/* The headline number: the featured hypothesis's net return, big. */
+.portfolio-page .arcana-card__headline { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.25rem 0.8125rem; margin: 0; }
+.arcana-card__headline-value {
+  font-family: var(--arcana-font-brand);
+  font-size: clamp(2.5rem, 8vw, 3.75rem);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.arcana-card__headline-label { font-size: 0.875rem; color: var(--arcana-text-muted); }
+[data-direction='yes'].arcana-card__headline-value { color: var(--arcana-green); text-shadow: 0 0 32px color-mix(in srgb, var(--arcana-green) 45%, transparent); }
+[data-direction='no'].arcana-card__headline-value { color: var(--arcana-red); }
+
+.arcana-card__video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border: 1px solid var(--arcana-border-strong);
+  border-radius: 0.5rem;
+  background: var(--arcana-canvas-raised);
+}
+
+.arcana-card__footer { display: flex; justify-content: flex-end; }
+.arcana-card__open {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6875rem 1.3125rem;
+  border-radius: 0.5rem;
+  background: var(--arcana-green);
+  color: var(--arcana-canvas);
+  font-family: var(--arcana-font-brand);
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.arcana-card__open > span { display: inline-block; transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.arcana-card:is(:hover, :focus-visible) .arcana-card__open > span { transform: translateX(0.3rem); }
+
+@keyframes arcana-card-pulse {
+  70% { box-shadow: 0 0 0 0.5rem transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+@media (max-width: 480px) {
+  .arcana-card__spiral { width: 95%; top: -10%; right: -30%; opacity: 0.6; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html:has(.arcana-card-section) { scroll-behavior: auto; }
+  .portfolio-page a.arcana-card, .arcana-card__open > span { transition: none; }
+  .arcana-card__live > span { animation: none; }
+}

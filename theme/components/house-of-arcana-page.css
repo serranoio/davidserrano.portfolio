@@ -1,0 +1,157 @@
+/* The House of Arcana page wears the platform's own design system. Every rule is scoped to
+   this page (.arcana-page, or the shared page chrome that holds it); tokens: theme/index.css. */
+
+.portfolio-page:has(.arcana-page) { position: relative; overflow-x: clip; background: var(--arcana-canvas); color: var(--arcana-text); }
+.arcana-page {
+  font-family: var(--arcana-font-ui);
+  color: var(--arcana-text);
+  /* One passing light for every glyph that catches it. */
+  --arcana-shine-pass: arcana-shine 9s cubic-bezier(0.2, 0, 0, 1) 1.6s infinite;
+}
+.arcana-page > :not(.arcana-page__spiral) { position: relative; z-index: 1; }
+
+/* The spiral: decorative, behind the hero. It fills the page's top-right 42.5% (of the page width), set in from the
+   corner by that width over φ⁵ (≈ 0.09), the golden ratio's fifth power, on both edges. Anchored to the full-width
+   page, not the content column. */
+.arcana-page__spiral {
+  --arcana-spiral-size: 42.5vw;
+  --arcana-spiral-inset: calc(var(--arcana-spiral-size) * 0.09);
+  position: absolute;
+  z-index: 0;
+  top: var(--arcana-spiral-inset);
+  right: var(--arcana-spiral-inset);
+  width: var(--arcana-spiral-size);
+  aspect-ratio: 5 / 4;
+  pointer-events: none;
+}
+
+/* Hero: the Arcana homepage lockup. */
+.arcana-page__hero { max-width: 46rem; margin-bottom: clamp(2.5rem, 6vw, 4rem); }
+.portfolio-page .arcana-page__eyebrow,
+.arcana-page__tabs button,
+.arcana-page .arcana-speed h2 {
+  font-family: var(--arcana-font-brand);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.portfolio-page .arcana-page__eyebrow { margin: 0 0 1.3125rem; font-size: 0.75rem; color: var(--arcana-text-subtle); }
+.portfolio-page .arcana-page__title,
+.portfolio-page .arcana-page__tagline {
+  font-family: var(--arcana-font-brand);
+  font-style: italic;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.portfolio-page .arcana-page__title { display: grid; justify-items: start; gap: 0.5rem; margin: 0 0 1.3125rem; letter-spacing: normal; line-height: 1; }
+.arcana-page__title-lead,
+.portfolio-page .arcana-page__tagline {
+  font-size: clamp(1.1rem, 3vw, 1.6875rem);
+  line-height: 1.875rem;
+  letter-spacing: 0.21em;
+}
+.arcana-page__title-lead { padding-inline-start: 0.3125rem; color: var(--arcana-text); }
+/* The mark, the tagline and the venue share one shine: a light band above each one's own base, clipped to the glyphs. */
+.arcana-page__title-mark,
+.portfolio-page .arcana-page__tagline,
+.arcana-page__venue {
+  background:
+    linear-gradient(105deg, transparent 47%, var(--arcana-shine) 50%, transparent 53%) 100% 0 / 250% 100% no-repeat,
+    var(--arcana-shine-base);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: var(--arcana-shine-pass);
+}
+.arcana-page__title-mark {
+  --arcana-shine-base: linear-gradient(to right, var(--arcana-text), var(--arcana-accent) 60%, var(--arcana-green));
+  font-size: clamp(3.25rem, 12vw, 8.5rem);
+  line-height: 0.85;
+  letter-spacing: 0.08em;
+  /* The italic's last glyph leans past its box; pad it back in so the clipped gradient does not cut it. */
+  padding-inline-end: 1.3125rem;
+}
+.portfolio-page .arcana-page__tagline { --arcana-shine-base: linear-gradient(var(--arcana-text-muted), var(--arcana-text-muted)); margin: 0 0 1.3125rem; }
+.arcana-page__venue { --arcana-shine-base: linear-gradient(to right, var(--arcana-text), var(--arcana-accent) 30%, var(--arcana-green) 60%); }
+.portfolio-page .arcana-page__introduction { max-width: 36rem; margin: 0; font-size: 1.0625rem; line-height: 1.75; color: var(--arcana-text-muted); }
+@keyframes arcana-shine {
+  from { background-position: 100% 0, 0 0; }
+  36%, to { background-position: 0% 0, 0 0; }
+}
+
+/* Demo: a hairline panel on the raised canvas. */
+.arcana-page__demo { margin: 0 0 clamp(2.5rem, 6vw, 3.5rem); }
+.arcana-page__video {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--arcana-border);
+  border-radius: 0.25rem;
+  background: var(--arcana-canvas-raised);
+}
+.portfolio-page .arcana-page__caption { max-width: 42rem; margin-top: 0.8125rem; font-size: 0.875rem; line-height: 1.6; font-style: italic; color: var(--arcana-text-subtle); }
+
+/* Tabs: Arcana's page tabs — muted until selected, then accent with an accent rule. */
+.arcana-page__tabs { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--arcana-border); }
+.arcana-page__tabs button {
+  min-height: 44px;
+  padding: 0.3125rem 0.8125rem;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: transparent;
+  color: var(--arcana-text-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+.arcana-page__tabs button:hover { color: var(--arcana-text); background: var(--arcana-surface); }
+.arcana-page__tabs button[aria-selected='true'] { color: var(--arcana-accent); background: transparent; border-bottom-color: var(--arcana-accent); }
+.portfolio-page .arcana-page__tabs button:focus-visible,
+.arcana-page__section:focus-visible { outline: 2px solid var(--arcana-accent); outline-offset: 2px; }
+
+/* Panels: solid, hairline-bordered, on the raised canvas. */
+.arcana-page__section {
+  margin-top: 1.3125rem;
+  padding: clamp(1.3125rem, 4vw, 2.125rem);
+  border: 1px solid var(--arcana-border);
+  border-radius: 0.25rem;
+  background: var(--arcana-canvas-raised);
+}
+.portfolio-page .arcana-page__section p { max-width: 42rem; margin: 0; color: var(--arcana-text-muted); }
+.portfolio-page .arcana-page__section p + p, .portfolio-page .arcana-page__steps + p { margin-top: 1.3125rem; }
+.arcana-page__section em { color: var(--arcana-text); font-style: normal; font-family: var(--arcana-font-mono); font-size: 0.875em; }
+.arcana-page__steps { counter-reset: arcana-step; max-width: 42rem; margin: 0; padding: 0; list-style: none; color: var(--arcana-text-muted); }
+.arcana-page__steps li {
+  counter-increment: arcana-step;
+  position: relative;
+  padding: 0.8125rem 0 0.8125rem 2.125rem;
+  border-bottom: 1px solid var(--arcana-border);
+  line-height: 1.6;
+}
+.arcana-page__steps li:first-child { padding-top: 0; }
+.arcana-page__steps li:first-child::before { top: 0; }
+.arcana-page__steps li::before { position: absolute; left: 0; top: 0.8125rem; content: counter(arcana-step, decimal-leading-zero); font-family: var(--arcana-font-mono); font-size: 0.75rem; line-height: 1.6rem; color: var(--arcana-green); }
+.arcana-page__steps strong { color: var(--arcana-text); font-weight: 500; }
+.portfolio-page .arcana-page__placeholder { font-family: var(--arcana-font-brand); font-style: italic; font-size: 1.25rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--arcana-text-subtle); }
+.arcana-page .arcana-speed { margin-top: 2.125rem; }
+.portfolio-page .arcana-page .arcana-speed h2 { margin: 0 0 1.3125rem; font-size: 0.8125rem; line-height: 1rem; color: var(--arcana-text-subtle); }
+
+/* The shared footer, in this page's voice. */
+.portfolio-page:has(.arcana-page) .portfolio-page__footer {
+  border-top-color: var(--arcana-border);
+  font-family: var(--arcana-font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  color: var(--arcana-text-subtle);
+}
+.portfolio-page:has(.arcana-page) .portfolio-page__footer a:hover { color: var(--arcana-accent); }
+.portfolio-page:has(.arcana-page) .portfolio-page__footer a:focus-visible { outline-color: var(--arcana-accent); }
+
+@media (max-width: 640px) {
+  .arcana-page__spiral { --arcana-spiral-size: 80vw; opacity: 0.7; }
+  .arcana-page__tabs button { padding-inline: 0.5rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arcana-page__title-mark, .portfolio-page .arcana-page__tagline, .arcana-page__venue { animation: none; background-position: 0 0, 0 0; }
+  .arcana-page__tabs button { transition: none; }
+}

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type Ref } from 'react';
 import type { BlogPost, BlogTag } from '../blog-posts';
 import { engineeringProfile, type PhoenixPath, type PhoenixPathId } from '../engineering-profile';
-import { ArcanaSpeed } from './arcana-speed';
+import { ArcanaCard } from './arcana-card';
 import { PHOENIX_WRITTEN_AT, type PhoenixPoint } from './phoenix-drawing';
 import { PhoenixCoal } from './phoenix-ember';
 import { PhoenixFigure } from './phoenix-figure';
@@ -16,7 +16,7 @@ declare const __WRITING_CATALOG__: {
 const writingCatalog = __WRITING_CATALOG__;
 const WRITING_TAG_PARAM = 'tag';
 
-function PortfolioPage({ eyebrow, title, introduction, children }: {
+export function PortfolioPage({ eyebrow, title, introduction, children }: {
   eyebrow?: string;
   title?: string;
   introduction?: string;
@@ -71,7 +71,10 @@ function PhoenixPathSection({ path, kindling, caught, ref }: {
       <ul className="phoenix-path__entries">
         {path.links.map((link) => (
           <li key={link.href}>
-            <a href={link.href}>{link.title}{'\u00a0'}<span aria-hidden="true">→</span></a>
+            {/* A link to this page's own section points down to it; the rest lead away. */}
+            <a href={link.href} data-in-page={link.href.startsWith('#') || undefined}>
+              {link.title}{'\u00a0'}<span aria-hidden="true">{link.href.startsWith('#') ? '↓' : '→'}</span>
+            </a>
           </li>
         ))}
         {path.notes.map((note) => (
@@ -142,7 +145,7 @@ export function EngineeringPage() {
         <p className="phoenix__ground">{profile.groundingLine}</p>
         <PhoenixSparks ref={sparks} />
       </div>
-      <ArcanaSpeed />
+      <ArcanaCard />
     </PortfolioPage>
   );
 }

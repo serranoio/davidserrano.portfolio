@@ -1,0 +1,107 @@
+/* The engineering loop: a drawing whose nodes are the layer tabs, then the selected layer. Arcana tokens only. */
+.portfolio-page .arcana-layers__lead { margin: 0 0 1.3125rem; }
+
+.arcana-layers__diagram { position: relative; aspect-ratio: 640 / 340; max-width: 46rem; margin: 0 auto 1.3125rem; }
+.arcana-layers__edges { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.arcana-layers__edges marker path { fill: var(--arcana-border-strong); }
+.arcana-layers__edge path { fill: none; stroke: var(--arcana-border-strong); stroke-width: 1.5; transition: stroke 0.2s ease; }
+.arcana-layers__edge text {
+  font-family: var(--arcana-font-mono);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  fill: var(--arcana-text-subtle);
+  paint-order: stroke;
+  stroke: var(--arcana-canvas-raised);
+  stroke-width: 6px;
+  transition: fill 0.2s ease;
+}
+.arcana-layers__edge[data-lit] path { stroke: var(--arcana-green); }
+.arcana-layers__edge[data-lit] text { fill: var(--arcana-accent); }
+
+.arcana-layers__nodes { position: absolute; inset: 0; }
+.arcana-layers__node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  min-width: 9.5rem;
+  justify-content: center;
+  padding: 0.8125rem 1.3125rem;
+  border: 1px solid var(--arcana-border-strong);
+  border-radius: 0.25rem;
+  background: var(--arcana-canvas);
+  color: var(--arcana-text-muted);
+  font-family: var(--arcana-font-brand);
+  font-size: 0.9375rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+.arcana-layers__node:hover { color: var(--arcana-text); background: var(--arcana-surface); }
+.arcana-layers__node[aria-selected='true'] { color: var(--arcana-accent); border-color: var(--arcana-green); }
+.arcana-layers__node:focus-visible { outline: 2px solid var(--arcana-accent); outline-offset: 3px; }
+.arcana-layers__index { font-family: var(--arcana-font-mono); font-size: 0.6875rem; color: var(--arcana-green); }
+.arcana-layers__steps { display: none; }
+
+.arcana-layers__panel { padding-top: 1.3125rem; border-top: 1px solid var(--arcana-border); }
+.arcana-layers__panel:focus-visible { outline: 2px solid var(--arcana-accent); outline-offset: 4px; }
+.portfolio-page .arcana-layers__name {
+  margin: 0;
+  font-family: var(--arcana-font-brand);
+  font-size: 1.125rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--arcana-text);
+}
+.portfolio-page .arcana-layers__purpose { margin: 0.3125rem 0 1.3125rem; color: var(--arcana-text-muted); }
+.arcana-layers__groups { display: grid; gap: 0; margin: 0; }
+.arcana-layers__groups > div {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr;
+  gap: 1.3125rem;
+  padding: 0.8125rem 0;
+  border-bottom: 1px solid var(--arcana-border);
+}
+.arcana-layers__groups dt {
+  font-family: var(--arcana-font-mono);
+  font-size: 0.75rem;
+  line-height: 1.6rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--arcana-green);
+}
+.arcana-layers__groups dd { margin: 0; }
+.arcana-layers__groups ul { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.arcana-layers__groups li {
+  padding: 0.1875rem 0.5rem;
+  border: 1px solid var(--arcana-border);
+  border-radius: 0.25rem;
+  background: var(--arcana-canvas);
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--arcana-text);
+}
+
+/* Narrow screens: the nodes become a row of tabs and the loop reads as numbered steps beneath them. */
+@media (max-width: 640px) {
+  .arcana-layers__diagram { aspect-ratio: auto; }
+  .arcana-layers__edges { display: none; }
+  .arcana-layers__nodes { position: static; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .arcana-layers__node { position: static; transform: none; min-width: 0; flex: 1 1 auto; padding: 0.5rem 0.8125rem; }
+  .arcana-layers__steps {
+    display: block;
+    margin: 0.8125rem 0 0;
+    padding-left: 1.3125rem;
+    font-family: var(--arcana-font-mono);
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: var(--arcana-text-subtle);
+  }
+  .arcana-layers__groups > div { grid-template-columns: 1fr; gap: 0.3125rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arcana-layers__edge path, .arcana-layers__edge text, .arcana-layers__node { transition: none; }
+}

@@ -52,13 +52,8 @@ export const engineeringProfile: EngineeringProfile = {
       id: 'hands',
       name: 'The hands',
       verse: 'are there for you to build what you love.',
-      links: [],
-      notes: [
-        {
-          title: 'The House of Arcana',
-          description: 'An automated trading platform on Kalshi. The full story is coming.',
-        },
-      ],
+      links: [{ title: 'The House of Arcana: automated trading on Kalshi', href: '#house-of-arcana' }],
+      notes: [],
     },
   ],
   groundingLine: "Build the craziest of dreams.",

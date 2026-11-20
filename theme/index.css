@@ -37,6 +37,10 @@
   --color-gold-light: #c9a86c;
   --color-gold-dark: #7a6040;
 
+  /* Market — the House of Arcana card speaks the exchange's language:
+     YES rises in green, NO falls in the rose's crimson. */
+  --color-market-yes: #00875f;
+
   /* Neutrals */
   --color-bg: #faf7f2;
   --color-bg-soft: #f5f1ea;
@@ -68,6 +72,8 @@ case-studies-section {
   --color-gold-primary: #d4af37;
   --color-gold-light: #e6c866;
   --color-gold-dark: #b8960b;
+
+  --color-market-yes: #2fd49a;
 
   --color-bg: #0a0a08;
   --color-bg-soft: #12120f;
@@ -107,6 +113,69 @@ case-studies-section {
   /* Hairlines */
   --rp-c-divider: color-mix(in srgb, var(--color-primary) 20%, transparent);
   --rp-c-divider-light: color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+/* ========================================
+   The House of Arcana
+
+   The /house-of-arcana page speaks the platform's own design system
+   instead of the portfolio's: near-black surfaces, hairline borders, a
+   pale-green accent and a green for what is selected or positive. Only
+   that page and its Engineering-page card use these tokens. The night values are Arcana's own; Arcana
+   has no light theme, so the light values are a daylight translation of
+   the same roles, tuned to read on a pale ground.
+   ======================================== */
+
+/* Light theme */
+:root {
+  --arcana-canvas: #f3f4f1;
+  --arcana-canvas-raised: #e9ece8;
+  --arcana-surface: #dfe4e0;
+  --arcana-text: #111517;
+  --arcana-text-muted: #47514f;
+  --arcana-text-subtle: #5d686d;
+  --arcana-border: rgba(17, 21, 23, 0.12);
+  --arcana-border-strong: rgba(17, 21, 23, 0.26);
+  --arcana-accent: #2c5a43;
+  --arcana-green: #12823a;
+  /* The title's passing light. */
+  --arcana-shine: rgba(255, 255, 255, 0.75);
+
+  /* The spiral: dark ink laid on the pale ground. */
+  --arcana-spiral-comet: #2a3236;
+  --arcana-spiral-yes: #00875f;
+  --arcana-red: #c4202a;
+  --arcana-spiral-no: var(--arcana-red);
+  --arcana-spiral-glint: #ffffff;
+  --arcana-spiral-blend: source-over;
+
+  --arcana-font-brand: 'Quantico', sans-serif;
+  --arcana-font-ui: 'IBM Plex Sans', sans-serif;
+  --arcana-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Night — Arcana's own values */
+.dark,
+html.dark {
+  --arcana-canvas: #050607;
+  --arcana-canvas-raised: #161b1e;
+  --arcana-surface: #1c2327;
+  --arcana-text: #eeefeb;
+  --arcana-text-muted: #a5afaf;
+  --arcana-text-subtle: #8f999f;
+  --arcana-border: rgba(221, 231, 226, 0.11);
+  --arcana-border-strong: rgba(221, 231, 226, 0.24);
+  --arcana-accent: #c1d7c8;
+  --arcana-green: #30d158;
+  --arcana-shine: rgba(255, 255, 255, 0.9);
+
+  /* The spiral: light added to the night, as on Arcana's homepage. */
+  --arcana-spiral-comet: #eeefeb;
+  --arcana-spiral-yes: #00b67a;
+  --arcana-red: #e02a32;
+  --arcana-spiral-no: var(--arcana-red);
+  --arcana-spiral-glint: #ffffff;
+  --arcana-spiral-blend: lighter;
 }
 
 /* ========================================
