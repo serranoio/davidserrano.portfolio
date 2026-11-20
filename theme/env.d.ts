@@ -56,3 +56,8 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+declare module '*.md' {
+  const Component: React.ComponentType;
+  export default Component;
+}

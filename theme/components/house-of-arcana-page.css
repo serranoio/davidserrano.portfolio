@@ -109,31 +109,173 @@
 .portfolio-page .arcana-page__tabs button:focus-visible,
 .arcana-page__section:focus-visible { outline: 2px solid var(--arcana-accent); outline-offset: 2px; }
 
-/* Panels: solid, hairline-bordered, on the raised canvas. */
-.arcana-page__section {
-  margin-top: 1.3125rem;
-  padding: clamp(1.3125rem, 4vw, 2.125rem);
-  border: 1px solid var(--arcana-border);
-  border-radius: 0.25rem;
-  background: var(--arcana-canvas-raised);
-}
+/* Panels: open on the canvas, under the tab rule; no box, so the content inside can carry its own structure. */
+.arcana-page__section { margin-top: clamp(2.125rem, 5vw, 3.5rem); animation: arcana-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
+.arcana-page__section:focus-visible { outline-offset: 6px; }
 .portfolio-page .arcana-page__section p { max-width: 42rem; margin: 0; color: var(--arcana-text-muted); }
-.portfolio-page .arcana-page__section p + p, .portfolio-page .arcana-page__steps + p { margin-top: 1.3125rem; }
-.arcana-page__section em { color: var(--arcana-text); font-style: normal; font-family: var(--arcana-font-mono); font-size: 0.875em; }
-.arcana-page__steps { counter-reset: arcana-step; max-width: 42rem; margin: 0; padding: 0; list-style: none; color: var(--arcana-text-muted); }
-.arcana-page__steps li {
-  counter-increment: arcana-step;
-  position: relative;
-  padding: 0.8125rem 0 0.8125rem 2.125rem;
-  border-bottom: 1px solid var(--arcana-border);
+.arcana-quant em { color: var(--arcana-text); font-style: normal; font-family: var(--arcana-font-mono); font-size: 0.875em; }
+@keyframes arcana-rise { from { opacity: 0; transform: translateY(0.5rem); } }
+
+/* The small ruled label every tab uses: mono capitals, green. */
+.arcana-kicker {
+  font-family: var(--arcana-font-mono);
+  font-size: 0.75rem;
+  font-weight: 400;
   line-height: 1.6;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--arcana-green);
 }
-.arcana-page__steps li:first-child { padding-top: 0; }
-.arcana-page__steps li:first-child::before { top: 0; }
-.arcana-page__steps li::before { position: absolute; left: 0; top: 0.8125rem; content: counter(arcana-step, decimal-leading-zero); font-family: var(--arcana-font-mono); font-size: 0.75rem; line-height: 1.6rem; color: var(--arcana-green); }
-.arcana-page__steps strong { color: var(--arcana-text); font-weight: 500; }
-.portfolio-page .arcana-page__placeholder { font-family: var(--arcana-font-brand); font-style: italic; font-size: 1.25rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--arcana-text-subtle); }
-.arcana-page .arcana-speed { margin-top: 2.125rem; }
+
+/* Quant: four stages on one track, each with a dashed exit down to a shared verdict rail. */
+.arcana-quant { --arcana-quant-dot: 9px; }
+.arcana-quant__stages {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--arcana-border-strong);
+}
+/* The track's head: it carries on past the last stage. */
+.arcana-quant__stages::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -4px;
+  width: 7px;
+  height: 7px;
+  border-top: 1px solid var(--arcana-border-strong);
+  border-right: 1px solid var(--arcana-border-strong);
+  transform: rotate(45deg);
+}
+.arcana-quant__stage { position: relative; padding: 1.75rem 1.75rem 2.625rem 0; }
+.arcana-quant__stage::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: calc(var(--arcana-quant-dot) / -2 - 0.5px);
+  width: var(--arcana-quant-dot);
+  height: var(--arcana-quant-dot);
+  border-radius: 50%;
+  background: var(--arcana-green);
+  box-shadow: 0 0 0 4px var(--arcana-canvas);
+}
+.arcana-quant__stage::after {
+  content: '';
+  position: absolute;
+  left: calc(var(--arcana-quant-dot) / 2 - 0.5px);
+  bottom: 0;
+  height: 1.3125rem;
+  border-left: 1px dashed var(--arcana-red);
+  opacity: 0.7;
+}
+.arcana-quant__number {
+  display: block;
+  margin-bottom: 0.8125rem;
+  font-family: var(--arcana-font-brand);
+  font-size: clamp(2.75rem, 6vw, 4.5rem);
+  font-style: italic;
+  font-weight: 700;
+  line-height: 0.9;
+  color: transparent;
+  -webkit-text-stroke: 1px var(--arcana-text-subtle);
+  opacity: 0.55;
+  transition: opacity 0.3s ease;
+}
+.arcana-quant__stage:hover .arcana-quant__number { opacity: 1; }
+.portfolio-page .arcana-quant__name {
+  margin: 0 0 0.5rem;
+  font-family: var(--arcana-font-brand);
+  font-size: 1.125rem;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--arcana-text);
+}
+.portfolio-page .arcana-quant__stage p { font-size: 0.9375rem; line-height: 1.65; }
+.portfolio-page .arcana-quant .arcana-quant__exit,
+.portfolio-page .arcana-quant .arcana-quant__next { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3125rem 1.3125rem; max-width: none; }
+.portfolio-page .arcana-quant .arcana-quant__exit { padding-top: 0.8125rem; border-top: 1px dashed color-mix(in srgb, var(--arcana-red) 70%, transparent); }
+.arcana-quant__exit .arcana-kicker { color: var(--arcana-red); }
+.portfolio-page .arcana-quant .arcana-quant__next { justify-content: flex-end; margin-top: 1.3125rem; color: var(--arcana-text); }
+
+/* Narrow: the track runs down the left edge; the stages read top to bottom, then the rails. */
+@media (max-width: 760px) {
+  .arcana-quant__stages { grid-template-columns: 1fr; border-top: 0; padding-left: 1.75rem; }
+  .arcana-quant__stages::before {
+    content: '';
+    position: absolute;
+    left: calc(var(--arcana-quant-dot) / 2 - 0.5px);
+    top: 0.5rem;
+    bottom: 0;
+    border-left: 1px solid var(--arcana-border-strong);
+  }
+  .arcana-quant__stages::after { right: auto; top: auto; bottom: 0; left: 1px; transform: rotate(135deg); }
+  .arcana-quant__stage { display: grid; grid-template-columns: 3.5rem 1fr; column-gap: 1.0625rem; padding: 0 0 1.75rem; }
+  .arcana-quant__stage::before { left: -1.75rem; top: 0.5rem; }
+  .arcana-quant__stage::after { display: none; }
+  .arcana-quant__number { grid-row: span 2; margin: 0; font-size: 2.5rem; }
+  .portfolio-page .arcana-quant .arcana-quant__next { justify-content: flex-start; }
+}
+
+/* Backstory: Markdown the author writes (theme/content/house-of-arcana-backstory.md), set as prose. While the file
+   holds a single line it reads as a placeholder: large display capitals and a waiting caret. */
+.arcana-backstory { max-width: 42rem; padding-block: clamp(1.3125rem, 5vw, 3.5rem); }
+.arcana-backstory__status { display: block; margin-bottom: 1.3125rem; }
+.arcana-backstory:not(:has(.arcana-backstory__body > p:only-child)) .arcana-backstory__status { display: none; }
+.portfolio-page .arcana-backstory__body p { font-size: 1.0625rem; line-height: 1.8; }
+.portfolio-page .arcana-backstory .arcana-backstory__body > * + * { margin-top: 1.3125rem; }
+.portfolio-page .arcana-backstory .arcana-backstory__body > :is(h1, h2, h3, h4) + * { margin-top: 0.5rem; }
+.portfolio-page .arcana-backstory__body :is(h1, h2, h3, h4) {
+  margin: 0;
+  font-family: var(--arcana-font-brand);
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--arcana-text);
+}
+.portfolio-page .arcana-backstory .arcana-backstory__body > :is(h1, h2, h3, h4):not(:first-child) { margin-top: 2.625rem; }
+.portfolio-page .arcana-backstory__body :is(h1, h2) { font-size: clamp(1.5rem, 4vw, 2rem); font-style: italic; font-weight: 700; }
+.arcana-backstory__body ul { list-style: square; }
+.arcana-backstory__body ol { list-style: decimal; }
+.arcana-backstory__body :is(ul, ol) { margin-bottom: 0; padding-left: 1.3125rem; color: var(--arcana-text-muted); line-height: 1.8; }
+.arcana-backstory__body li::marker { color: var(--arcana-green); }
+.arcana-backstory__body .rp-header-anchor { display: none; }
+.arcana-backstory__body em { color: var(--arcana-text); }
+.arcana-backstory__body strong { color: var(--arcana-text); font-weight: 600; }
+.arcana-backstory__body a { color: var(--arcana-accent); text-decoration: underline; text-decoration-color: var(--arcana-border-strong); text-underline-offset: 0.2em; }
+.arcana-backstory__body a:hover { text-decoration-color: var(--arcana-green); }
+.arcana-backstory__body a:focus-visible { outline: 2px solid var(--arcana-accent); outline-offset: 2px; }
+.arcana-backstory__body img { display: block; max-width: 100%; height: auto; border: 1px solid var(--arcana-border); border-radius: 0.25rem; }
+.arcana-backstory__body blockquote { margin-inline: 0; padding-left: 1.3125rem; border-left: 1px solid var(--arcana-border-strong); }
+.portfolio-page .arcana-backstory__body > p:only-child {
+  font-family: var(--arcana-font-brand);
+  font-size: clamp(1.75rem, 6vw, 3rem);
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--arcana-text-subtle);
+}
+.arcana-backstory__body > p:only-child::after {
+  content: '';
+  display: inline-block;
+  width: 0.45em;
+  height: 0.8em;
+  margin-left: 0.2em;
+  vertical-align: -0.05em;
+  background: var(--arcana-green);
+  animation: arcana-caret 1.1s steps(1) infinite;
+}
+@keyframes arcana-caret { 50% { opacity: 0; } }
+
+.arcana-page .arcana-speed { margin-top: clamp(2.5rem, 6vw, 4rem); padding-top: 1.3125rem; border-top: 1px solid var(--arcana-border-strong); }
 .portfolio-page .arcana-page .arcana-speed h2 { margin: 0 0 1.3125rem; font-size: 0.8125rem; line-height: 1rem; color: var(--arcana-text-subtle); }
 
 /* The shared footer, in this page's voice. */
@@ -154,4 +296,6 @@
 @media (prefers-reduced-motion: reduce) {
   .arcana-page__title-mark, .portfolio-page .arcana-page__tagline, .arcana-page__venue { animation: none; background-position: 0 0, 0 0; }
   .arcana-page__tabs button { transition: none; }
+  .arcana-page__section { animation: none; }
+  .arcana-backstory__body > p:only-child::after { animation: none; }
 }

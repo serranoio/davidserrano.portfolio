@@ -1,7 +1,10 @@
 import type { ReactNode } from 'react';
 import { arcanaDemo } from '../arcana-demo';
+// The author writes the backstory here, in Markdown; the MDX pipeline compiles it to a component.
+import Backstory from '../content/house-of-arcana-backstory.md';
 import { ArcanaDemoVideo } from './arcana-card';
 import { ArcanaLayers } from './arcana-layers';
+import { arcanaOrdinal } from './arcana-ordinal';
 import { PortfolioPage } from './portfolio-pages';
 import { useTabList } from './use-tab-list';
 import './arcana-spiral';
@@ -9,31 +12,50 @@ import './house-of-arcana-page.css';
 
 type SectionId = 'quant' | 'engineering' | 'backstory';
 
+/** The research pipeline, in order. Any stage may stop an idea; only a validated one goes on to paper trading. */
+const STAGES: readonly { name: string; text: string }[] = [
+  { name: 'Claim', text: 'State a falsifiable market hypothesis and the equation that forecasts it.' },
+  { name: 'Forecast', text: 'Replay market evidence and score every forecast against what the market did.' },
+  { name: 'Trade', text: 'Backtest trading on those forecasts, with fees, fills and capital limits simulated.' },
+  { name: 'Validate', text: 'Freeze the configuration and run it once on a held-out validation period.' },
+];
+
+function QuantPipeline() {
+  return (
+    <div className="arcana-quant">
+      <ol className="arcana-quant__stages">
+        {STAGES.map((stage, i) => (
+          <li key={stage.name} className="arcana-quant__stage">
+            <span className="arcana-quant__number" aria-hidden="true">{arcanaOrdinal(i)}</span>
+            <h3 className="arcana-quant__name">{stage.name}</h3>
+            <p>{stage.text}</p>
+          </li>
+        ))}
+      </ol>
+      <p className="arcana-quant__exit">
+        <span className="arcana-kicker">Exit</span>
+        <span>Every stage can conclude <em>insufficient evidence</em> or <em>do not trade</em>.</span>
+      </p>
+      <p className="arcana-quant__next">
+        <span className="arcana-kicker">Then</span>
+        <span>Paper trading. Not live yet.</span>
+      </p>
+    </div>
+  );
+}
+
 const SECTIONS: readonly { id: SectionId; label: string; body: () => ReactNode }[] = [
-  {
-    id: 'quant',
-    label: 'Quant',
-    body: () => (
-      <>
-        <ol className="arcana-page__steps">
-          <li><strong>Claim.</strong> State a falsifiable market hypothesis and the equation that forecasts it.</li>
-          <li><strong>Forecast.</strong> Replay market evidence and score each forecast against what the market did.</li>
-          <li><strong>Trade.</strong> Backtest acting on those forecasts, with fees, fills and capital limits simulated.</li>
-          <li><strong>Validate.</strong> Hold the configuration fixed and run it once on untouched data before paper trading.</li>
-        </ol>
-        <p>Every stage can conclude <em>insufficient evidence</em> or <em>do not trade</em>.</p>
-      </>
-    ),
-  },
-  {
-    id: 'engineering',
-    label: 'Engineering',
-    body: () => <ArcanaLayers />,
-  },
+  { id: 'quant', label: 'Quant', body: () => <QuantPipeline /> },
+  { id: 'engineering', label: 'Engineering', body: () => <ArcanaLayers /> },
   {
     id: 'backstory',
     label: 'Backstory',
-    body: () => <p className="arcana-page__placeholder">The story is coming.</p>,
+    body: () => (
+      <div className="arcana-backstory">
+        <span className="arcana-kicker arcana-backstory__status">In preparation</span>
+        <div className="arcana-backstory__body"><Backstory /></div>
+      </div>
+    ),
   },
 ];
 
