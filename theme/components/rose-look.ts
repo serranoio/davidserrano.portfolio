@@ -95,6 +95,40 @@ export const OFFER = {
   tiltDegrees: 6,
 } as const;
 
+// --- Selection: the petal whose poem is open ---------------------------------
+// Hover and offers only ever gild a petal. The chosen petal goes further: it
+// is held fully gold, lit from within by a paler, near-white gold that swells
+// with the breath, and every other petal steps back into shadow. The click
+// itself is acknowledged at once by a press — a flash and a small dip — that
+// settles into the held glow.
+export const SELECT = {
+  // How far the inner light is pulled from gold toward white (0 gold, 1 white).
+  whiteness: 0.45,
+  // Emissive strength of the held glow, and how much of it rides the breath.
+  glow: 0.55,
+  glowBreath: 0.25,
+  // Emissive strength at the instant of the click; decays into `glow`.
+  pressGlow: 1.6,
+  pressSeconds: 0.45,
+  // World units the petal sinks, and degrees its lip tips in, at the press.
+  pressSink: 0.02,
+  pressTiltDegrees: 5,
+  // Factor every other petal's colour falls to while one is chosen.
+  othersDim: 0.62,
+  // Selection arrives at once; this is how fast it lets go as the poem closes.
+  releasePerSecond: 5,
+} as const;
+
+// --- Spent: a petal whose poem has already been read -------------------------
+// It wilts: drained of colour and darkened, so what is left to read stands
+// out. Gold (hover, selection) still lights it fully, so it stays clickable.
+export const SPENT = {
+  // How far its colour is drained toward grey (0 none, 1 fully grey).
+  desaturate: 0.85,
+  // Factor its colour falls to.
+  dim: 0.4,
+} as const;
+
 // Sheet + rim: the model cuts most petals into a broad sheet and a thin strip
 // along its lip. Two petal meshes whose centres sit within this distance
 // (world units) of each other are one petal.

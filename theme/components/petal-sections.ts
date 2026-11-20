@@ -124,3 +124,23 @@ export const POEM_COMPONENTS: Record<string, ComponentType> = Object.fromEntries
 export const SECTION_TITLES: Record<string, string> = Object.fromEntries(
   PETAL_SECTIONS.map((s) => [s.id, s.title])
 );
+
+// The poems themselves, each once, in ARTICLES order — the poem list's view.
+// Many petals carry the same poem; `sectionId` is the first petal that
+// carries it, so opening a poem from the list opens a real petal.
+export interface Poem {
+  title: string;
+  sectionId: string;
+}
+
+export const POEMS: readonly Poem[] = ARTICLES.flatMap(({ title, Component }) => {
+  const petal = PETAL_SECTIONS.find((s) => s.Component === Component);
+  return petal ? [{ title, sectionId: petal.id }] : [];
+});
+
+// Which poem a petal's section holds, as an index into POEMS; -1 for none.
+export function poemIndexOfSection(sectionId: string | null): number {
+  const Component = sectionId ? POEM_COMPONENTS[sectionId] : undefined;
+  if (!Component) return -1;
+  return POEMS.findIndex((poem) => POEM_COMPONENTS[poem.sectionId] === Component);
+}

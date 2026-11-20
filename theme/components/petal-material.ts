@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { readColorToken, type ColorToken } from '../design-tokens';
-import { GOLD, PETAL } from './rose-look';
+import { GOLD, PETAL, SELECT, SPENT } from './rose-look';
 
 // A living petal: matte, velvety flesh that light passes through where it is
 // thin. Built on MeshPhysicalMaterial (for sheen) with three additions the
@@ -21,6 +21,11 @@ export interface PetalMaps {
 
 interface PetalUniforms {
   uGold: { value: number };
+  // Selection: x is this petal's inner glow (it is the chosen one), y how far
+  // it steps back into shadow (another petal is chosen).
+  uSelect: { value: THREE.Vector2 };
+  // 1 once this petal's poem has been read; 0 while it is still to read.
+  uSpent: { value: number };
 }
 
 // Everything the petals of one rose share: the uniforms every petal shader
@@ -50,6 +55,9 @@ export function createPetalLook(scope: Element): PetalLook {
   uThinRange: { value: new THREE.Vector2(...PETAL.thinRange) },
   uVelvet: { value: color(PETAL.velvetColor).multiplyScalar(PETAL.velvetStrength) },
   uFaceOnDepth: { value: PETAL.faceOnDepth },
+  uSelectColor: { value: color(GOLD.color).lerp(new THREE.Color(1, 1, 1), SELECT.whiteness) },
+  uOthersDim: { value: SELECT.othersDim },
+  uSpentLook: { value: new THREE.Vector2(SPENT.desaturate, SPENT.dim) },
     },
   };
 }
@@ -70,6 +78,16 @@ uniform vec2 uGiltRange;
 uniform vec2 uThinRange;
 uniform vec3 uVelvet;
 uniform float uFaceOnDepth;
+uniform vec2 uSelect;
+uniform vec3 uSelectColor;
+uniform float uOthersDim;
+uniform float uSpent;
+uniform vec2 uSpentLook;
+
+vec3 petalWilt( vec3 c, float amount ) {
+  vec3 wilted = mix( c, vec3( dot( c, vec3( 0.299, 0.587, 0.114 ) ) ), uSpentLook.x ) * uSpentLook.y;
+  return mix( c, wilted, amount );
+}
 
 // Bump from a height difference, after three's own bumpmap chunk (which is
 // only compiled in when a bumpMap is assigned).
@@ -121,6 +139,10 @@ const FRAGMENT_RELIEF = /* glsl */ `
 // After <emissivemap_fragment>: light that the stock BRDF throws away.
 const FRAGMENT_LIGHT = /* glsl */ `
 {
+  // Spent: a read poem's petal wilts — greyed and darkened — unless gold
+  // (hover, selection) is lighting it.
+  float petalSpent = uSpent * ( 1.0 - uGold );
+  diffuseColor.rgb = petalWilt( diffuseColor.rgb, petalSpent );
   vec3 petalView = normalize( vViewPosition );
   float petalGraze = 1.0 - saturate( dot( normal, petalView ) );
   float petalRim = pow( petalGraze, 3.0 );
@@ -146,6 +168,14 @@ const FRAGMENT_LIGHT = /* glsl */ `
     );
   #endif
   totalEmissiveRadiance += uGoldColor * ( uGoldGlow.x * petalGiltBody + uGoldGlow.y * uGold * petalRim ) * ( 0.45 + 0.55 * petalTone );
+  // Chosen: lit from within, brightest at the thin, grazing lip.
+  totalEmissiveRadiance += uSelectColor * uSelect.x * ( 0.4 + 0.6 * petalTone ) * ( 0.65 + 0.35 * petalRim );
+  // Not chosen: step back so the chosen petal stands alone.
+  float petalRecede = mix( 1.0, uOthersDim, uSelect.y );
+  diffuseColor.rgb *= petalRecede;
+  totalEmissiveRadiance *= petalRecede;
+  // The light passing through a wilted petal is drained with it.
+  totalEmissiveRadiance = petalWilt( totalEmissiveRadiance, petalSpent );
 }
 `;
 
@@ -202,7 +232,11 @@ export function createPetalMaterial(maps: PetalMaps, look: PetalLook): THREE.Mes
     side: THREE.DoubleSide,
   });
   material.normalScale.setScalar(PETAL.normalStrength);
-  const uniforms: PetalUniforms = { uGold: { value: 0 } };
+  const uniforms: PetalUniforms = {
+    uGold: { value: 0 },
+    uSelect: { value: new THREE.Vector2() },
+    uSpent: { value: 0 },
+  };
   material.userData.petalUniforms = uniforms;
   material.userData.petalLook = look;
   material.onBeforeCompile = patchPetalShader;
@@ -211,4 +245,15 @@ export function createPetalMaterial(maps: PetalMaps, look: PetalLook): THREE.Mes
 
 export function setPetalGold(material: THREE.Material, level: number) {
   (material.userData.petalUniforms as PetalUniforms).uGold.value = level;
+}
+
+// `glow` lights the chosen petal from within; `recede` (0–1) dims a petal
+// that was not chosen.
+export function setPetalSelect(material: THREE.Material, glow: number, recede: number) {
+  (material.userData.petalUniforms as PetalUniforms).uSelect.value.set(glow, recede);
+}
+
+// Marks a petal whose poem has been read (1) or is still to read (0).
+export function setPetalSpent(material: THREE.Material, spent: boolean) {
+  (material.userData.petalUniforms as PetalUniforms).uSpent.value = spent ? 1 : 0;
 }

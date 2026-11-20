@@ -1,4 +1,5 @@
 import { LitElement, html } from 'lit';
+import floatingButtonStyles from './floating-button.styles';
 import styles from './music-player.styles';
 
 const VIDEO_ID = 'thoR1IWLiqc';
@@ -74,7 +75,7 @@ function loadYouTubeAPI(): Promise<YouTubeAPI> {
 }
 
 export class MusicPlayerElement extends LitElement {
-  static styles = [styles];
+  static styles = [floatingButtonStyles, styles];
   static properties = {
     playbackState: { type: String, state: true },
     message: { type: String, state: true },
@@ -269,7 +270,7 @@ export class MusicPlayerElement extends LitElement {
       <div class="player-mount" aria-hidden="true" inert></div>
       <p class="player-message" role="status" ?hidden=${!this.message || !this.hasInteracted}>${this.message}</p>
       <button
-        class="player-button ${this.bouncing ? 'bouncing' : ''}"
+        class="floating-button player-button ${this.bouncing ? 'bouncing' : ''}"
         @click=${this.handleClick}
         aria-label=${labels[this.playbackState]}
         aria-busy=${this.playbackState === 'loading'}

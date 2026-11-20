@@ -6,11 +6,13 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import styles from './golden-rose.styles';
 import { PoemPanel } from './poem-panel';
+import './poem-list';
 import { RoseText } from './rose-text';
 import { MeteorField } from './meteor-field';
 import { SkyDome } from './sky-dome';
 import { breath } from './breath';
-import { createPetalLook, createPetalMaterial, setPetalGold } from './petal-material';
+import { createPetalLook, createPetalMaterial, setPetalGold, setPetalSelect, setPetalSpent } from './petal-material';
+import { loadReadPoems, markPoemRead } from './read-poems';
 import { COLOR_TOKEN, readColorToken } from '../design-tokens';
 import {
   BREATH_MOTION,
@@ -21,14 +23,21 @@ import {
   LIGHT,
   OFFER,
   PETAL_PAIR_DISTANCE,
+  SELECT,
 } from './rose-look';
-import { ACTIVE_PETAL_INDICES, SECTIONS, SECTION_TITLES } from './petal-sections';
+import { ACTIVE_PETAL_INDICES, SECTIONS, SECTION_TITLES, poemIndexOfSection } from './petal-sections';
 import truthStatement from '../../docs/sections/truth-statement.txt?raw';
 
 const ROSE_MODEL_URL = '/models/rose_separated.glb';
 // The light's elevation wanders on a period unrelated to its azimuth so the
 // path never visibly repeats.
 const LIGHT_ELEVATION_PERIOD_RATIO = 0.62;
+
+// Exponential approach of `current` toward `target` at `rate` per second.
+function approach(current: number, target: number, rate: number, dt: number): number {
+  const next = current + (target - current) * (1 - Math.exp(-rate * dt));
+  return Math.abs(next - target) < 0.001 ? target : next;
+}
 
 // Test API interface
 interface RoseTestAPI {
@@ -68,7 +77,8 @@ export class GoldenRoseElement extends LitElement {
     activeSection: { type: String, state: true },
     coarsePointer: { type: Boolean, state: true },
     hintSeen: { type: Boolean, state: true },
-    hoveredTitle: { type: String, state: true },
+    hoveredSection: { type: String, state: true },
+    readPoems: { attribute: false, state: true },
   };
 
   private _loading = true;
@@ -76,9 +86,12 @@ export class GoldenRoseElement extends LitElement {
   private _activeSection: string | null = null;
   private _coarsePointer = false;
   private _hintSeen = false;
-  private _hoveredTitle: string | null = null;
-  // The last title shown stays in the label while it fades out.
-  private lastTitle = '';
+  private _hoveredSection: string | null = null;
+  // Titles of the poems this visitor has opened (see read-poems.ts).
+  private _readPoems: ReadonlySet<string> = new Set();
+  // A poem asked for (via openSection) while the rose was mid-animation;
+  // opened once the rose settles.
+  private pendingSection: string | null = null;
 
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
@@ -161,6 +174,15 @@ export class GoldenRoseElement extends LitElement {
   private pointerPx: THREE.Vector2 | null = null;
   private prevFrameTime = 0;
 
+  // Selection follows `activeSection`, however it was set (a click, or a
+  // poem opened from elsewhere). `selectedGroup` is the petal group showing
+  // the chosen look; it outlives the section only while that look fades.
+  // `selectLevel` is the held look (1 chosen, 0 gone), `selectPress` the
+  // click's acknowledgement (1 at the instant of choosing, decaying to 0).
+  private selectedGroup: number | null = null;
+  private selectLevel = 0;
+  private selectPress = 0;
+
   // Pointer type selects text layout and paragraph-button visibility.
   // Re-evaluate on change for convertible devices; one-finger scrolling
   // remains native regardless of the primary pointer type.
@@ -186,16 +208,25 @@ export class GoldenRoseElement extends LitElement {
     breathLag: number;
   }> = [];
 
-  get hoveredTitle() {
-    return this._hoveredTitle;
+  // The section of the active petal under the pointer; the poem list shows it.
+  get hoveredSection() {
+    return this._hoveredSection;
   }
 
-  set hoveredTitle(val: string | null) {
-    const oldVal = this._hoveredTitle;
+  set hoveredSection(val: string | null) {
+    const oldVal = this._hoveredSection;
     if (oldVal === val) return;
-    this._hoveredTitle = val;
-    if (val !== null) this.lastTitle = val;
-    this.requestUpdate('hoveredTitle', oldVal);
+    this._hoveredSection = val;
+    this.requestUpdate('hoveredSection', oldVal);
+  }
+
+  get readPoems() {
+    return this._readPoems;
+  }
+  set readPoems(val: ReadonlySet<string>) {
+    const oldVal = this._readPoems;
+    this._readPoems = val;
+    this.requestUpdate('readPoems', oldVal);
   }
 
   get hintSeen() {
@@ -231,6 +262,7 @@ export class GoldenRoseElement extends LitElement {
   set activeSection(val: string | null) {
     const oldVal = this._activeSection;
     this._activeSection = val;
+    if (val) this.readPoems = markPoemRead(this.readPoems, SECTION_TITLES[val]);
     this.requestUpdate('activeSection', oldVal);
   }
 
@@ -257,6 +289,7 @@ export class GoldenRoseElement extends LitElement {
     } catch {
       this.hintSeen = false;
     }
+    this.readPoems = loadReadPoems();
     // Expose test API
     (window as any).__ROSE_TEST_API__ = this.createTestAPI();
   }
@@ -311,15 +344,11 @@ export class GoldenRoseElement extends LitElement {
         this.handlePetalClick(index);
       },
       clickPetalBySection: (sectionId: string) => {
-        const idx = this.petals.findIndex(
-          (p) => p.userData?.section === sectionId
-        );
+        const idx = this.petalIndexForSection(sectionId);
         if (idx !== -1) this.handlePetalClick(idx);
       },
       getPetalIndexForSection: (sectionId: string) => {
-        const idx = this.petals.findIndex(
-          (p) => p.userData?.section === sectionId
-        );
+        const idx = this.petalIndexForSection(sectionId);
         return idx === -1 ? null : idx;
       },
       getPetalPositions: () => {
@@ -411,8 +440,17 @@ export class GoldenRoseElement extends LitElement {
 
   updated(changed: PropertyValues) {
     super.updated(changed);
+    if (changed.has('readPoems')) this.applySpentPetals();
     if (changed.has('activeSection') && this._reactRoot) {
       this._reactRoot.render(createElement(PoemPanel, { section: this.activeSection }));
+      // A swapped-in poem starts from its first line.
+      this.renderRoot.querySelector('#content-mount')?.scrollTo({ top: 0 });
+    }
+    const settled = this.roseState === 'open' || this.roseState === 'idle';
+    if (changed.has('roseState') && settled && this.pendingSection) {
+      const pending = this.pendingSection;
+      this.pendingSection = null;
+      this.openSection(pending);
     }
   }
 
@@ -580,16 +618,15 @@ export class GoldenRoseElement extends LitElement {
         this.setGold(member, Math.max(this.goldLevels[member], GOLD.instantLevel));
       }
     }
-    const section: string | null = this.petals[index].userData.section;
-    this.hoveredTitle = section ? SECTION_TITLES[section] ?? null : null;
+    this.hoveredSection = isActive ? this.petals[index].userData.section : null;
     if (this.renderer) {
       this.renderer.domElement.style.cursor = isActive ? 'pointer' : 'default';
     }
   }
 
   private unhighlightPetal(_index: number) {
-    // The gold itself fades in updateOffers(); only the cursor and title reset here.
-    this.hoveredTitle = null;
+    // The gold itself fades in updateOffers(); only the cursor and list reset here.
+    this.hoveredSection = null;
     if (this.renderer) {
       this.renderer.domElement.style.cursor = 'default';
     }
@@ -691,15 +728,63 @@ export class GoldenRoseElement extends LitElement {
     if (hovered !== null && this.petals[hovered].userData.isActive) {
       this.offerTargets[this.petalGroupOf[hovered]] = 1;
     }
+    // The chosen petal is held fully gold, letting go with the selection.
+    if (this.selectedGroup !== null) {
+      const group = this.selectedGroup;
+      this.offerTargets[group] = Math.max(this.offerTargets[group], this.selectLevel);
+    }
 
     this.petals.forEach((_petal, index) => {
       const target = this.offerTargets[this.petalGroupOf[index]];
       const level = this.goldLevels[index];
       if (level === target) return;
       const rate = target > level ? GOLD.attackPerSecond : GOLD.releasePerSecond;
-      const next = level + (target - level) * (1 - Math.exp(-rate * dt));
-      this.setGold(index, Math.abs(next - target) < 0.001 ? target : next);
+      this.setGold(index, approach(level, target, rate, dt));
     });
+  }
+
+  // The petal group that opens `section`, or null.
+  private groupForSection(section: string | null): number | null {
+    if (!section) return null;
+    const index = this.petalIndexForSection(section);
+    return index === -1 ? null : this.petalGroupOf[index];
+  }
+
+  // Derives the chosen petal from `activeSection` every frame, so it follows
+  // the section however it changed. A new choice is acknowledged on the very
+  // frame it is seen: full gold, a flash and a dip. The look holds while the
+  // poem blooms and stays open, and lets go as it closes.
+  private updateSelection(dt: number) {
+    const chosen = this.roseState === 'closing' ? null : this.groupForSection(this.activeSection);
+    if (chosen !== null && chosen !== this.selectedGroup) {
+      this.selectedGroup = chosen;
+      this.selectLevel = 1;
+      this.selectPress = 1;
+      for (const member of this.petalGroups[chosen]) this.setGold(member, 1);
+    }
+    if (chosen === null) {
+      this.selectLevel = approach(this.selectLevel, 0, SELECT.releasePerSecond, dt);
+      if (this.selectLevel === 0) this.selectedGroup = null;
+    }
+    this.selectPress = Math.max(0, this.selectPress - dt / SELECT.pressSeconds);
+
+    // Reduced motion keeps the held glow steady and skips the flash.
+    const press = breath.still ? 0 : this.pressAmount();
+    const swell = breath.still ? 0 : SELECT.glowBreath * breath.level();
+    const glow = this.selectLevel * (SELECT.glow + swell) + SELECT.pressGlow * press;
+    this.petals.forEach((petal, index) => {
+      const isChosen = this.petalGroupOf[index] === this.selectedGroup;
+      setPetalSelect(
+        petal.material as THREE.Material,
+        isChosen ? glow : 0,
+        isChosen ? 0 : this.selectLevel
+      );
+    });
+  }
+
+  // The press eases out: a sharp hit that settles softly.
+  private pressAmount(): number {
+    return this.selectPress * this.selectPress;
   }
 
   // The hint has done its work once any petal has been chosen.
@@ -753,6 +838,10 @@ export class GoldenRoseElement extends LitElement {
     this.roseState = 'blooming';
     this.bloomProgress = 0;
 
+    this.announceSection(section);
+  }
+
+  private announceSection(section: string) {
     this.dispatchEvent(
       new CustomEvent('section-selected', {
         detail: { section },
@@ -760,6 +849,19 @@ export class GoldenRoseElement extends LitElement {
         composed: true,
       })
     );
+  }
+
+  // Every petal whose poem has been read wilts (see SPENT in rose-look.ts).
+  private applySpentPetals() {
+    for (const petal of this.petals) {
+      const section: string | null = petal.userData.section;
+      setPetalSpent(petal.material as THREE.Material, !!section && this.readPoems.has(SECTION_TITLES[section]));
+    }
+  }
+
+  // Index of the petal that opens `section`, or -1.
+  private petalIndexForSection(section: string): number {
+    return this.petals.findIndex((petal) => petal.userData?.section === section);
   }
 
   // Start a camera fly to a top-down view of the bloom. Driven by the bloom
@@ -813,6 +915,30 @@ export class GoldenRoseElement extends LitElement {
       })
     );
   }
+
+  // Opens the poem on `sectionId`'s petal from outside the rose (the poem
+  // list). From the closed rose it blooms as a petal click does; with a poem
+  // already open the words swap in place; mid-animation the request waits
+  // for the rose to settle (see updated()).
+  openSection(sectionId: string) {
+    const index = this.petalIndexForSection(sectionId);
+    if (index === -1) return;
+    if (this.roseState === 'blooming' || this.roseState === 'closing') {
+      this.pendingSection = sectionId;
+      return;
+    }
+    if (this.roseState === 'idle') {
+      this.handlePetalClick(index);
+      return;
+    }
+    if (poemIndexOfSection(sectionId) === poemIndexOfSection(this.activeSection)) return;
+    this.activeSection = sectionId;
+    this.announceSection(sectionId);
+  }
+
+  private handlePoemSelect = (event: CustomEvent<{ sectionId: string }>) => {
+    this.openSection(event.detail.sectionId);
+  };
 
   private handleCanvasClick = (event: MouseEvent) => {
     // Update mouse position
@@ -1015,6 +1141,7 @@ export class GoldenRoseElement extends LitElement {
       this.camera.lookAt(this.bloomCenter);
     }
 
+    this.applySpentPetals();
     // Reveal the rose first — any Troika failure cannot keep the shimmer up.
     this.loading = false;
 
@@ -1093,7 +1220,10 @@ export class GoldenRoseElement extends LitElement {
     // Bloom and breath share one pose: the breath keeps moving the petals
     // in every state, the bloom is laid over it. Offers are settled first
     // because an offered petal also lifts.
-    if (this.petals.length > 0) this.updateOffers(dt);
+    if (this.petals.length > 0) {
+      this.updateSelection(dt);
+      this.updateOffers(dt);
+    }
     this.posePetals(this.easeOutCubic(this.bloomProgress));
     this.updateKeyLight(now / 1000);
     this.skyDome?.update(now / 1000);
@@ -1134,6 +1264,9 @@ export class GoldenRoseElement extends LitElement {
       // An offered petal rises out of the bloom toward the viewer's hand;
       // the gesture belongs to the closed rose and fades as it opens.
       const offer = this.goldLevels[index] * (1 - bloom);
+      // The chosen petal gives under the click: it sinks and tips inward.
+      const press =
+        !breath.still && this.petalGroupOf[index] === this.selectedGroup ? this.pressAmount() : 0;
 
       // Geometry is re-centered at load so each petal's local origin = its
       // centroid. Rotating `petal.quaternion` therefore pivots the petal
@@ -1141,7 +1274,9 @@ export class GoldenRoseElement extends LitElement {
       petal.quaternion.setFromAxisAngle(
         o.tangent,
         this.BLOOM_FLARE * bloom -
-          (BREATH_MOTION.petalFlareDegrees * air + OFFER.tiltDegrees * offer) *
+          (BREATH_MOTION.petalFlareDegrees * air +
+            OFFER.tiltDegrees * offer -
+            SELECT.pressTiltDegrees * press) *
             THREE.MathUtils.DEG2RAD
       );
       petal.position
@@ -1151,7 +1286,10 @@ export class GoldenRoseElement extends LitElement {
           this.BLOOM_SPREAD * bloom + BREATH_MOTION.petalSpread * air + OFFER.liftOut * offer
         );
       petal.position.y +=
-        this.BLOOM_LIFT * bloom + BREATH_MOTION.petalLift * air + OFFER.lift * offer;
+        this.BLOOM_LIFT * bloom +
+        BREATH_MOTION.petalLift * air +
+        OFFER.lift * offer -
+        SELECT.pressSink * press;
     });
   }
 
@@ -1211,13 +1349,6 @@ export class GoldenRoseElement extends LitElement {
         >
           ${HINT.text}
         </p>
-        <p
-          class="petal-title ${this.hoveredTitle !== null && this.roseState === 'idle' && !this.coarsePointer ? 'shown' : ''}"
-          data-testid="petal-title"
-          aria-hidden="true"
-        >
-          ${this.hoveredTitle ?? this.lastTitle}
-        </p>
         <div id="content-root" class="${this.roseState === 'open' ? 'visible' : ''}">
           <button
             class="close-button"
@@ -1229,6 +1360,14 @@ export class GoldenRoseElement extends LitElement {
           </button>
           <div id="content-mount" class="content-body" data-testid="content-body"></div>
         </div>
+        ${this.loading
+          ? null
+          : html`<poem-list
+              .activeSection=${this.activeSection}
+              .hoveredSection=${this.hoveredSection}
+              .readPoems=${this.readPoems}
+              @poem-select=${this.handlePoemSelect}
+            ></poem-list>`}
         <div class="attribution" data-testid="model-attribution">
           <a
             href="https://sketchfab.com/3d-models/rose-6281bf3703584323bb4d8326f1f1b59d"
