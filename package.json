@@ -6,7 +6,8 @@
   "scripts": {
     "build": "rspress build",
     "dev": "rspress dev",
-    "preview": "rspress preview"
+    "preview": "rspress preview",
+    "og:house-of-arcana": "bun scripts/og-house-of-arcana.ts"
   },
   "dependencies": {
     "@fontsource/cormorant-garamond": "^5.3.0",

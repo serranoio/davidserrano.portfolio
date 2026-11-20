@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 import { defineConfig } from '@rspress/core';
 import { BLOG_POSTS, TAG_ORDER, TAG_LABELS, postsByTag } from './theme/blog-posts';
+import { socialPreviewHead } from './theme/social-preview';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -8,6 +9,7 @@ export default defineConfig({
   icon: '/serrano-heart.png',
   logo: '/serrano-heart.png',
   logoText: 'David Serrano',
+  head: [socialPreviewHead],
   themeConfig: {
     nav: [
       { text: 'Engineering', link: '/engineering' },

@@ -123,12 +123,12 @@ export const TAG_CARDS: Record<BlogTag, { title: string; blurb: string }> = {
 };
 
 const BLOG_DIR = path.join(process.cwd(), 'docs', 'blog');
-const FRONTMATTER_RE = /^---\n([\s\S]*?)\n---/;
+export const FRONTMATTER_RE = /^---\n([\s\S]*?)\n---/;
 const FALLBACK_TITLES: Record<string, string> = {
   intro: 'Welcome',
 };
 
-function parseScalar(frontmatter: string, key: string): string | undefined {
+export function parseScalar(frontmatter: string, key: string): string | undefined {
   const match = frontmatter.match(new RegExp(`^${key}:\\s*(.+)$`, 'm'));
   return match?.[1]?.trim().replace(/^['"]|['"]$/g, '');
 }
