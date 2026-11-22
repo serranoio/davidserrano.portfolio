@@ -113,7 +113,6 @@
 .arcana-page__section { margin-top: clamp(2.125rem, 5vw, 3.5rem); animation: arcana-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1); }
 .arcana-page__section:focus-visible { outline-offset: 6px; }
 .portfolio-page .arcana-page__section p { max-width: 42rem; margin: 0; color: var(--arcana-text-muted); }
-.arcana-quant em { color: var(--arcana-text); font-style: normal; font-family: var(--arcana-font-mono); font-size: 0.875em; }
 @keyframes arcana-rise { from { opacity: 0; transform: translateY(0.5rem); } }
 
 /* The small ruled label every tab uses: mono capitals, green. */
@@ -125,100 +124,6 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--arcana-green);
-}
-
-/* Quant: four stages on one track, each with a dashed exit down to a shared verdict rail. */
-.arcana-quant { --arcana-quant-dot: 9px; }
-.arcana-quant__stages {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid var(--arcana-border-strong);
-}
-/* The track's head: it carries on past the last stage. */
-.arcana-quant__stages::after {
-  content: '';
-  position: absolute;
-  right: 0;
-  top: -4px;
-  width: 7px;
-  height: 7px;
-  border-top: 1px solid var(--arcana-border-strong);
-  border-right: 1px solid var(--arcana-border-strong);
-  transform: rotate(45deg);
-}
-.arcana-quant__stage { position: relative; padding: 1.75rem 1.75rem 2.625rem 0; }
-.arcana-quant__stage::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: calc(var(--arcana-quant-dot) / -2 - 0.5px);
-  width: var(--arcana-quant-dot);
-  height: var(--arcana-quant-dot);
-  border-radius: 50%;
-  background: var(--arcana-green);
-  box-shadow: 0 0 0 4px var(--arcana-canvas);
-}
-.arcana-quant__stage::after {
-  content: '';
-  position: absolute;
-  left: calc(var(--arcana-quant-dot) / 2 - 0.5px);
-  bottom: 0;
-  height: 1.3125rem;
-  border-left: 1px dashed var(--arcana-red);
-  opacity: 0.7;
-}
-.arcana-quant__number {
-  display: block;
-  margin-bottom: 0.8125rem;
-  font-family: var(--arcana-font-brand);
-  font-size: clamp(2.75rem, 6vw, 4.5rem);
-  font-style: italic;
-  font-weight: 700;
-  line-height: 0.9;
-  color: transparent;
-  -webkit-text-stroke: 1px var(--arcana-text-subtle);
-  opacity: 0.55;
-  transition: opacity 0.3s ease;
-}
-.arcana-quant__stage:hover .arcana-quant__number { opacity: 1; }
-.portfolio-page .arcana-quant__name {
-  margin: 0 0 0.5rem;
-  font-family: var(--arcana-font-brand);
-  font-size: 1.125rem;
-  font-weight: 400;
-  line-height: 1.3;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--arcana-text);
-}
-.portfolio-page .arcana-quant__stage p { font-size: 0.9375rem; line-height: 1.65; }
-.portfolio-page .arcana-quant .arcana-quant__exit,
-.portfolio-page .arcana-quant .arcana-quant__next { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.3125rem 1.3125rem; max-width: none; }
-.portfolio-page .arcana-quant .arcana-quant__exit { padding-top: 0.8125rem; border-top: 1px dashed color-mix(in srgb, var(--arcana-red) 70%, transparent); }
-.arcana-quant__exit .arcana-kicker { color: var(--arcana-red); }
-.portfolio-page .arcana-quant .arcana-quant__next { justify-content: flex-end; margin-top: 1.3125rem; color: var(--arcana-text); }
-
-/* Narrow: the track runs down the left edge; the stages read top to bottom, then the rails. */
-@media (max-width: 760px) {
-  .arcana-quant__stages { grid-template-columns: 1fr; border-top: 0; padding-left: 1.75rem; }
-  .arcana-quant__stages::before {
-    content: '';
-    position: absolute;
-    left: calc(var(--arcana-quant-dot) / 2 - 0.5px);
-    top: 0.5rem;
-    bottom: 0;
-    border-left: 1px solid var(--arcana-border-strong);
-  }
-  .arcana-quant__stages::after { right: auto; top: auto; bottom: 0; left: 1px; transform: rotate(135deg); }
-  .arcana-quant__stage { display: grid; grid-template-columns: 3.5rem 1fr; column-gap: 1.0625rem; padding: 0 0 1.75rem; }
-  .arcana-quant__stage::before { left: -1.75rem; top: 0.5rem; }
-  .arcana-quant__stage::after { display: none; }
-  .arcana-quant__number { grid-row: span 2; margin: 0; font-size: 2.5rem; }
-  .portfolio-page .arcana-quant .arcana-quant__next { justify-content: flex-start; }
 }
 
 /* Backstory: Markdown the author writes (theme/content/house-of-arcana-backstory.md), set as prose. While the file

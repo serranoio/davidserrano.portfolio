@@ -14,8 +14,23 @@ const AUTOPLAY_GRACE_MS = 2500;
  * The demo recording, muted and looping. It autoplays unless the visitor prefers stillness. Whenever it is not
  * playing — reduced motion, autoplay refused (iOS Low Power Mode, data saver) or still loading past the grace
  * period — a play button over the poster starts it, since a tap always permits playback. Offscreen, it pauses.
+ * Without `src`, it is the main demo recording.
  */
-export function ArcanaDemoVideo({ className }: { className?: string }) {
+export function ArcanaDemoVideo({
+  className,
+  src = arcanaDemo.video.mp4,
+  poster = arcanaDemo.video.poster,
+  label = `Arcana replaying a trading backtest on ${arcanaDemo.market}`,
+  playLabel = 'Play the demo replay',
+}: {
+  className?: string;
+  src?: string;
+  poster?: string;
+  /** What the recording shows; names the video. */
+  label?: string;
+  /** Names the play button. */
+  playLabel?: string;
+}) {
   const video = useRef<HTMLVideoElement>(null);
   // Whether the recording should be running: autoplay was allowed, or the visitor pressed play.
   const wanted = useRef(false);
@@ -85,15 +100,16 @@ export function ArcanaDemoVideo({ className }: { className?: string }) {
   return (
     <div className="arcana-video">
       <video ref={video} className={className} muted loop playsInline preload="metadata"
-        poster={arcanaDemo.video.poster} aria-label={`Arcana replaying a trading backtest on ${arcanaDemo.market}`}>
-        <source src={arcanaDemo.video.mp4} type="video/mp4" />
+        poster={poster} aria-label={label}>
+        <source src={src} type="video/mp4" />
       </video>
       {!playing && !settling && (
-        <button type="button" className="arcana-video__play" onClick={onPlay} aria-label="Play the demo replay">
+        <button type="button" className="arcana-video__play" onClick={onPlay} aria-label={playLabel}>
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z" /></svg>
           <span aria-hidden="true">Play replay</span>
         </button>
       )}
+
     </div>
   );
 }

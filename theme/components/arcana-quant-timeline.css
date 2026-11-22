@@ -1,0 +1,108 @@
+/* Quant: the research pipeline as a vertical timeline. A green rail joins four numbered nodes, each with its step's
+   Arcana screen; the rail ends on the exits. Tokens: theme/index.css; .arcana-kicker: house-of-arcana-page.css. */
+
+.arcana-quant {
+  --arcana-quant-node: 2.5rem;
+  --arcana-quant-rail: 2px;
+  --arcana-quant-indent: calc(var(--arcana-quant-node) + 1.3125rem);
+}
+.arcana-quant__steps { margin: 0; padding: 0; list-style: none; }
+
+.arcana-quant__step,
+.arcana-quant__end { position: relative; padding-left: var(--arcana-quant-indent); }
+.arcana-quant__step {
+  display: grid;
+  gap: 1.0625rem;
+  padding-bottom: clamp(2.625rem, 6vw, 3.5rem);
+}
+
+/* The rail: drawn by each step from its node down to the next, so it ends where the steps do. */
+.arcana-quant__step::before {
+  content: '';
+  position: absolute;
+  left: calc((var(--arcana-quant-node) - var(--arcana-quant-rail)) / 2);
+  top: 0;
+  bottom: 0;
+  width: var(--arcana-quant-rail);
+  background: var(--arcana-green);
+}
+
+.arcana-quant__node {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
+  width: var(--arcana-quant-node);
+  height: var(--arcana-quant-node);
+  border: var(--arcana-quant-rail) solid var(--arcana-green);
+  border-radius: 50%;
+  background: var(--arcana-canvas);
+  color: var(--arcana-green);
+  font-family: var(--arcana-font-mono);
+  font-size: 0.8125rem;
+  line-height: 1;
+  box-shadow: 0 0 0 4px var(--arcana-canvas);
+}
+/* The end of the rail: a small open node in the exits' red. */
+.arcana-quant__node--end {
+  --arcana-quant-end: 0.75rem;
+  left: calc((var(--arcana-quant-node) - var(--arcana-quant-end)) / 2);
+  top: 0.3125rem;
+  width: var(--arcana-quant-end);
+  height: var(--arcana-quant-end);
+  border-color: var(--arcana-red);
+}
+
+.portfolio-page .arcana-quant__name {
+  margin: 0 0 0.5rem;
+  padding-top: 0.5rem;
+  font-family: var(--arcana-font-brand);
+  font-size: 1.125rem;
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--arcana-text);
+}
+.portfolio-page .arcana-quant__text p { font-size: 0.9375rem; line-height: 1.65; }
+
+.arcana-quant__figure { min-width: 0; margin: 0; }
+.arcana-quant__media {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--arcana-border);
+  border-radius: 0.25rem;
+  background: var(--arcana-canvas-raised);
+}
+.portfolio-page .arcana-quant__caption {
+  margin-top: 0.8125rem;
+  font-family: var(--arcana-font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--arcana-text-subtle);
+}
+
+.portfolio-page .arcana-quant .arcana-quant__exit,
+.portfolio-page .arcana-quant .arcana-quant__next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3125rem 1.3125rem;
+  max-width: none;
+}
+.arcana-quant__exit .arcana-kicker { color: var(--arcana-red); }
+.portfolio-page .arcana-quant .arcana-quant__next { margin-top: 0.8125rem; color: var(--arcana-text); }
+.arcana-quant em { color: var(--arcana-text); font-style: normal; font-family: var(--arcana-font-mono); font-size: 0.875em; }
+
+/* Wide: each step's words beside its screen. */
+@media (min-width: 960px) {
+  .arcana-quant__step { grid-template-columns: minmax(12rem, 17rem) minmax(0, 1fr); column-gap: 2.625rem; align-items: start; }
+}
+
+@media (max-width: 640px) {
+  .arcana-quant { --arcana-quant-node: 2.125rem; --arcana-quant-indent: calc(var(--arcana-quant-node) + 0.8125rem); }
+  .arcana-quant__node { font-size: 0.75rem; }
+}

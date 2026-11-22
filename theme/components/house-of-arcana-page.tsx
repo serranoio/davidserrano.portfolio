@@ -4,7 +4,7 @@ import { arcanaDemo } from '../arcana-demo';
 import Backstory from '../content/house-of-arcana-backstory.md';
 import { ArcanaDemoVideo } from './arcana-card';
 import { ArcanaLayers } from './arcana-layers';
-import { arcanaOrdinal } from './arcana-ordinal';
+import { ArcanaQuantTimeline } from './arcana-quant-timeline';
 import { PortfolioPage } from './portfolio-pages';
 import { useTabList } from './use-tab-list';
 import './arcana-spiral';
@@ -12,40 +12,8 @@ import './house-of-arcana-page.css';
 
 type SectionId = 'quant' | 'engineering' | 'backstory';
 
-/** The research pipeline, in order. Any stage may stop an idea; only a validated one goes on to paper trading. */
-const STAGES: readonly { name: string; text: string }[] = [
-  { name: 'Claim', text: 'State a falsifiable market hypothesis and the equation that forecasts it.' },
-  { name: 'Forecast', text: 'Replay market evidence and score every forecast against what the market did.' },
-  { name: 'Trade', text: 'Backtest trading on those forecasts, with fees, fills and capital limits simulated.' },
-  { name: 'Validate', text: 'Freeze the configuration and run it once on a held-out validation period.' },
-];
-
-function QuantPipeline() {
-  return (
-    <div className="arcana-quant">
-      <ol className="arcana-quant__stages">
-        {STAGES.map((stage, i) => (
-          <li key={stage.name} className="arcana-quant__stage">
-            <span className="arcana-quant__number" aria-hidden="true">{arcanaOrdinal(i)}</span>
-            <h3 className="arcana-quant__name">{stage.name}</h3>
-            <p>{stage.text}</p>
-          </li>
-        ))}
-      </ol>
-      <p className="arcana-quant__exit">
-        <span className="arcana-kicker">Exit</span>
-        <span>Every stage can conclude <em>insufficient evidence</em> or <em>do not trade</em>.</span>
-      </p>
-      <p className="arcana-quant__next">
-        <span className="arcana-kicker">Then</span>
-        <span>Paper trading. Not live yet.</span>
-      </p>
-    </div>
-  );
-}
-
 const SECTIONS: readonly { id: SectionId; label: string; body: () => ReactNode }[] = [
-  { id: 'quant', label: 'Quant', body: () => <QuantPipeline /> },
+  { id: 'quant', label: 'Quant', body: () => <ArcanaQuantTimeline /> },
   { id: 'engineering', label: 'Engineering', body: () => <ArcanaLayers /> },
   {
     id: 'backstory',
@@ -95,6 +63,13 @@ export function HouseOfArcanaPage() {
           <figcaption className="arcana-page__caption">{arcanaDemo.caption}</figcaption>
         </figure>
 
+
+<div>
+  <p>
+This is NOT a product I am selling. I don't have to! I can scale this to millions of revenue without any funding as I can run this allllll locally on my hardare. If VC acquires me, then we will turn this into a real product.
+  </p>
+
+</div>
         <div className="arcana-page__tabs" role="tablist" aria-label="The House of Arcana" onKeyDown={onKeyDown}>
           {SECTIONS.map((s) => (
             <button key={s.id} type="button" id={`arcana-tab-${s.id}`} aria-controls={`arcana-panel-${s.id}`}
