@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { breath } from './breath';
 import { SKY, STAR_CONFIG } from './shooting-stars-config';
+import { NOISE_GLSL } from './glsl-noise';
 
 const VERTEX_SHADER = /* glsl */ `
 varying vec3 vDirection;
@@ -19,25 +20,11 @@ uniform vec3 uHorizon;
 uniform vec3 uHaze;
 uniform float uHazeStrength;
 uniform float uTime;
+uniform float uGain;
+uniform vec3 uTint;
 varying vec3 vDirection;
 
-float hash( vec3 p ) {
-  p = fract( p * 0.3183099 + 0.1 );
-  p *= 17.0;
-  return fract( p.x * p.y * p.z * ( p.x + p.y + p.z ) );
-}
-
-float noise( vec3 x ) {
-  vec3 i = floor( x );
-  vec3 f = fract( x );
-  f = f * f * ( 3.0 - 2.0 * f );
-  return mix(
-    mix( mix( hash( i ), hash( i + vec3( 1, 0, 0 ) ), f.x ),
-         mix( hash( i + vec3( 0, 1, 0 ) ), hash( i + vec3( 1, 1, 0 ) ), f.x ), f.y ),
-    mix( mix( hash( i + vec3( 0, 0, 1 ) ), hash( i + vec3( 1, 0, 1 ) ), f.x ),
-         mix( hash( i + vec3( 0, 1, 1 ) ), hash( i + vec3( 1, 1, 1 ) ), f.x ), f.y ),
-    f.z );
-}
+${NOISE_GLSL}
 
 void main() {
   vec3 dir = normalize( vDirection );
@@ -49,6 +36,9 @@ void main() {
   haze = smoothstep( 0.5, 0.82, haze );
   // Haze gathers low and thins toward the zenith.
   color += uHaze * haze * uHazeStrength * ( 1.0 - 0.75 * height );
+  // Grade set by whatever lights the sky (the forged star): an overall gain
+  // and a warm wash that, like the haze, gathers low.
+  color = color * uGain + uTint * ( 0.4 + haze ) * ( 1.0 - 0.6 * height );
 
   gl_FragColor = vec4( color, 1.0 );
   #include <colorspace_fragment>
@@ -71,6 +61,8 @@ export class SkyDome {
         uHaze: { value: new THREE.Color(SKY.haze) },
         uHazeStrength: { value: SKY.hazeStrength },
         uTime: { value: 0 },
+        uGain: { value: 1 },
+        uTint: { value: new THREE.Color(0, 0, 0) },
       },
       vertexShader: VERTEX_SHADER,
       fragmentShader: FRAGMENT_SHADER,
@@ -89,6 +81,13 @@ export class SkyDome {
     this.material.uniforms.uTime.value = breath.still ? 0 : nowSec * SKY.hazeDriftPerSec;
     this.material.uniforms.uHazeStrength.value =
       SKY.hazeStrength * (1 - SKY.hazeBreath * (1 - breath.level()));
+  }
+
+  // `gain` scales the sky (1 = as authored); `tint` is a linear colour added
+  // on top. Both are owned by the caller and applied until changed.
+  setGrade(gain: number, tint: THREE.Color) {
+    this.material.uniforms.uGain.value = gain;
+    (this.material.uniforms.uTint.value as THREE.Color).copy(tint);
   }
 
   dispose() {

@@ -12,6 +12,8 @@ It was 8:11 am in a Summer in San Francisco in 2023. I had downloaded a personal
 
  It was the equivalent of the Stormbreaker forged by a star in Avengers: Infinity War. 
 
+[[star]]
+
 Every strike of the hammer, every drop of sweat, my mentor's +20 years of experience, of failing & learning from these mistakes, his entire soul had been poured into this codebase just as how the heart of the star had been poured into Stormbreaker's forge. Harnessing this amount of power has to be cultivated, learned.
 
 I could feel the passion in the code. There is no reason why someone would build such a beautiful masterpiece if it didn't have passion behind it.
