@@ -2,11 +2,13 @@ The Ballad of Programata - A collection of poems about coding
 
 By David Serrano
 
-Click a petal to view my poems or read the preface
+Click a petal to view my poems or scroll to read the preface
 
 Preface
 
-It was 8:11 am in a Summer in San Francisco in 2023. I had downloaded a personal project vacuum made by my mentor, [quobix](https://quobix.com/), onto my goland IDE. I remember standing away from my desk in absolute awe of what I had just seen. I think this was the second epiphany moment of my lifetime. I saw code **forged** into art.
+It was 8:11 am in a Summer in San Francisco in 2023. I had downloaded a personal project vacuum made by my mentor, [quobix](https://quobix.com/), onto my goland IDE.
+
+ And that's all it took. I remember standing away from my desk in absolute awe of what I had just seen. I think this was the second epiphany moment of my lifetime. I saw code **forged** into art.
 
  It was the equivalent of the Stormbreaker forged by a star in Avengers: Infinity War. 
 
