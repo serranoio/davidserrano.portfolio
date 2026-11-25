@@ -106,3 +106,30 @@
 - Reversing retraces the poem without resetting it.
 - Model loading does not move the writing section; reload restores the poem at the restored page position.
 - Paragraph buttons scroll the same page timeline, respect reduced motion, and leave the screen with the rose.
+
+---
+
+## TC-8 — The forged star (Stormbreaker slot)
+
+The `[[star]]` line in `docs/sections/truth-statement.txt` reserves an empty
+slot (1.5 extra paragraph slots of scroll) under the Stormbreaker paragraph.
+Tunables live in `theme/components/star-forge-config.ts`.
+
+**Steps:**
+1. Scroll until "It was the equivalent of the Stormbreaker…" is in focus, then keep scrolling slowly toward "Every strike of the hammer…".
+2. In the console, read `__ROSE_TEST_API__.getStarProgress()` and `getStarIntensity()` at several points.
+3. Scroll backward through the same range, then forward again quickly (wheel, scrollbar drag, Page Down).
+4. Repeat at 375×667 with touch emulation, and with reduced motion enabled.
+5. Click a petal while the beam is on.
+
+**Expected:**
+- The marker never renders as text; the gap under the Stormbreaker paragraph is empty except for the star.
+- 0–0.25 progress: the sky and meteors dim slightly; a faint pinprick appears below the paragraph, deep behind the text.
+- 0.25–0.55: the core swells and overexposes to white with a soft warm glare and slowly churning corona (white → pale gold → amber, never saturated orange); the sky warms a little.
+- 0.55–0.8: a thin, soft-edged beam reaches from the star to the rose; dust motes glitter inside it; the rose takes warm light and its petals gild.
+- 0.8–1: the beam thins and fades as the next paragraph rises; a faint ember remains.
+- No hard edges, ghost flares, diffraction spikes or cartoon rays.
+- `getStarProgress()` is 0 before the slot and 1 after it, and the same page position always reports the same progress and intensity in both directions. With reduced motion, the same position renders the same frame.
+- Mobile shows fewer dust motes and a narrower offset, with the star still under the paragraph.
+- The star, beam and rose light fade with the text during the bloom (TC-3) and return on close (TC-4).
+- Paragraph arrows step over the star slot paragraph-to-paragraph; page height grows by exactly 1.5 × 40svh.

@@ -29,6 +29,24 @@ const MOBILE_PARAGRAPH_SPACING = 1.0;
 const MOBILE_HEIGHT_OFFSET = -0.3;
 const MOBILE_RADIAL_DISTANCE = 1.35;
 
+// A line like `[[star]]` standing alone as a paragraph reserves an empty slot
+// in the stack instead of rendering: room (and scroll) for a scene beat
+// between two paragraphs. It is never drawn.
+const SLOT_MARKER = /^\[\[([\w-]+)\]\]$/;
+
+// Extra paragraph slots each named marker adds (unknown names add none).
+export type SlotSpans = Readonly<Record<string, number>>;
+
+// Where everything sits in the stack, in paragraph slots: paragraph i is
+// centred at `positions[i]`; a named slot runs from the paragraph before its
+// marker to the paragraph after it.
+export interface TruthLayout {
+  paragraphs: string[];
+  positions: number[];
+  slots: Record<string, { start: number; end: number }>;
+  totalSlots: number;
+}
+
 export class RoseText {
   readonly group: THREE.Group;
   readonly meshes: Text[] = [];
@@ -44,6 +62,7 @@ export class RoseText {
   private scrollOffset = 0;
   private maxScrollOffset: number;
   private paragraphSpacing = PARAGRAPH_SPACING;
+  private readonly layout: TruthLayout;
 
   // Mirror the opacity we *intend* to render at. Reading back from
   // mesh.material.opacity on a Troika Text mesh isn't reliable (Troika wraps
@@ -52,7 +71,7 @@ export class RoseText {
   private lastOpacity = 1;
 
   // `color` is the resolved text colour token (any CSS colour string).
-  constructor(body: string, bloomCenter: THREE.Vector3, color: string) {
+  constructor(body: string, bloomCenter: THREE.Vector3, color: string, slotSpans: SlotSpans = {}) {
     if (typeof body !== 'string') {
       throw new TypeError(
         `RoseText requires a string body, got ${typeof body}. ` +
@@ -60,7 +79,8 @@ export class RoseText {
       );
     }
 
-    const paragraphs = RoseText.parseParagraphs(body);
+    this.layout = RoseText.layout(body, slotSpans);
+    const { paragraphs } = this.layout;
     this.group = new THREE.Group();
 
     paragraphs.forEach((paragraph, index) => {
@@ -85,7 +105,7 @@ export class RoseText {
       text.frustumCulled = false;
       // Stack each paragraph downward along local Y. Paragraph 0 sits at the
       // top of the stack so the first paragraph is what the user sees first.
-      text.position.y = -index * PARAGRAPH_SPACING;
+      text.position.y = -this.layout.positions[index] * PARAGRAPH_SPACING;
       text.sync();
       this.meshes.push(text);
       this.group.add(text);
@@ -94,7 +114,7 @@ export class RoseText {
     this.bloomCenter = bloomCenter.clone();
     this.heightOffset = TEXT_OFFSET.y;
     this.radialDistance = Math.abs(TEXT_OFFSET.z);
-    this.maxScrollOffset = Math.max(0, (paragraphs.length - 1) * PARAGRAPH_SPACING);
+    this.maxScrollOffset = this.layout.totalSlots * PARAGRAPH_SPACING;
 
     // Seed initial position; overwritten each frame by update().
     this.group.position.copy(this.bloomCenter).add(TEXT_OFFSET);
@@ -135,14 +155,14 @@ export class RoseText {
     this.heightOffset = enabled ? MOBILE_HEIGHT_OFFSET : TEXT_OFFSET.y;
     this.radialDistance = enabled ? MOBILE_RADIAL_DISTANCE : Math.abs(TEXT_OFFSET.z);
     this.paragraphSpacing = enabled ? MOBILE_PARAGRAPH_SPACING : PARAGRAPH_SPACING;
-    this.maxScrollOffset = Math.max(0, (this.meshes.length - 1) * this.paragraphSpacing);
+    this.maxScrollOffset = this.layout.totalSlots * this.paragraphSpacing;
     this.scrollOffset = Math.max(0, Math.min(this.maxScrollOffset, this.scrollOffset));
 
     this.meshes.forEach((mesh, index) => {
       mesh.fontSize = enabled ? MOBILE_TEXT_FONT_SIZE : TEXT_FONT_SIZE;
       mesh.lineHeight = enabled ? MOBILE_TEXT_LINE_HEIGHT : TEXT_LINE_HEIGHT;
       mesh.maxWidth = enabled ? MOBILE_TEXT_MAX_WIDTH : TEXT_MAX_WIDTH;
-      mesh.position.y = -index * this.paragraphSpacing;
+      mesh.position.y = -this.layout.positions[index] * this.paragraphSpacing;
       mesh.sync();
     });
   }
@@ -163,12 +183,51 @@ export class RoseText {
     return this.meshes.length;
   }
 
+  // Scroll position in paragraph slots (0 = first paragraph in focus).
+  private scrolledSlots(): number {
+    return this.paragraphSpacing > 0 ? this.scrollOffset / this.paragraphSpacing : 0;
+  }
+
   getActiveParagraphIndex(): number {
-    if (this.paragraphSpacing <= 0) return 0;
-    return Math.max(
-      0,
-      Math.min(this.meshes.length - 1, Math.round(this.scrollOffset / this.paragraphSpacing))
+    const scrolled = this.scrolledSlots();
+    let nearest = 0;
+    this.layout.positions.forEach((position, index) => {
+      if (Math.abs(position - scrolled) < Math.abs(this.layout.positions[nearest] - scrolled)) {
+        nearest = index;
+      }
+    });
+    return nearest;
+  }
+
+  // Each paragraph's place on the poem's scroll timeline (0–1).
+  getParagraphProgresses(): number[] {
+    const total = this.layout.totalSlots;
+    return this.layout.positions.map((position) => (total > 0 ? position / total : 0));
+  }
+
+  // 0 while the paragraph before the named slot is in focus, 1 once the
+  // paragraph after it is; 0 for a slot the text does not have.
+  getSlotProgress(name: string): number {
+    const slot = this.layout.slots[name];
+    if (!slot || slot.end <= slot.start) return 0;
+    return THREE.MathUtils.clamp((this.scrolledSlots() - slot.start) / (slot.end - slot.start), 0, 1);
+  }
+
+  // World position on the text plane, as of the last update(), of the
+  // paragraph that opens the named slot. `parallax` (0–1) scales how far it
+  // has scrolled from the focal line, so something set deep behind the words
+  // moves less than they do. Leaves `out` untouched and returns false for an
+  // unknown slot.
+  getSlotAnchor(name: string, parallax: number, out: THREE.Vector3): boolean {
+    const slot = this.layout.slots[name];
+    if (!slot) return false;
+    const opening = slot.start * this.paragraphSpacing;
+    out.set(
+      this.group.position.x,
+      this.bloomCenter.y + this.heightOffset + parallax * (this.scrollOffset - opening),
+      this.group.position.z
     );
+    return true;
   }
 
   getActiveParagraphScreenBounds(camera: THREE.Camera, viewport: { width: number; height: number }) {
@@ -222,6 +281,35 @@ export class RoseText {
     }
     this.meshes.length = 0;
     if (this.group.parent) this.group.parent.remove(this.group);
+  }
+
+  static layout(body: string, slotSpans: SlotSpans = {}): TruthLayout {
+    const paragraphs: string[] = [];
+    const positions: number[] = [];
+    const slots: TruthLayout['slots'] = {};
+    let open: string[] = [];
+    let cursor = 0;
+    let pending = 0;
+    for (const block of RoseText.parseParagraphs(body)) {
+      const marker = SLOT_MARKER.exec(block);
+      if (marker) {
+        const name = marker[1];
+        pending += slotSpans[name] ?? 0;
+        slots[name] = { start: cursor, end: cursor };
+        open.push(name);
+        continue;
+      }
+      const position = paragraphs.length === 0 ? pending : cursor + 1 + pending;
+      for (const name of open) slots[name].end = position;
+      paragraphs.push(block);
+      positions.push(position);
+      open = [];
+      cursor = position;
+      pending = 0;
+    }
+    // A marker after the last paragraph still extends the scroll.
+    for (const name of open) slots[name].end = cursor + pending;
+    return { paragraphs, positions, slots, totalSlots: cursor + pending };
   }
 
   static parseParagraphs(body: string): string[] {

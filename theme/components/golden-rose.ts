@@ -10,6 +10,8 @@ import './poem-list';
 import { RoseText } from './rose-text';
 import { MeteorField } from './meteor-field';
 import { SkyDome } from './sky-dome';
+import { StarForge } from './star-forge';
+import { STAR_FORGE } from './star-forge-config';
 import { breath } from './breath';
 import { createPetalLook, createPetalMaterial, setPetalGold, setPetalSelect, setPetalSpent } from './petal-material';
 import { loadReadPoems, markPoemRead } from './read-poems';
@@ -32,6 +34,10 @@ const ROSE_MODEL_URL = '/models/rose_separated.glb';
 // The light's elevation wanders on a period unrelated to its azimuth so the
 // path never visibly repeats.
 const LIGHT_ELEVATION_PERIOD_RATIO = 0.62;
+// Page scroll reserved per paragraph slot of the preface.
+const SCROLL_SVH_PER_SLOT = 40;
+// Empty slots the preface reserves for scene beats (see RoseText.layout).
+const TRUTH_SLOT_SPANS = { [STAR_FORGE.slot.name]: STAR_FORGE.slot.span };
 
 // Exponential approach of `current` toward `target` at `rate` per second.
 function approach(current: number, target: number, rate: number, dt: number): number {
@@ -66,6 +72,8 @@ interface RoseTestAPI {
   projectPetalToScreen: (index: number) => { x: number; y: number } | null;
   raycastAtCanvas: (x: number, y: number) => { index: number; isActive: boolean; section: string | null } | null;
   setAutoRotate: (enabled: boolean) => void;
+  getStarProgress: () => number;
+  getStarIntensity: () => number;
 }
 
 export class GoldenRoseElement extends LitElement {
@@ -152,6 +160,9 @@ export class GoldenRoseElement extends LitElement {
   // so the two sections feel like the same sky.
   private meteorField: MeteorField | null = null;
   private skyDome: SkyDome | null = null;
+  // The star that forges Stormbreaker, in the slot under that paragraph.
+  private starForge: StarForge | null = null;
+  private readonly starAnchor = new THREE.Vector3();
 
   // The one warm light. Drifts slowly and swells with the shared breath.
   private keyLight: THREE.DirectionalLight | null = null;
@@ -280,8 +291,8 @@ export class GoldenRoseElement extends LitElement {
     // Reserve the reading distance before the model loads so loading cannot
     // move the writing section. Stable viewport units avoid toolbar-driven
     // changes to the poem's scroll distance on mobile.
-    const steps = Math.max(0, RoseText.parseParagraphs(truthStatement).length - 1);
-    this.style.setProperty('--poem-scroll-distance', `${steps * 40}svh`);
+    const steps = RoseText.layout(truthStatement, TRUTH_SLOT_SPANS).totalSlots;
+    this.style.setProperty('--poem-scroll-distance', `${steps * SCROLL_SVH_PER_SLOT}svh`);
     // Storage can be unavailable (private mode, blocked site data); the hint
     // then simply shows again next time.
     try {
@@ -397,6 +408,8 @@ export class GoldenRoseElement extends LitElement {
       setAutoRotate: (enabled: boolean) => {
         this.autoRotateEnabled = enabled;
       },
+      getStarProgress: () => this.starForge?.getProgress() ?? 0,
+      getStarIntensity: () => this.starForge?.getIntensity() ?? 0,
       raycastAtCanvas: (x: number, y: number) => {
         if (!this.camera || !this.renderer) return null;
         const size = new THREE.Vector2();
@@ -513,6 +526,9 @@ export class GoldenRoseElement extends LitElement {
 
     // Adapt text and navigation to the pointer while preserving native scroll.
     this.coarseQuery = window.matchMedia('(pointer: coarse)');
+    this.starForge = new StarForge(this.coarseQuery.matches ? 'narrow' : 'wide');
+    this.starForge.setPixelRatio(this.renderer.getPixelRatio());
+    this.scene.add(this.starForge.group);
     this.applyTouchConfig();
     this.coarseQuery.addEventListener('change', this.handleCoarseChange);
 
@@ -533,6 +549,7 @@ export class GoldenRoseElement extends LitElement {
     this.controls.touches.ONE = null;
     this.controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
     this.roseText?.setMobileLayout(isCoarse);
+    this.starForge?.setLayout(isCoarse ? 'narrow' : 'wide');
     this.camera.fov = isCoarse ? CAMERA.coarseFov : CAMERA.fov;
     this.camera.updateProjectionMatrix();
     this.renderer.domElement.style.touchAction = 'pan-y pinch-zoom';
@@ -963,14 +980,18 @@ export class GoldenRoseElement extends LitElement {
     const rect = this.getBoundingClientRect();
     const start = rect.top + window.scrollY;
     const distance = Math.max(0, rect.height - this.sceneViewport.clientHeight);
-    const steps = Math.max(1, this.roseText.getParagraphCount() - 1);
-    const paragraph = THREE.MathUtils.clamp(-rect.top / (distance || 1), 0, 1) * steps;
-    // Round in the travel direction so reversing halfway through a button
-    // transition returns to the preceding paragraph immediately.
-    const next = direction > 0 ? Math.floor(paragraph + 0.01) + 1 : Math.ceil(paragraph - 0.01) - 1;
-    let top = start + (next / steps) * distance;
-    if (next < 0 || next > steps) {
-      const section = document.querySelector(next < 0 ? 'welcome-section' : 'writing-section');
+    const stops = this.roseText.getParagraphProgresses();
+    const progress = THREE.MathUtils.clamp(-rect.top / (distance || 1), 0, 1);
+    // Step past the nearest stop in the travel direction so reversing halfway
+    // through a button transition returns to the preceding paragraph at once.
+    const epsilon = 0.01 / Math.max(1, stops.length);
+    const target =
+      direction > 0
+        ? stops.find((stop) => stop > progress + epsilon)
+        : [...stops].reverse().find((stop) => stop < progress - epsilon);
+    let top = start + (target ?? 0) * distance;
+    if (target === undefined) {
+      const section = document.querySelector(direction < 0 ? 'welcome-section' : 'writing-section');
       if (!section) return;
       top = section.getBoundingClientRect().top + window.scrollY;
     }
@@ -1147,7 +1168,12 @@ export class GoldenRoseElement extends LitElement {
     this.loading = false;
 
     try {
-      this.roseText = new RoseText(truthStatement, this.bloomCenter, readColorToken(this, COLOR_TOKEN.text));
+      this.roseText = new RoseText(
+        truthStatement,
+        this.bloomCenter,
+        readColorToken(this, COLOR_TOKEN.text),
+        TRUTH_SLOT_SPANS
+      );
       this.roseText.setMobileLayout(this.coarseQuery?.matches ?? false);
       this.scene.add(this.roseText.group);
     } catch (err) {
@@ -1238,23 +1264,46 @@ export class GoldenRoseElement extends LitElement {
     this.updateKeyLight(now / 1000);
     this.skyDome?.update(now / 1000);
 
-    if (this.roseText) {
-      // One formula across all states: idle→1, blooming/closing→linear,
-      // open→0. bloomProgress lives in [0,1] for all of them.
-      const fade = Math.min(1, Math.max(0, this.bloomProgress / this.TRUTH_FADE_RATIO));
-      this.roseText.update(this.camera, 1 - fade);
-    }
+    // One formula across all states: idle→1, blooming/closing→linear,
+    // open→0. bloomProgress lives in [0,1] for all of them. The text, the
+    // forged star and the meteors all yield to the panel along it.
+    const presence = 1 - Math.min(1, Math.max(0, this.bloomProgress / this.TRUTH_FADE_RATIO));
+    this.roseText?.update(this.camera, presence);
+    this.updateStarForge(presence, now / 1000);
 
     if (this.meteorField) {
-      // Same fade curve as truth text — meteors are atmosphere and should
-      // yield to the panel just like the prose does.
-      const fade = Math.min(1, Math.max(0, this.bloomProgress / this.TRUTH_FADE_RATIO));
-      this.meteorField.setOpacity(1 - fade);
+      this.meteorField.setOpacity(presence * (this.starForge?.getMeteorGain() ?? 1));
       this.meteorField.update(now / 1000, dt);
     }
 
     this.renderer?.render(this.scene, this.camera);
   };
+
+  // The star follows its slot in the preface: it sits among the words,
+  // its progress is the slot's scroll progress, and it grades the sky and
+  // gilds the petals under its beam. Runs after the text has been placed.
+  private updateStarForge(presence: number, nowSec: number) {
+    const forge = this.starForge;
+    if (!forge) return;
+    const { name } = STAR_FORGE.slot;
+    const placed =
+      !!this.roseText &&
+      this.roseText.getSlotAnchor(name, STAR_FORGE.placement.parallax, this.starAnchor);
+    forge.place(this.starAnchor, this.bloomCenter);
+    forge.update(
+      this.camera,
+      placed ? this.roseText!.getSlotProgress(name) : 0,
+      placed ? presence : 0,
+      nowSec
+    );
+    const grade = forge.getSkyGrade();
+    this.skyDome?.setGrade(grade.gain, grade.tint);
+    // The beam's gold is a floor under each petal's own (hover, ripple).
+    const gild = forge.getGild();
+    this.petals.forEach((petal, index) => {
+      setPetalGold(petal.material as THREE.Material, Math.max(this.goldLevels[index], gild));
+    });
+  }
 
   private easeOutCubic(t: number): number {
     return 1 - Math.pow(1 - t, 3);
@@ -1334,6 +1383,8 @@ export class GoldenRoseElement extends LitElement {
     this.meteorField = null;
     this.skyDome?.dispose();
     this.skyDome = null;
+    this.starForge?.dispose();
+    this.starForge = null;
     this.keyLight = null;
     this.renderer?.dispose();
   }
