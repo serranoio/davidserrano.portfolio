@@ -469,6 +469,7 @@ export class GoldenRoseElement extends LitElement {
     );
     this.camera.position.set(0, 1.7, 2.4);
     this.camera.lookAt(0, 1.3, 0);
+    this.fitCameraFrame();
 
     // Renderer
     this.renderer = new THREE.WebGLRenderer({
@@ -1160,9 +1161,18 @@ export class GoldenRoseElement extends LitElement {
     const { clientWidth: width, clientHeight: height } = this.sceneViewport;
     if (!width || !height) return;
     this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix();
+    this.fitCameraFrame();
     this.renderer.setSize(width, height, false);
   };
+
+  // Shift the rendered frame down so the rose sits below the screen's middle.
+  // A view offset moves the image without moving the camera, so orbiting,
+  // picking and every projection to screen stay consistent with it.
+  private fitCameraFrame() {
+    const width = this.sceneViewport?.clientWidth || 1;
+    const height = this.sceneViewport?.clientHeight || 1;
+    this.camera.setViewOffset(width, height, 0, -height * CAMERA.frameDrop, width, height);
+  }
 
   private animationLoop = () => {
     this.animationFrameId = requestAnimationFrame(this.animationLoop);

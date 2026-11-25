@@ -46,8 +46,8 @@ export class WelcomeSectionElement extends LitElement {
           <p class="intro">
             You're alive, it's beautiful and it is enough to be content.
           </p>
-          <p class="intro">Turn on the music and enjoy the journey with me.</p>
-          <p class="signoff">I'm David. I welcome you to my headspace.</p>
+          <p class="intro">Turn on the music and enjoy the experience with me.</p>
+          <p class="signoff">I'm David and I welcome you to my headspace.</p>
         </div>
         <figure class="photo-col">
           <div class="ember-glow" aria-hidden="true"></div>

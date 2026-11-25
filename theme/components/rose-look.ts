@@ -196,4 +196,7 @@ export const CAMERA = {
   // Touch devices are mostly portrait, where a long lens would push the
   // bloom past the sides of the screen; they keep the wider view.
   coarseFov: 50,
+  // The rose sits below the middle of the screen: the whole frame is shifted
+  // down by this fraction of the viewport height.
+  frameDrop: 0.25,
 } as const;
