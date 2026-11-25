@@ -1,4 +1,5 @@
 import { breath } from './breath';
+import { SpriteCache, fitCanvasToBox } from './canvas-2d';
 import {
   STAR_CONFIG,
   meteorOpacity,
@@ -34,37 +35,15 @@ const DEG_TO_RAD = Math.PI / 180;
 const BASE_ANGLE_RAD = STAR_CONFIG.meteorAngleDegrees * DEG_TO_RAD;
 const ANGLE_JITTER_RAD = STAR_CONFIG.meteorAngleJitterDegrees * DEG_TO_RAD;
 
-// Sprites are drawn once at this resolution and scaled down per star.
-const SPRITE_PX = 32;
 // Fraction of the viewport diagonal a meteor crosses before it has dissolved.
 const METEOR_TRAVEL_RANGE = [0.55, 0.8] as const;
-
-// A star of the given softness: a solid core out to (1 - softness) of the
-// radius, then a falloff to nothing. Soft far stars are all falloff.
-function buildStarSprite(color: string, softness: number): HTMLCanvasElement {
-  const sprite = document.createElement('canvas');
-  sprite.width = sprite.height = SPRITE_PX;
-  const ctx = sprite.getContext('2d');
-  if (!ctx) return sprite;
-  const r = SPRITE_PX / 2;
-  const core = Math.max(0, 1 - softness) * 0.7;
-  const grad = ctx.createRadialGradient(r, r, 0, r, r, r);
-  grad.addColorStop(0, color);
-  grad.addColorStop(core, color);
-  grad.addColorStop(core + (1 - core) * 0.45, `${color}40`);
-  grad.addColorStop(1, `${color}00`);
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, SPRITE_PX, SPRITE_PX);
-  return sprite;
-}
 
 // Canvas 2D sky for the welcome and writing sections: the same layered,
 // breathing stars as the rose scene, with scroll parallax standing in for
 // camera depth. Owns its rAF loop and scroll listener. Disposable.
 export class ShootingStarsCanvas {
   private readonly ctx: CanvasRenderingContext2D;
-  private readonly dpr: number;
-  private readonly sprites = new Map<string, HTMLCanvasElement>();
+  private readonly sprites = new SpriteCache();
 
   private stars: Star[] = [];
   private meteors: Meteor[] = [];
@@ -79,7 +58,6 @@ export class ShootingStarsCanvas {
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('ShootingStarsCanvas: 2d context unavailable');
     this.ctx = ctx;
-    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     this.resize();
     this.seedStars();
@@ -114,22 +92,7 @@ export class ShootingStarsCanvas {
   };
 
   private resize() {
-    const rect = this.canvas.getBoundingClientRect();
-    this.width = rect.width;
-    this.height = rect.height;
-    this.canvas.width = Math.round(rect.width * this.dpr);
-    this.canvas.height = Math.round(rect.height * this.dpr);
-    this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
-  }
-
-  private spriteFor(color: string, layer: StarLayer): HTMLCanvasElement {
-    const key = `${color}/${layer.softness}`;
-    let sprite = this.sprites.get(key);
-    if (!sprite) {
-      sprite = buildStarSprite(color, layer.softness);
-      this.sprites.set(key, sprite);
-    }
-    return sprite;
+    ({ width: this.width, height: this.height } = fitCanvasToBox(this.canvas, this.ctx));
   }
 
   private seedStars() {
@@ -150,7 +113,7 @@ export class ShootingStarsCanvas {
         baseOpacity: randomIn(layer.opacityRange),
         twinklePhase: Math.random() * Math.PI * 2,
         layer,
-        sprite: this.spriteFor(color, layer),
+        sprite: this.sprites.get(color, layer.softness),
       });
     }
   }

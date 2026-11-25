@@ -3,6 +3,8 @@
 // gradient filling the area under its recent path. Deterministic in time; it claims no real market.
 // Source: the-house-of-arcana packages/ui/src/pages/home-page/home-page.helpers.ts and home-page.market.ts.
 
+import { canvasPixelRatio } from './canvas-2d';
+
 /** The golden angle (≈137.508°): each comet turns by it from the last, so they overlap least, as in a sunflower. */
 const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 
@@ -336,8 +338,7 @@ const bloom = (elapsedMs: number) => 1 - (1 - Math.min(1, Math.max(0, elapsedMs 
 
 /** Matches the backing store to the CSS box at a device ratio clamped to 2, and scales drawing to CSS pixels. */
 export function fitArcanaSpiralCanvas(canvas: HTMLCanvasElement, context: CanvasRenderingContext2D, width: number, height: number) {
-  const dpr = globalThis.devicePixelRatio;
-  const ratio = Number.isFinite(dpr) && dpr > 0 ? Math.min(dpr, 2) : 1;
+  const ratio = canvasPixelRatio();
   if (canvas.width !== Math.round(width * ratio)) canvas.width = Math.round(width * ratio);
   if (canvas.height !== Math.round(height * ratio)) canvas.height = Math.round(height * ratio);
   context.setTransform(ratio, 0, 0, ratio, 0, 0);

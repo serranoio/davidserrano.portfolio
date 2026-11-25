@@ -1,19 +1,28 @@
 import { LitElement, html, type PropertyValues } from 'lit';
+import { query } from 'lit/decorators.js';
 import styles from './welcome-section.styles';
 import { ShootingStarsCanvas } from './shooting-stars-canvas';
+import { EmberHaloCanvas } from './ember-halo-canvas';
 
 export class WelcomeSectionElement extends LitElement {
   static styles = [styles];
 
+  @query('.stars-canvas') private accessor _starsCanvas: HTMLCanvasElement | null = null;
+  @query('.ember-canvas') private accessor _emberCanvas: HTMLCanvasElement | null = null;
+  @query('.ember-glow') private accessor _emberGlow: HTMLElement | null = null;
+
   private starsRenderer: ShootingStarsCanvas | null = null;
+  private emberRenderer: EmberHaloCanvas | null = null;
 
   firstUpdated(_changed: PropertyValues) {
     super.firstUpdated(_changed);
-    const canvas = this.renderRoot.querySelector<HTMLCanvasElement>('.stars-canvas');
-    // The renderer holds the sky still on its own when motion is reduced.
-    if (canvas) {
-      this.starsRenderer = new ShootingStarsCanvas(canvas);
+    // Both renderers hold still on their own when motion is reduced.
+    if (this._starsCanvas) {
+      this.starsRenderer = new ShootingStarsCanvas(this._starsCanvas);
       this.starsRenderer.start();
+    }
+    if (this._emberCanvas && this._emberGlow) {
+      this.emberRenderer = new EmberHaloCanvas(this._emberCanvas, this._emberGlow);
     }
   }
 
@@ -21,19 +30,8 @@ export class WelcomeSectionElement extends LitElement {
     super.disconnectedCallback();
     this.starsRenderer?.dispose();
     this.starsRenderer = null;
-  }
-
-  private enterRose(event: Event) {
-    const rose = document.getElementById('rose');
-    if (!rose) return;
-    event.preventDefault();
-    rose.scrollIntoView({
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
-      block: 'start',
-    });
-    // Move keyboard navigation into the destination as well as the viewport.
-    rose.setAttribute('tabindex', '-1');
-    rose.focus({ preventScroll: true });
+    this.emberRenderer?.dispose();
+    this.emberRenderer = null;
   }
 
   render() {
@@ -42,42 +40,28 @@ export class WelcomeSectionElement extends LitElement {
       <div class="container">
         <div class="text-col">
           <p class="greeting">Hey, I'm David.</p>
-          <div class="headline-wrap" data-testid="welcome-headline">
-            <h1 class="headline">Your life<br />is <em>art.</em></h1>
-          </div>
           <p class="subline" data-testid="welcome-subline">
-            Where every step is another brushstroke you paint.
-            Your heart is an endless paintbucket. It has the potential to radiate colors in every facet of your life.
+            Take a deep breath in, inhale<br />
+            exhale, let go.
           </p>
           <p class="intro">
-            I'm here to help you discover this source of life, or rather,
-            return to this oasis that already exists inside of you.
+            You're alive, it's beautiful and it is enough to be content.
           </p>
-          <nav class="destinations" aria-label="Explore my work">
-            <a class="destination-link" href="/engineering.html">
-              Explore my engineering <span aria-hidden="true">↗</span>
-            </a>
-            <a class="destination-link" href="/writing.html">
-              Read my writing <span aria-hidden="true">↗</span>
-            </a>
-          </nav>
-          <div class="invitation">
-            <a class="explore-link" href="#rose" @click=${this.enterRose}>
-              Discover the beauty in engineering <span aria-hidden="true">↓</span>
-            </a>
-            <p class="journey-note">It starts with the day I saw code become art.</p>
-          </div>
+          <p class="intro">Turn on the music and enjoy the journey with me.</p>
         </div>
         <figure class="photo-col">
-          <img
-            class="photo"
-            src="/img/david-hero.jpg"
-            alt="David standing near the Golden Gate Bridge"
-            data-testid="welcome-photo"
-            loading="eager"
-            decoding="async"
-          />
-          <figcaption>David Serrano · San Francisco</figcaption>
+          <div class="ember-glow" aria-hidden="true"></div>
+          <div class="portrait">
+            <img
+              class="photo"
+              src="/img/david-hero.jpg"
+              alt="David standing near the Golden Gate Bridge"
+              data-testid="welcome-photo"
+              loading="eager"
+              decoding="async"
+            />
+          </div>
+          <canvas class="ember-canvas" data-testid="welcome-ember-canvas" aria-hidden="true"></canvas>
         </figure>
       </div>
     `;
