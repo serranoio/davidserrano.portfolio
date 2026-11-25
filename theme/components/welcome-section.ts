@@ -23,50 +23,20 @@ export class WelcomeSectionElement extends LitElement {
     this.starsRenderer = null;
   }
 
-  private enterRose(event: Event) {
-    const rose = document.getElementById('rose');
-    if (!rose) return;
-    event.preventDefault();
-    rose.scrollIntoView({
-      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
-      block: 'start',
-    });
-    // Move keyboard navigation into the destination as well as the viewport.
-    rose.setAttribute('tabindex', '-1');
-    rose.focus({ preventScroll: true });
-  }
-
   render() {
     return html`
       <canvas class="stars-canvas" data-testid="welcome-stars-canvas" aria-hidden="true"></canvas>
       <div class="container">
         <div class="text-col">
-          <p class="greeting">Hey, I'm David.</p>
-          <div class="headline-wrap" data-testid="welcome-headline">
-            <h1 class="headline">Your life<br />is <em>art.</em></h1>
-          </div>
           <p class="subline" data-testid="welcome-subline">
-            Where every step is another brushstroke you paint.
-            Your heart is an endless paintbucket. It has the potential to radiate colors in every facet of your life.
+            Take a deep breath in, inhale<br />
+            exhale, let go.
           </p>
           <p class="intro">
-            I'm here to help you discover this source of life, or rather,
-            return to this oasis that already exists inside of you.
+            You're alive, it's beautiful and it is enough to be content.
           </p>
-          <nav class="destinations" aria-label="Explore my work">
-            <a class="destination-link" href="/engineering.html">
-              Explore my engineering <span aria-hidden="true">↗</span>
-            </a>
-            <a class="destination-link" href="/writing.html">
-              Read my writing <span aria-hidden="true">↗</span>
-            </a>
-          </nav>
-          <div class="invitation">
-            <a class="explore-link" href="#rose" @click=${this.enterRose}>
-              Discover the beauty in engineering <span aria-hidden="true">↓</span>
-            </a>
-            <p class="journey-note">It starts with the day I saw code become art.</p>
-          </div>
+          <p class="intro">Turn on the music and enjoy the journey with me.</p>
+          <p class="signoff">I'm David. I welcome you to my headspace.</p>
         </div>
         <figure class="photo-col">
           <img
@@ -77,7 +47,6 @@ export class WelcomeSectionElement extends LitElement {
             loading="eager"
             decoding="async"
           />
-          <figcaption>David Serrano · San Francisco</figcaption>
         </figure>
       </div>
     `;

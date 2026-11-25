@@ -56,5 +56,5 @@ export const engineeringProfile: EngineeringProfile = {
       notes: [],
     },
   ],
-  groundingLine: "Build the craziest of dreams.",
+  groundingLine: "You're a badass mf, build the most craziest of dreams.",
 };

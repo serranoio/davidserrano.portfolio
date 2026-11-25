@@ -41,24 +41,10 @@ export default css`
     box-sizing: border-box;
   }
 
-  .greeting {
-    margin: 0 0 1.5rem;
+  .signoff {
+    margin: 2rem 0 0;
     font-size: 1rem;
     color: color-mix(in srgb, var(--color-text) 85%, transparent);
-  }
-
-  .headline {
-    font-family: var(--font-title, 'Cormorant Garamond', Georgia, serif);
-    font-weight: 400;
-    font-size: clamp(4.5rem, 8.4vw, 7.5rem);
-    line-height: 0.92;
-    letter-spacing: -0.035em;
-    margin: 0;
-  }
-
-  .headline em {
-    color: var(--color-primary);
-    font-weight: 400;
   }
 
   .subline {
@@ -76,79 +62,6 @@ export default css`
     line-height: 1.75;
   }
 
-  .invitation {
-    margin-top: 1.5rem;
-  }
-
-  .destinations {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.25rem 1.75rem;
-    margin-top: 1.5rem;
-  }
-
-  .destination-link {
-    display: inline-flex;
-    gap: 0.75rem;
-    align-items: center;
-    min-height: 44px;
-    color: var(--color-text);
-    text-decoration: underline;
-    text-underline-offset: 0.4em;
-    text-decoration-color: var(--color-primary-muted);
-    font-size: 0.95rem;
-  }
-
-  .destination-link:hover {
-    color: var(--color-primary);
-  }
-
-  .destination-link:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 4px;
-  }
-
-  .explore-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-height: 48px;
-    box-sizing: border-box;
-    border-bottom: 1px solid var(--color-primary-muted);
-    color: var(--color-primary);
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: color 180ms ease;
-  }
-
-  .explore-link span {
-    transition: transform 180ms ease;
-  }
-
-  .explore-link:hover {
-    color: var(--color-text);
-  }
-
-  .explore-link:hover span {
-    transform: translateY(3px);
-  }
-
-  .explore-link:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 6px;
-  }
-
-  .explore-link:active {
-    color: color-mix(in srgb, var(--color-text) 85%, transparent);
-  }
-
-  .journey-note {
-    margin: 0.75rem 0 0;
-    color: var(--color-text-muted);
-    font-size: 0.875rem;
-    line-height: 1.5;
-  }
-
   .photo-col {
     margin: 0;
     align-self: center;
@@ -163,13 +76,6 @@ export default css`
     border-radius: 2px;
   }
 
-  figcaption {
-    margin-top: 1rem;
-    color: var(--color-text-muted);
-    font-size: 0.875rem;
-    line-height: 1.5;
-  }
-
   @media (max-width: 768px) {
     .container {
       grid-template-columns: 1fr;
@@ -178,28 +84,9 @@ export default css`
       padding: 3rem 0;
     }
 
-    .headline {
-      font-size: clamp(4.5rem, 17vw, 6.5rem);
-    }
-
-    .greeting {
-      margin-bottom: 1.25rem;
-    }
-
-    .destinations {
-      column-gap: 1rem;
-    }
-
     .photo-col {
       width: 72%;
       justify-self: end;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .explore-link,
-    .explore-link span {
-      transition: none;
     }
   }
 `;
