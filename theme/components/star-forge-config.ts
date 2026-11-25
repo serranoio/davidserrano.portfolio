@@ -14,15 +14,24 @@ export const STAR_FORGE = {
   // star's slot, and how many paragraph slots of extra scroll it adds.
   slot: { name: 'star', span: 1.5 },
 
-  // Choreography over t. Each beat is [start, end].
-  phases: {
-    gather: [0, 0.25] as const,
-    ignite: [0.25, 0.55] as const,
-    // The beam rises over `beam` and reaches the rose by `beamReach`.
-    beam: [0.55, 0.72] as const,
-    beamReach: [0.55, 0.66] as const,
-    afterglow: [0.8, 1] as const,
+  // The beam strikes the rose at the slot progress where the Stormbreaker
+  // paragraph crosses the vertical centre of the screen. Measured in the
+  // browser per text layout (the camera's vertical FOV is fixed, so it holds
+  // across viewport sizes); re-measure if the text layout or camera changes.
+  strikeAt: { wide: 0.32, narrow: 0.4 },
+
+  // Choreography leading up to the strike, as fractions of `strikeAt`:
+  // the star gathers, ignites, then the beam travels to the rose and lands
+  // exactly at the strike. Each beat is [start, end].
+  leadIn: {
+    gather: [0, 0.35] as const,
+    ignite: [0.25, 0.75] as const,
+    beamReach: [0.75, 1] as const,
   },
+  // The beam finishes swelling this far (in t) after it lands.
+  beamSettle: 0.06,
+  // After the strike the beam holds on the rose, then cools to an ember.
+  afterglow: [0.8, 1] as const,
 
   // Where the star sits: below the Stormbreaker paragraph and off to one
   // side of the rose, deep behind the words so the scroll carries it up

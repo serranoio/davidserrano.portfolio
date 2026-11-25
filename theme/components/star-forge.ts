@@ -10,7 +10,7 @@ import {
   GLOW_VERTEX_SHADER,
 } from './star-forge.shaders';
 
-const { phases, star: STAR, beam: BEAM, dust: DUST } = STAR_FORGE;
+const { star: STAR, beam: BEAM, dust: DUST } = STAR_FORGE;
 // Dust layout is seeded so every visit (and every screenshot) is the same sky.
 const DUST_SEED = 0x5ab3e1;
 // Fallback "up" when the beam itself points straight up.
@@ -21,9 +21,28 @@ function smoothstep(edges: readonly [number, number], x: number): number {
   return THREE.MathUtils.smoothstep(x, edges[0], edges[1]);
 }
 
+type Span = readonly [number, number];
+
+// The beats over slot progress t for a text layout, timed so the beam lands
+// on the rose at that layout's strike point.
+export function starForgePhases(layout: StarForgeLayout) {
+  const strike = STAR_FORGE.strikeAt[layout];
+  const { leadIn } = STAR_FORGE;
+  const scaled = ([start, end]: Span): Span => [start * strike, end * strike];
+  const beamReach = scaled(leadIn.beamReach);
+  return {
+    gather: scaled(leadIn.gather),
+    ignite: scaled(leadIn.ignite),
+    beamReach,
+    beam: [beamReach[0], strike + STAR_FORGE.beamSettle] as Span,
+    afterglow: STAR_FORGE.afterglow,
+  };
+}
+
 // How far each beat of the choreography has played at slot progress t. Pure:
 // the same t always yields the same levels, whichever way the page scrolls.
-export function starForgeLevels(t: number) {
+export function starForgeLevels(t: number, layout: StarForgeLayout) {
+  const phases = starForgePhases(layout);
   const gather = smoothstep(phases.gather, t);
   const ignite = smoothstep(phases.ignite, t);
   const beam = smoothstep(phases.beam, t);
@@ -209,7 +228,7 @@ export class StarForge {
   private readonly beamEnd = new THREE.Vector3();
   private readonly scratch = new THREE.Vector3();
   private readonly right = new THREE.Vector3();
-  private levels: StarForgeLevels = starForgeLevels(0);
+  private levels: StarForgeLevels = starForgeLevels(0, 'wide');
   private progress = 0;
   private opacity = 0;
 
@@ -302,7 +321,7 @@ export class StarForge {
   update(camera: THREE.Camera, t: number, opacity: number, nowSec: number) {
     this.progress = THREE.MathUtils.clamp(t, 0, 1);
     this.opacity = opacity;
-    const levels = (this.levels = starForgeLevels(this.progress));
+    const levels = (this.levels = starForgeLevels(this.progress, this.layout));
     const visible = opacity > 0.001 && levels.gather > 0;
     this.group.visible = visible;
     this.light.intensity = 0;

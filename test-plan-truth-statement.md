@@ -124,9 +124,9 @@ Tunables live in `theme/components/star-forge-config.ts`.
 
 **Expected:**
 - The marker never renders as text; the gap under the Stormbreaker paragraph is empty except for the star.
-- 0–0.25 progress: the sky and meteors dim slightly; a faint pinprick appears below the paragraph, deep behind the text.
-- 0.25–0.55: the core swells and overexposes to white with a soft warm glare and slowly churning corona (white → pale gold → amber, never saturated orange); the sky warms a little.
-- 0.55–0.8: a thin, soft-edged beam reaches from the star to the rose; dust motes glitter inside it; the rose takes warm light and its petals gild.
+- Before the strike: the sky and meteors dim slightly and a faint pinprick appears below the paragraph, deep behind the text; then the core swells and overexposes to white with a soft warm glare and slowly churning corona (white → pale gold → amber, never saturated orange); the sky warms a little; then a thin, soft-edged beam travels from the star toward the rose.
+- **Strike:** the beam lands on the rose exactly when the Stormbreaker paragraph's vertical centre crosses the centre of the screen (progress ≈ 0.32 desktop, ≈ 0.40 touch; `STAR_FORGE.strikeAt`). Dust motes glitter inside the beam; the rose takes warm light and its petals gild.
+- Strike–0.8: the beam holds on the rose as the paragraph rises away.
 - 0.8–1: the beam thins and fades as the next paragraph rises; a faint ember remains.
 - No hard edges, ghost flares, diffraction spikes or cartoon rays.
 - `getStarProgress()` is 0 before the slot and 1 after it, and the same page position always reports the same progress and intensity in both directions. With reduced motion, the same position renders the same frame.
