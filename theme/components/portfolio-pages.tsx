@@ -163,8 +163,9 @@ export function WritingPage() {
   const tags = writingCatalog.tags.filter((tag) =>
     writingCatalog.posts.some((post) => post.tags.includes(tag.id)));
   return (
-    <PortfolioPage eyebrow="Writing" title="A life, put into words."
-      introduction="Essays and poems about craft, dance, inner work, and learning to live with purpose. All written by me.">
+    <PortfolioPage>
+      <div className="writing-backdrop" aria-hidden="true"><PhoenixFigure /></div>
+      <h1 className="writing-heading">Writing</h1>
       <section aria-label="Browse my writing">
         <div className="writing-filters" role="group" aria-label="Filter writing by topic">
           <button type="button" aria-pressed={selectedTag === null} onClick={() => setSelectedTag(null)}>All writing</button>

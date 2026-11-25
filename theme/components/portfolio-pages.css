@@ -123,6 +123,12 @@
 .portfolio-page__footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; margin-top: 5rem; padding-top: 1.5rem; border-top: 1px solid var(--rp-c-divider); font-size: 0.875rem; color: var(--color-text-muted); }
 .portfolio-page__footer a { display: inline-flex; align-items: center; min-height: 44px; color: inherit; }
 .portfolio-page__footer > span { align-self: center; }
+/* The phoenix stands behind the writing: drawn once, held still behind the list, and not to be touched. */
+.portfolio-page:has(.writing-backdrop) { isolation: isolate; }
+.writing-backdrop { position: fixed; inset: var(--rp-nav-height, 64px) 0 0; z-index: -1; display: grid; place-items: center; opacity: 0.32; pointer-events: none; }
+.writing-backdrop .phoenix-figure { width: auto; height: min((100svh - var(--rp-nav-height, 64px)) * 0.86, 46rem); max-width: 92vw; }
+.writing-backdrop :is(.phoenix-figure__touch, .phoenix-figure__thread) { display: none; }
+.portfolio-page .writing-heading { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .writing-filters { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; border-block: 1px solid var(--rp-c-divider); padding: 0.75rem 0; }
 .writing-filters button { min-height: 44px; padding: 0.25rem 0; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--color-text-muted); font: inherit; font-size: 0.875rem; cursor: pointer; }
 .writing-filters button:hover { color: var(--color-text); }

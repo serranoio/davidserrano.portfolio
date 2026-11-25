@@ -9,7 +9,6 @@ tags: [spiritual, tech]
 
 _Intentionally talking in jargon so that you know it's not written by AI_
 
-
 * It's a damn marathon!
 * Glossary
 * Guardrails
