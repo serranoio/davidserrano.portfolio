@@ -1,19 +1,28 @@
 import { LitElement, html, type PropertyValues } from 'lit';
+import { query } from 'lit/decorators.js';
 import styles from './welcome-section.styles';
 import { ShootingStarsCanvas } from './shooting-stars-canvas';
+import { EmberHaloCanvas } from './ember-halo-canvas';
 
 export class WelcomeSectionElement extends LitElement {
   static styles = [styles];
 
+  @query('.stars-canvas') private accessor _starsCanvas: HTMLCanvasElement | null = null;
+  @query('.ember-canvas') private accessor _emberCanvas: HTMLCanvasElement | null = null;
+  @query('.ember-glow') private accessor _emberGlow: HTMLElement | null = null;
+
   private starsRenderer: ShootingStarsCanvas | null = null;
+  private emberRenderer: EmberHaloCanvas | null = null;
 
   firstUpdated(_changed: PropertyValues) {
     super.firstUpdated(_changed);
-    const canvas = this.renderRoot.querySelector<HTMLCanvasElement>('.stars-canvas');
-    // The renderer holds the sky still on its own when motion is reduced.
-    if (canvas) {
-      this.starsRenderer = new ShootingStarsCanvas(canvas);
+    // Both renderers hold still on their own when motion is reduced.
+    if (this._starsCanvas) {
+      this.starsRenderer = new ShootingStarsCanvas(this._starsCanvas);
       this.starsRenderer.start();
+    }
+    if (this._emberCanvas && this._emberGlow) {
+      this.emberRenderer = new EmberHaloCanvas(this._emberCanvas, this._emberGlow);
     }
   }
 
@@ -21,6 +30,8 @@ export class WelcomeSectionElement extends LitElement {
     super.disconnectedCallback();
     this.starsRenderer?.dispose();
     this.starsRenderer = null;
+    this.emberRenderer?.dispose();
+    this.emberRenderer = null;
   }
 
   render() {
@@ -39,14 +50,18 @@ export class WelcomeSectionElement extends LitElement {
           <p class="signoff">I'm David. I welcome you to my headspace.</p>
         </div>
         <figure class="photo-col">
-          <img
-            class="photo"
-            src="/img/david-hero.jpg"
-            alt="David standing near the Golden Gate Bridge"
-            data-testid="welcome-photo"
-            loading="eager"
-            decoding="async"
-          />
+          <div class="ember-glow" aria-hidden="true"></div>
+          <div class="portrait">
+            <img
+              class="photo"
+              src="/img/david-hero.jpg"
+              alt="David standing near the Golden Gate Bridge"
+              data-testid="welcome-photo"
+              loading="eager"
+              decoding="async"
+            />
+          </div>
+          <canvas class="ember-canvas" data-testid="welcome-ember-canvas" aria-hidden="true"></canvas>
         </figure>
       </div>
     `;

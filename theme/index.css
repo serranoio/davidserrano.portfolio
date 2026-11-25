@@ -115,6 +115,22 @@ case-studies-section {
   --rp-c-divider-light: color-mix(in srgb, var(--color-primary) 10%, transparent);
 }
 
+/* Ember halo — the firelight around the home hero photo. The hero is always
+   night, but in the light theme it opens under the pale header and page: a
+   lower, more golden fire keeps it from reading as a muddy orange smudge.
+   Deliberately not declared on the night-section elements, so the hero
+   inherits the page theme's value. */
+:root {
+  --ember-halo-gain: 0.78;
+  --ember-halo-heat: 55%;
+}
+
+.dark,
+html.dark {
+  --ember-halo-gain: 1;
+  --ember-halo-heat: 78%;
+}
+
 /* ========================================
    The House of Arcana
 

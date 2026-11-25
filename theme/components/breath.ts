@@ -28,13 +28,25 @@ export function breathLevelAt(seconds: number): number {
 class BreathClock {
   private query: MediaQueryList | null = null;
 
-  // True when motion should be held still. Read live so a preference change
-  // takes effect without a reload.
-  get still(): boolean {
+  private get motionQuery(): MediaQueryList | null {
     if (!this.query && typeof window !== 'undefined') {
       this.query = window.matchMedia(REDUCED_MOTION_QUERY);
     }
-    return this.query?.matches ?? false;
+    return this.query;
+  }
+
+  // True when motion should be held still. Read live so a preference change
+  // takes effect without a reload.
+  get still(): boolean {
+    return this.motionQuery?.matches ?? false;
+  }
+
+  // For renderers that stop their loop while still and must restart it when
+  // the visitor allows motion again. Returns the unsubscribe.
+  onStillChange(listener: () => void): () => void {
+    const query = this.motionQuery;
+    query?.addEventListener('change', listener);
+    return () => query?.removeEventListener('change', listener);
   }
 
   // Seconds on the shared timeline. Every consumer uses this (not its own
