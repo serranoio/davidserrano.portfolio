@@ -10,18 +10,23 @@ import type { EffectFrame, EffectOverlay, EffectWord } from './word-effect';
 // A pale violet, cooler than the ivory text around it.
 export const POTENTIAL_COLOR = '#c9b6ff';
 
-// Where each ghost drifts, as a direction in font sizes (x, y) and its own
-// breathing phase. Uneven on purpose, so they never read as a pattern.
-// They drift sideways and up, never down (below, a copy reads as a drop
-// shadow), and stay inside the word's own line.
+// Where each ghost drifts, as a direction in font sizes (x, y), how much
+// bigger it is than the word, its tilt (radians) and its own breathing
+// phase: each a slightly different form the word could take. Uneven on
+// purpose, so they never read as a pattern. They drift sideways and up,
+// never down (below, a copy reads as a drop shadow), and stay inside the
+// word's own line.
 const GHOSTS = [
-  { x: -0.34, y: 0.1, phase: 0.0 },
-  { x: 0.3, y: 0.05, phase: 0.41 },
-  { x: 0.04, y: 0.19, phase: 0.73 },
+  { x: -0.42, y: 0.1, scale: 1.06, tilt: 0.02, phase: 0.0 },
+  { x: 0.38, y: 0.05, scale: 1.1, tilt: -0.025, phase: 0.41 },
+  { x: 0.05, y: 0.2, scale: 1.14, tilt: 0.0, phase: 0.73 },
+  { x: -0.2, y: 0.17, scale: 1.03, tilt: -0.035, phase: 0.22 },
+  { x: 0.24, y: 0.14, scale: 1.18, tilt: 0.03, phase: 0.58 },
 ];
 // How far apart they start (multiplying the directions above) and how close
-// they settle.
-const SPREAD = { far: 0.8, near: 0.16 };
+// they come once settled: never all the way, so the possibilities stay
+// visible around the word.
+const SPREAD = { far: 1.3, near: 0.38 };
 // Seconds per breath of the settled halo.
 const BREATH = 5.2;
 
@@ -60,10 +65,10 @@ export function createPotentialGhosts(word: EffectWord): EffectOverlay {
     // a ghost reads as a possibility, not a misprint. (Troika supports these;
     // the local type declaration doesn't list them.)
     Object.assign(text, {
-      fillOpacity: 0.55,
+      fillOpacity: 0.6,
       outlineBlur: '22%',
       outlineColor: POTENTIAL_COLOR,
-      outlineOpacity: 0.35,
+      outlineOpacity: 0.45,
     });
     text.frustumCulled = false;
     text.raycast = () => {};
@@ -82,19 +87,21 @@ export function createPotentialGhosts(word: EffectWord): EffectOverlay {
       const spread = THREE.MathUtils.lerp(SPREAD.far, SPREAD.near, settle);
       ghosts.forEach((ghost, i) => {
         const g = GHOSTS[i];
-        const breath = 0.75 + 0.25 * Math.sin(((time / BREATH) + g.phase) * Math.PI * 2);
-        const reach = spread * (settle < 1 ? 1 : breath);
-        // A ghost a touch larger than the word, as if it might grow into it.
-        const scale = 1 + 0.05 * (1 - settle) + 0.015 * breath * settle;
+        // Settled, each keeps wandering out and back on its own breath.
+        const breath = 0.55 + 0.45 * Math.sin(((time / BREATH) + g.phase) * Math.PI * 2);
+        const reach = spread * THREE.MathUtils.lerp(1, breath, settle);
+        // Each ghost its own size, as if the word might grow into it.
+        const scale = 1 + (g.scale - 1) * (1 - 0.4 * settle) + 0.02 * breath * settle;
         ghost.scale.setScalar(scale);
+        ghost.rotation.z = g.tilt * (1 - 0.5 * settle);
         ghost.position.set(
           centre.x + (word.left - centre.x) * scale + g.x * fs * reach,
           centre.y + (word.top - centre.y) * scale + g.y * fs * reach,
           -0.001
         );
       });
-      // Clearer while apart, fainter as they merge; never gone.
-      material.opacity = THREE.MathUtils.lerp(0.26, 0.18, settle) * opacity * Math.min(1, t * 12);
+      // Clearer while apart, a little fainter once settled; never gone.
+      material.opacity = THREE.MathUtils.lerp(0.42, 0.3, settle) * opacity * Math.min(1, t * 12);
       group.visible = opacity > 0.001 && t > 0;
     },
     dispose() {
