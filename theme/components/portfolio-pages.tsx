@@ -14,10 +14,12 @@ declare const __WRITING_CATALOG__: {
 };
 
 interface WritingTag { id: BlogTag; label: string }
+type WritingSelection = { kind: 'group'; id: TagGroupId } | { kind: 'tag'; id: BlogTag };
 interface WritingGroup { id: TagGroupId; label: string; tags: readonly WritingTag[] }
 
 const writingCatalog = __WRITING_CATALOG__;
 const WRITING_TAG_PARAM = 'tag';
+const WRITING_GROUP_PARAM = 'group';
 
 export function PortfolioPage({ eyebrow, title, introduction, children }: {
   eyebrow?: string;
@@ -154,36 +156,59 @@ export function EngineeringPage() {
 }
 
 export function WritingPage() {
-  const [selectedTag, setSelectedTag] = useState<BlogTag | null>(null);
-  // A link may arrive already filtered, e.g. /writing.html?tag=tech.
-  useEffect(() => {
-    const asked = new URLSearchParams(window.location.search).get(WRITING_TAG_PARAM);
-    if (tags.some((tag) => tag.id === asked)) setSelectedTag(asked as BlogTag);
-  }, []);
-  const posts = writingCatalog.posts
-    .filter((post) => !selectedTag || post.tags.includes(selectedTag))
-    .slice().sort((a, b) => a.title.localeCompare(b.title));
-  // PLACEHOLDER LOOK: the groups arrive here, but are still shown as one flat row.
+  const [selected, setSelected] = useState<WritingSelection | null>(null);
+  // Pressing what is already chosen lets go of it.
+  const toggle = (next: WritingSelection) =>
+    setSelected((current) => (current?.kind === next.kind && current.id === next.id ? null : next));
   const groups: readonly WritingGroup[] = writingCatalog.groups
     .map((group) => ({ ...group, tags: group.tags.filter((tag) =>
       writingCatalog.posts.some((post) => post.tags.includes(tag.id))) }))
     .filter((group) => group.tags.length > 0);
   const tags = groups.flatMap((group) => group.tags);
+  // A link may arrive already filtered, e.g. /writing.html?tag=tech or ?group=heart.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const tag = tags.find((candidate) => candidate.id === params.get(WRITING_TAG_PARAM));
+    const group = groups.find((candidate) => candidate.id === params.get(WRITING_GROUP_PARAM));
+    if (tag) setSelected({ kind: 'tag', id: tag.id });
+    else if (group) setSelected({ kind: 'group', id: group.id });
+  }, []);
+  const selectedGroup = selected?.kind === 'group' ? groups.find((group) => group.id === selected.id) : undefined;
+  const selectedTags: readonly BlogTag[] | null = selected === null ? null
+    : selectedGroup ? selectedGroup.tags.map((tag) => tag.id) : [selected.id as BlogTag];
+  const selectedLabel = selectedGroup?.label ?? tags.find((tag) => tag.id === selected?.id)?.label;
+  const posts = writingCatalog.posts
+    .filter((post) => !selectedTags || selectedTags.some((tag) => post.tags.includes(tag)))
+    .slice().sort((a, b) => a.title.localeCompare(b.title));
   return (
     <PortfolioPage>
       <div className="writing-backdrop" aria-hidden="true"><PhoenixFigure /></div>
       <h1 className="writing-heading">Writing</h1>
       <section aria-label="Browse my writing">
-        <div className="writing-filters" role="group" aria-label="Filter writing by topic">
-          <button type="button" aria-pressed={selectedTag === null} onClick={() => setSelectedTag(null)}>All writing</button>
-          {tags.map((tag) => (
-            <button type="button" key={tag.id} aria-pressed={selectedTag === tag.id}
-              onClick={() => setSelectedTag(tag.id)}>{tag.label}</button>
+        <div className="writing-groups" role="group" aria-label="Filter writing by topic">
+          {groups.map((group) => (
+            <div className={`writing-group writing-group--${group.id}`} key={group.id}>
+              <h2 className="writing-group__name">
+                <button type="button" aria-pressed={selected?.kind === 'group' && selected.id === group.id}
+                  onClick={() => toggle({ kind: 'group', id: group.id })}>{group.label}</button>
+              </h2>
+              <ul className="writing-group__tags">
+                {group.tags.map((tag) => (
+                  <li key={tag.id}>
+                    <button type="button" aria-pressed={selected?.kind === 'tag' && selected.id === tag.id}
+                      onClick={() => toggle({ kind: 'tag', id: tag.id })}>{tag.label}</button>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ))}
         </div>
-        <p className="writing-count" role="status" aria-live="polite">
-          {posts.length} {posts.length === 1 ? 'piece' : 'pieces'}{selectedTag ? ` · ${tags.find((tag) => tag.id === selectedTag)?.label}` : ''}
-        </p>
+        <div className="writing-status">
+          <p className="writing-count" role="status" aria-live="polite">
+            {posts.length} {posts.length === 1 ? 'piece' : 'pieces'}{selectedLabel ? ` · ${selectedLabel}` : ''}
+          </p>
+          <button type="button" className="writing-all" aria-pressed={selected === null} onClick={() => setSelected(null)}>All writing</button>
+        </div>
         <ul className="writing-list">
           {posts.map((post) => (
             <li key={post.slug}>

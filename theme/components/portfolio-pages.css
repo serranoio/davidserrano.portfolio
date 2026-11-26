@@ -129,11 +129,20 @@
 .writing-backdrop .phoenix-figure { width: auto; height: min((100svh - var(--rp-nav-height, 64px)) * 0.86, 46rem); max-width: 92vw; }
 .writing-backdrop :is(.phoenix-figure__touch, .phoenix-figure__thread) { display: none; }
 .portfolio-page .writing-heading { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-.writing-filters { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; border-block: 1px solid var(--rp-c-divider); padding: 0.75rem 0; }
-.writing-filters button { min-height: 44px; padding: 0.25rem 0; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--color-text-muted); font: inherit; font-size: 0.875rem; cursor: pointer; }
-.writing-filters button:hover { color: var(--color-text); }
-.writing-filters button[aria-pressed='true'] { color: var(--color-text); border-bottom-color: var(--color-primary); }
-.writing-count { margin: 1.5rem 0 0.5rem; color: var(--color-text-muted); font-size: 0.875rem; }
+/* Heart, Mind and Wings stand as the phoenix's paths do: one to the left, one in the middle, one to the right. */
+.writing-groups { display: grid; grid-template-columns: repeat(3, 1fr); column-gap: clamp(0.5rem, 2.5vw, 2rem); border-bottom: 1px solid var(--rp-c-divider); padding-bottom: 1rem; }
+.writing-group--mind { text-align: center; }
+.writing-group--wings { text-align: right; }
+.portfolio-page .writing-group__name { margin: 0 0 0.25rem; font-family: var(--font-title); font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 400; line-height: 1.2; letter-spacing: normal; }
+.writing-group__tags { list-style: none; padding: 0; margin: 0; }
+.writing-groups button, .writing-all { min-height: 44px; padding: 0.25rem 0; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--color-text-muted); font: inherit; font-size: 0.875rem; cursor: pointer; }
+.writing-group__name button { color: var(--color-text); font-size: inherit; line-height: inherit; }
+.writing-groups button:hover, .writing-all:hover { color: var(--color-text); }
+.writing-groups button[aria-pressed='true'] { color: var(--color-text); border-bottom-color: var(--color-primary); }
+/* Nothing chosen is already all writing, so the way back only shows once something is. */
+.writing-all[aria-pressed='true'] { visibility: hidden; }
+.writing-status { display: flex; align-items: baseline; justify-content: space-between; gap: 1.5rem; margin-top: 0.75rem; }
+.writing-count { margin: 0; color: var(--color-text-muted); font-size: 0.875rem; }
 .writing-list { list-style: none; padding: 0; margin: 0; }
 .writing-list li { border-bottom: 1px solid var(--rp-c-divider); }
 .writing-list a { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; padding: 1.5rem 0; color: var(--color-text); }
