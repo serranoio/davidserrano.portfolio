@@ -20,6 +20,7 @@ interface WritingGroup { id: TagGroupId; label: string; tags: readonly WritingTa
 const writingCatalog = __WRITING_CATALOG__;
 const WRITING_TAG_PARAM = 'tag';
 const WRITING_GROUP_PARAM = 'group';
+const WRITING_LEAD = 'Writing from the';
 
 export function PortfolioPage({ eyebrow, title, introduction, children }: {
   eyebrow?: string;
@@ -185,6 +186,7 @@ export function WritingPage() {
       <div className="writing-backdrop" aria-hidden="true"><PhoenixFigure /></div>
       <h1 className="writing-heading">Writing</h1>
       <section aria-label="Browse my writing">
+        <div className="writing-lead">{WRITING_LEAD}</div>
         <div className="writing-groups" role="group" aria-label="Filter writing by topic">
           {groups.map((group) => (
             <div className={`writing-group writing-group--${group.id}`} key={group.id}>

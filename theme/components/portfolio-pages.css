@@ -130,6 +130,7 @@
 .writing-backdrop :is(.phoenix-figure__touch, .phoenix-figure__thread) { display: none; }
 .portfolio-page .writing-heading { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 /* Heart, Mind and Wings stand as the phoenix's paths do: one to the left, one in the middle, one to the right. */
+.writing-lead { margin-bottom: 0.5rem; text-align: center; font-family: var(--font-title); font-style: italic; font-size: clamp(1.2rem, 2vw, 1.4rem); line-height: 1.4; color: var(--color-text-muted); }
 .writing-groups { display: grid; grid-template-columns: repeat(3, 1fr); column-gap: clamp(0.5rem, 2.5vw, 2rem); border-bottom: 1px solid var(--rp-c-divider); padding-bottom: 1rem; }
 .writing-group--mind { text-align: center; }
 .writing-group--wings { text-align: right; }
