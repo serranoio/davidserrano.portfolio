@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { formatDate } from './dates';
 import { FRONTMATTER_RE, frontmatterOf, isPublished } from './frontmatter';
 
 /**
@@ -31,7 +32,6 @@ const HISTORY_DIR_NAME = 'history';
 const HISTORY_DIR = path.join(BLOG_DIR, HISTORY_DIR_NAME);
 const RECORD = '\x1e';
 const FIELD = '\x1f';
-const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function git(args: string[]): string {
   return execFileSync('git', args, { cwd: ROOT, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
@@ -44,12 +44,6 @@ function ensureFullHistory(): void {
   if (git(['rev-parse', '--is-shallow-repository']).trim() === 'true') {
     throw new Error('doc-history: the git clone is shallow and could not be unshallowed.');
   }
-}
-
-/** "2026-11-25T10:00:00-05:00" → "Nov 25, 2026", using the author's own calendar date. */
-function formatDate(iso: string): string {
-  const [year, month, day] = iso.slice(0, 10).split('-').map(Number);
-  return `${MONTHS[month - 1]} ${day}, ${year}`;
 }
 
 interface Commit {

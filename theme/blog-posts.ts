@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { formatDate, isoFromFrontmatterDate } from './dates';
 import { frontmatterOf, isPublished, parseList, parseScalar } from './frontmatter';
 
 export type BlogTag =
@@ -21,6 +22,8 @@ export interface BlogPost {
   slug: string;
   title: string;
   tags: readonly BlogTag[];
+  /** When the piece was published, from its `date` frontmatter; absent when it carries none. */
+  published?: { iso: string; label: string };
 }
 
 export const TAG_ORDER: readonly BlogTag[] = [
@@ -175,8 +178,10 @@ function readBlogPosts(): BlogPost[] {
       const slug = slugFromFile;
       const title = parseScalar(frontmatter, 'title') ?? FALLBACK_TITLES[slug] ?? slug;
       const tags = parseTags(frontmatter);
+      const iso = isoFromFrontmatterDate(parseScalar(frontmatter, 'date'));
+      const published = iso ? { iso, label: formatDate(iso) } : undefined;
 
-      return { slug, title, tags };
+      return { slug, title, tags, published };
     })
     .filter((post) => post.tags.length > 0);
 }

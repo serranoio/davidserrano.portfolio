@@ -1,10 +1,14 @@
 import * as path from 'node:path';
 import { defineConfig } from '@rspress/core';
-import { BLOG_POSTS, TAG_GROUPS, TAG_ORDER, TAG_LABELS, UNPUBLISHED_ROUTES, postsByTag } from './theme/blog-posts';
+import { BLOG_POSTS, TAG_GROUPS, TAG_LABELS, UNPUBLISHED_ROUTES, postsByTag, type BlogPost } from './theme/blog-posts';
 import { buildDocHistory } from './theme/doc-history';
 
 // Writes docs/blog/history/** (one page per version) before routes are scanned.
 const DOC_HISTORY = buildDocHistory();
+
+// The welcome note belongs to no part of the phoenix; it opens the sidebar and stays off the writing list.
+const INTRO_SLUG = 'intro';
+const postLink = (post: BlogPost) => ({ text: post.title, link: `/blog/${post.slug}` });
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -28,15 +32,21 @@ export default defineConfig({
       },
     ],
     sidebar: {
-      '/blog/': TAG_ORDER.map((tag) => ({
-        text: TAG_LABELS[tag],
-        collapsible: true,
-        collapsed: tag !== 'spiritual',
-        items: postsByTag(tag).map((p) => ({
-          text: p.title,
-          link: `/blog/${p.slug}`,
+      // The welcome note, then the phoenix's three parts, each holding its tags.
+      '/blog/': [
+        ...BLOG_POSTS.filter((post) => post.slug === INTRO_SLUG).map(postLink),
+        ...TAG_GROUPS.map((group) => ({
+          text: group.label,
+          collapsible: true,
+          collapsed: false,
+          items: group.tags.map((tag) => ({
+            text: TAG_LABELS[tag],
+            collapsible: true,
+            collapsed: true,
+            items: postsByTag(tag).map(postLink),
+          })),
         })),
-      })),
+      ],
     },
   },
   builderConfig: {
@@ -55,7 +65,7 @@ export default defineConfig({
       define: {
         __DOC_HISTORY__: JSON.stringify(DOC_HISTORY),
         __WRITING_CATALOG__: JSON.stringify({
-          posts: BLOG_POSTS.filter((post) => post.slug !== 'intro'),
+          posts: BLOG_POSTS.filter((post) => post.slug !== INTRO_SLUG),
           groups: TAG_GROUPS.map((group) => ({
             id: group.id,
             label: group.label,

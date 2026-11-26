@@ -217,7 +217,10 @@ export function WritingPage() {
               <a href={`/blog/${post.slug}.html`}>
                 <span>
                   <span className="writing-list__title">{post.title}</span>
-                  <span className="writing-list__topics">{tags.filter((tag) => post.tags.includes(tag.id)).map((tag) => tag.label).join(' · ')}</span>
+                  <span className="writing-list__topics">
+                    {post.published && <><time dateTime={post.published.iso}>{post.published.label}</time>{' · '}</>}
+                    {tags.filter((tag) => post.tags.includes(tag.id)).map((tag) => tag.label).join(' · ')}
+                  </span>
                 </span>
                 <span aria-hidden="true">↗</span>
               </a>
