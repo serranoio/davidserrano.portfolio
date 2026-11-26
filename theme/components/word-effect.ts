@@ -88,8 +88,9 @@ export interface WordEffect {
   // y top→bottom, where the glyph sat before any vertexShader moved it.
   // size: the box in world units. dist: signed distance to the glyph edge
   // in world units (< 0 inside). aa: antialiasing width at this pixel.
-  // base: how plain text would draw here. Uniform in scope: float
-  // uWordOpacity (the text's overall opacity).
+  // base: how plain text would draw here. Uniforms in scope: float
+  // uWordOpacity (the text's overall opacity) and float uWordStill (1 while
+  // reduced motion holds `time` still: rest anything driven by the clock).
   readonly glyphShader: string;
   // GLSL at file scope for vertexShader.
   readonly vertexDefs?: string;
@@ -156,6 +157,7 @@ function createUniforms() {
     uWordCount: { value: 0 },
     uWordTime: { value: 0 },
     uWordOpacity: { value: 1 },
+    uWordStill: { value: 0 },
     uWordPad: { value: 0 },
   };
 }
@@ -171,6 +173,8 @@ const SHARED_DEFS = /* glsl */ `
   uniform int uWordCount;
   uniform float uWordTime;
   uniform float uWordOpacity;
+  // 1 while reduced motion holds the clock still, else 0.
+  uniform float uWordStill;
   uniform float uWordPad;
   varying vec2 vWordLocal;
 `;
@@ -331,6 +335,7 @@ export class EffectWords {
     const time = effectClock();
     this.uniforms.uWordTime.value = time;
     this.uniforms.uWordOpacity.value = opacity;
+    this.uniforms.uWordStill.value = breath.still ? 1 : 0;
     this.words.forEach((word, index) => {
       const height = lift + (word.top + word.bottom) / 2;
       const along = THREE.MathUtils.clamp((height - pass.enter) / (pass.exit - pass.enter), 0, 1);

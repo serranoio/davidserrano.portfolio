@@ -4,11 +4,11 @@ import { FORGE_COLOR, FORGE_SHARED_GLSL, createForgeSparks } from './forge-spark
 // How a `{{forge:word}}` in the preface looks like it was forged (see
 // word-effect.ts for the contract; GLSL names defined here start with
 // `forge`). Variant A, struck on the anvil: the word rises out of the fire
-// soft-edged, a little tall and glowing, and is struck three times as it
-// climbs the screen. Each blow squashes it and springs back, takes it a
-// third of the way to its finished shape, flares its heat and throws a
-// short spray of sparks (forge-sparks.ts); between blows it cools, and it
-// ends as crisp, dark tempered steel with a cold edge.
+// soft-edged, a little tall and glowing, and the hammer strikes it on a
+// steady beat while it is in the fire. Every blow is the same: it squashes
+// the word and springs back, flares its heat and throws a short spray of
+// sparks (forge-sparks.ts). As it climbs, the work finishes its shape and
+// it cools, ending as crisp, dark tempered steel with a cold edge.
 
 export const FORGE_EFFECT: WordEffect = {
   color: FORGE_COLOR,
@@ -17,7 +17,7 @@ export const FORGE_EFFECT: WordEffect = {
   glyphDefs: FORGE_SHARED_GLSL,
   glyphShader: /* glsl */ `
     float fs = size.y / FORGE_LINE_EM;
-    float heat = forgeHeat(t);
+    float heat = forgeHeat(t, time, uWordStill);
     float rough = forgeRough(t);
     // Unworked metal has a soft, glowing edge; each blow sharpens it.
     float soft = aa + rough * fs * 0.03;
@@ -36,7 +36,7 @@ export const FORGE_EFFECT: WordEffect = {
   vertexShader: /* glsl */ `
     float h = rect.w - rect.y;
     float baseline = rect.y + h * (1.0 - FORGE_BASELINE);
-    float jolt = forgeJolts(t);
+    float jolt = forgeJolts(t, time, uWordStill);
     float rough = forgeRough(t);
     // Each blow squashes the letters onto their baseline and spreads them;
     // until the last, they stand a little tall and narrow, unfinished.

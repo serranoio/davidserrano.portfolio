@@ -5,53 +5,57 @@ import type { EffectFrame, EffectOverlay, EffectWord } from './word-effect';
 // Variant A, struck on the anvil: the forge's timeline, shared by the glyphs
 // (forge-effect.ts) and the overlay below, and the overlay itself — the
 // spray of sparks each hammer blow throws, and the faint glow of the hot
-// metal. Everything about the word's shape and heat is set by its progress
-// t, so the same scroll position always shows the same word; only the
-// sparks run on the clock, from the moment a blow is struck.
+// metal. The hammer keeps a smith's steady beat on the clock for as long as
+// the word is in the fire; the scroll decides how hot it still is and how
+// finished its shape, so the same scroll position always shows the same
+// stage of the work, struck in the same rhythm.
 
 // Hot iron, as the word first appears.
 export const FORGE_COLOR = '#ff8a3d';
 
-// Where in the word's pass the three blows land: the word is struck as it
-// rises through the lower half of the screen and is finished by the middle.
-export const FORGE_BLOWS = [0.24, 0.33, 0.42] as const;
+// The hammer: one blow every `period` seconds while the word is in the
+// fire, from `start` to `end` of its pass up the screen (it rises through
+// the lower half and is finished by the middle).
+export const FORGE_RHYTHM = { period: 0.7, start: 0.2, end: 0.46 } as const;
 
 export const FORGE_SHARED_GLSL = /* glsl */ `
   #define FORGE_LINE_EM 1.211
   // Baseline, as a fraction of the line box from its top.
   #define FORGE_BASELINE 0.763
-  #define FORGE_BLOW_0 ${FORGE_BLOWS[0].toFixed(3)}
-  #define FORGE_BLOW_1 ${FORGE_BLOWS[1].toFixed(3)}
-  #define FORGE_BLOW_2 ${FORGE_BLOWS[2].toFixed(3)}
+  #define FORGE_PERIOD ${FORGE_RHYTHM.period.toFixed(3)}
+  #define FORGE_START ${FORGE_RHYTHM.start.toFixed(3)}
+  #define FORGE_END ${FORGE_RHYTHM.end.toFixed(3)}
 
-  // The jolt of one blow, as the word scrolls past it: a hard squash that
-  // springs back with one small rebound. 0 before the blow.
-  float forgeJolt(float t, float blow) {
-    float a = t - blow;
-    if (a < 0.0) return 0.0;
-    return smoothstep(0.0, 0.003, a) * exp(-a / 0.011) * cos(a * 140.0);
+  // 1 while the word is in the fire, easing in and out at the ends.
+  float forgeInFire(float t) {
+    return smoothstep(FORGE_START, FORGE_START + 0.02, t) * (1.0 - smoothstep(FORGE_END - 0.03, FORGE_END, t));
   }
-  float forgeJolts(float t) {
-    return forgeJolt(t, FORGE_BLOW_0) + forgeJolt(t, FORGE_BLOW_1) + forgeJolt(t, FORGE_BLOW_2);
+  // Seconds since the last blow landed.
+  float forgeSinceBlow(float time) {
+    return fract(time / FORGE_PERIOD) * FORGE_PERIOD;
   }
-  // How unfinished the shape still is: 1 before the first blow, 0 after the
-  // last; each blow takes a third.
+  // Which blow that was (for varying where it lands).
+  float forgeBlowIndex(float time) {
+    return floor(time / FORGE_PERIOD);
+  }
+  // The jolt of a blow: a hard squash that springs back with one small
+  // rebound, the same every time. Held at rest under reduced motion.
+  float forgeJolts(float t, float time, float still) {
+    float a = forgeSinceBlow(time);
+    float jolt = smoothstep(0.0, 0.015, a) * exp(-a / 0.07) * cos(a * 26.0);
+    return jolt * forgeInFire(t) * (1.0 - still);
+  }
+  // How unfinished the shape still is: 1 as it enters the fire, 0 once it
+  // leaves; the blows work it steadily in between.
   float forgeRough(float t) {
-    return 1.0 - (smoothstep(FORGE_BLOW_0, FORGE_BLOW_0 + 0.008, t)
-      + smoothstep(FORGE_BLOW_1, FORGE_BLOW_1 + 0.008, t)
-      + smoothstep(FORGE_BLOW_2, FORGE_BLOW_2 + 0.008, t)) / 3.0;
+    return 1.0 - smoothstep(FORGE_START, FORGE_END, t);
   }
   // Heat, 0 (cold steel) to 1 (white-hot): glowing from the fire as it
-  // rises, flaring a little less at each blow and cooling between them,
-  // cold by the time it's well past the middle of the screen.
-  float forgeFlare(float t, float blow, float peak) {
-    float a = t - blow;
-    return a < 0.0 ? 0.0 : peak * exp(-a / 0.05);
-  }
-  float forgeHeat(float t) {
+  // rises and cooling by a little past the middle of the screen; each blow
+  // flares it by the same amount while it's in the fire.
+  float forgeHeat(float t, float time, float still) {
     float ember = 0.72 * (1.0 - smoothstep(0.2, 0.62, t));
-    float flare = max(forgeFlare(t, FORGE_BLOW_0, 0.92),
-      max(forgeFlare(t, FORGE_BLOW_1, 0.8), forgeFlare(t, FORGE_BLOW_2, 0.68)));
+    float flare = 0.9 * exp(-forgeSinceBlow(time) / 0.18) * forgeInFire(t) * (1.0 - still);
     return max(ember, flare);
   }
   // Incandescence for a heat: dark red, cherry, orange, yellow, near white.
@@ -71,8 +75,6 @@ export const FORGE_SHARED_GLSL = /* glsl */ `
 const REACH_X = 1.8;
 const REACH_UP = 0.6;
 const REACH_DOWN = 0.6;
-// Where along the word each blow lands (0 left – 1 right).
-const STRIKE_U = [0.34, 0.64, 0.5];
 
 const vertexShader = /* glsl */ `
   varying vec2 vLocal;
@@ -86,8 +88,9 @@ const fragmentShader = /* glsl */ `
   uniform vec4 uRect;      // left, bottom, right, top (paragraph-local)
   uniform float uT;
   uniform float uOpacity;
-  uniform vec3 uAge;       // seconds since each blow was struck (< 0: not struck)
-  uniform vec3 uStrikeU;
+  uniform float uTime;
+  uniform float uStill;
+  uniform float uSeed;
   uniform vec4 uBounds;    // the overlay plane: left, bottom, right, top
   varying vec2 vLocal;
   ${FORGE_SHARED_GLSL}
@@ -139,10 +142,13 @@ const fragmentShader = /* glsl */ `
     // The struck face: the top of the lowercase letters.
     float faceY = T - 0.42 * h;
 
-    vec2 s0 = forgeSpray(p, vec2(mix(L, R, uStrikeU.x), faceY), uAge.x, 0.0, fs, aa);
-    vec2 s1 = forgeSpray(p, vec2(mix(L, R, uStrikeU.y), faceY), uAge.y, 1.0, fs, aa);
-    vec2 s2 = forgeSpray(p, vec2(mix(L, R, uStrikeU.z), faceY), uAge.z, 2.0, fs, aa);
-    vec2 spray = max(s0, max(s1, s2));
+    // Every blow throws its spray from a slightly different spot on the
+    // struck face; the sparks fade out with the fire.
+    float blow = forgeBlowIndex(uTime);
+    float strikeU = mix(0.28, 0.72, forgeHash(blow * 1.7 + uSeed * 13.0));
+    float age = uStill > 0.5 ? -1.0 : forgeSinceBlow(uTime);
+    vec2 spray = forgeSpray(p, vec2(mix(L, R, strikeU), faceY), age, mod(blow, 7.0), fs, aa)
+      * forgeInFire(uT);
     vec3 sparkColor = mix(vec3(1.0, 0.42, 0.1), vec3(1.0, 0.9, 0.62), spray.y);
     // Sparks burn out before the plane's edge rather than being cut by it.
     vec2 inside = min(p - uBounds.xy, uBounds.zw - p);
@@ -151,7 +157,7 @@ const fragmentShader = /* glsl */ `
     // The hot metal's faint glow, hugging the word.
     vec2 c = vec2((L + R) * 0.5, uRect.y + 0.45 * h);
     vec2 q = (p - c) / vec2((R - L) * 0.5 + fs * 0.35, h * 0.45 + fs * 0.2);
-    float heat = forgeHeat(uT);
+    float heat = forgeHeat(uT, uTime, uStill);
     float glow = exp(-dot(q, q) * 1.8) * 0.36 * smoothstep(0.2, 0.9, heat);
 
     vec3 color = sparkColor * spray.x * 1.6 + forgeGlow(heat) * glow;
@@ -172,7 +178,6 @@ export function createForgeSparks(word: EffectWord): EffectOverlay {
   const geometry = new THREE.PlaneGeometry(right - left, top - bottom);
   geometry.translate((left + right) / 2, (top + bottom) / 2, 0);
 
-  const age = new THREE.Vector3(-1, -1, -1);
   const material = new THREE.ShaderMaterial({
     vertexShader,
     fragmentShader,
@@ -181,8 +186,9 @@ export function createForgeSparks(word: EffectWord): EffectOverlay {
       uBounds: { value: new THREE.Vector4(left, bottom, right, top) },
       uT: { value: 0 },
       uOpacity: { value: 1 },
-      uAge: { value: age },
-      uStrikeU: { value: new THREE.Vector3(...STRIKE_U.map((u) => Math.min(1, Math.max(0, u + (word.seed - 0.5) * 0.12)))) },
+      uTime: { value: 0 },
+      uStill: { value: 0 },
+      uSeed: { value: word.seed },
     },
     transparent: true,
     depthWrite: false,
@@ -198,25 +204,11 @@ export function createForgeSparks(word: EffectWord): EffectOverlay {
   mesh.renderOrder = 0.5;
   mesh.position.z = -0.001;
 
-  // When each blow was struck (clock seconds), or null.
-  const struck: (number | null)[] = FORGE_BLOWS.map(() => null);
-  let lastT: number | null = null;
-
   return {
     object: mesh,
     update({ t, time, opacity }: EffectFrame) {
-      FORGE_BLOWS.forEach((blow, k) => {
-        // Struck only by scrolling down through it — not by landing past it
-        // on load, and never while motion is held still.
-        if (lastT !== null && lastT < blow && t >= blow && t - blow < 0.05 && !breath.still) struck[k] = time;
-        if (t < blow) struck[k] = null;
-      });
-      lastT = t;
-      age.set(
-        struck[0] === null ? -1 : time - struck[0],
-        struck[1] === null ? -1 : time - struck[1],
-        struck[2] === null ? -1 : time - struck[2]
-      );
+      material.uniforms.uTime.value = time;
+      material.uniforms.uStill.value = breath.still ? 1 : 0;
       material.uniforms.uT.value = t;
       material.uniforms.uOpacity.value = opacity;
       mesh.visible = opacity > 0.001 && t > 0;
