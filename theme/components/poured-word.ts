@@ -62,6 +62,9 @@ export interface PourWord {
   readonly mesh: Text;
   // Stable per word, 0–1: lets two pours of the same word differ.
   readonly seed: number;
+  // Where the word sits in the mesh's text: characters [start, end).
+  readonly start: number;
+  readonly end: number;
 }
 
 // Scene objects an effect draws around one word (streams, drips, drops):
@@ -241,6 +244,8 @@ export class PouredWords {
           fontSize: this.mesh.fontSize,
           mesh: this.mesh,
           seed: hash(text, spanIndex),
+          start: span.start,
+          end: span.end,
         });
       }
     });
