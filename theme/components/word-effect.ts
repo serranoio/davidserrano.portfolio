@@ -23,9 +23,6 @@ export const WORD_PASS = {
   narrow: { enter: -0.79, exit: 2.57 },
 };
 
-// Glyphs can overhang their characters' selection rects a little; this much
-// extra (as a fraction of font size) on each side still counts as the word.
-const RECT_PAD = 0.12;
 // The shader has room for this many effect words per paragraph.
 const MAX_WORDS = 4;
 
@@ -158,7 +155,6 @@ function createUniforms() {
     uWordTime: { value: 0 },
     uWordOpacity: { value: 1 },
     uWordStill: { value: 0 },
-    uWordPad: { value: 0 },
   };
 }
 type EffectUniforms = ReturnType<typeof createUniforms>;
@@ -175,8 +171,11 @@ const SHARED_DEFS = /* glsl */ `
   uniform float uWordOpacity;
   // 1 while reduced motion holds the clock still, else 0.
   uniform float uWordStill;
-  uniform float uWordPad;
   varying vec2 vWordLocal;
+  // Which effect word this glyph belongs to (its index), or -1. Decided per
+  // glyph from its centre, so a glyph overhanging its word still belongs to
+  // it and a neighbouring glyph (the full stop after it) never does.
+  varying float vWordIndex;
 `;
 
 // Calls the effect whose index is `kind`, as an if-chain over every effect.
@@ -203,6 +202,7 @@ const VERTEX_DEFS = /* glsl */ `
 // bounds and offset are in scope here.
 const VERTEX_INTRO = /* glsl */ `
   vWordLocal = position.xy;
+  vWordIndex = -1.0;
   vec2 wordGlyph = vec2(
     (aTroikaGlyphBounds.x + aTroikaGlyphBounds.z) * 0.5 + uTroikaPositionOffset.x,
     (aTroikaGlyphBounds.y + aTroikaGlyphBounds.w) * 0.5 - uTroikaPositionOffset.y
@@ -211,6 +211,7 @@ const VERTEX_INTRO = /* glsl */ `
     if (i >= uWordCount) break;
     vec4 r = uWordRects[i];
     if (wordGlyph.x < r.x || wordGlyph.x > r.z || wordGlyph.y < r.y || wordGlyph.y > r.w) continue;
+    vWordIndex = float(i);
     int kind = int(uWordKind[i] + 0.5);
     ${dispatch((name) =>
       WORD_EFFECTS[name].vertexShader
@@ -236,9 +237,8 @@ const FRAGMENT_DEFS = /* glsl */ `
 const FRAGMENT_TRANSFORM = /* glsl */ `
   for (int i = 0; i < WORD_MAX; i++) {
     if (i >= uWordCount) break;
+    if (abs(vWordIndex - float(i)) > 0.5) continue;
     vec4 r = uWordRects[i];
-    if (vWordLocal.x < r.x - uWordPad || vWordLocal.x > r.z + uWordPad ||
-        vWordLocal.y < r.y || vWordLocal.y > r.w) continue;
     vec2 size = r.zw - r.xy;
     vec2 uv = vec2((vWordLocal.x - r.x) / size.x, (r.w - vWordLocal.y) / size.y);
     float dist = troikaGetFragDistValue();
@@ -327,7 +327,6 @@ export class EffectWords {
       this.overlays.push(overlay);
     });
     u.uWordCount.value = this.words.length;
-    u.uWordPad.value = this.mesh.fontSize * RECT_PAD;
   }
 
   // `lift`: world height of the paragraph mesh's origin above the focal line.
