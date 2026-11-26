@@ -15,7 +15,8 @@
     "@rspress/core": "^2.0.9",
     "lit": "^3.3.2",
     "three": "^0.184.0",
-    "troika-three-text": "^0.52.4"
+    "troika-three-text": "^0.52.4",
+    "troika-three-utils": "^0.52.4"
   },
   "devDependencies": {
     "@types/node": "^22.8.1",

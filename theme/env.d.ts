@@ -48,6 +48,8 @@ declare module 'troika-three-text' {
     colorRanges: Record<number, ColorRepresentation> | null;
     readonly textRenderInfo: TextRenderInfo | null;
     sync(callback?: () => void): void;
+    /** Wraps a base material in Troika's text shader; override to derive further. */
+    createDerivedMaterial(baseMaterial: Material): Material;
     dispose(): void;
   }
   export interface TextRenderInfo {
@@ -59,8 +61,30 @@ declare module 'troika-three-text' {
     right: number;
     bottom: number;
   }
+  /** Troika's text shader, derived from `baseMaterial`. */
+  export function createTextDerivedMaterial(baseMaterial: Material): Material;
   /** The rects covering characters [start, end), in the mesh's local space. */
   export function getSelectionRects(info: TextRenderInfo, start: number, end: number): SelectionRect[];
+}
+
+declare module 'troika-three-utils' {
+  import type { Material } from 'three';
+  export interface DerivedMaterialOptions {
+    chained?: boolean;
+    uniforms?: Record<string, { value: unknown }>;
+    defines?: Record<string, string>;
+    vertexDefs?: string;
+    vertexMainIntro?: string;
+    vertexMainOutro?: string;
+    vertexTransform?: string;
+    fragmentDefs?: string;
+    fragmentMainIntro?: string;
+    fragmentMainOutro?: string;
+    fragmentColorTransform?: string;
+    timeUniform?: string;
+  }
+  /** A material whose shaders are `baseMaterial`'s with these snippets spliced in. */
+  export function createDerivedMaterial<T extends Material>(baseMaterial: T, options: DerivedMaterialOptions): T;
 }
 
 interface ImportMetaEnv {
