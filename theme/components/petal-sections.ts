@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react';
+import { frontmatterOf, isPublished, parseList, withoutFrontmatter } from '../frontmatter';
 import Architecture from '../../docs/sections/code-is-architecture.mdx';
 import ArchitectureSource from '../../docs/sections/code-is-architecture.mdx?raw';
 import History from '../../docs/sections/history-in-cities.mdx';
@@ -29,15 +30,16 @@ import ForgingSource from '../../docs/sections/forging-code.mdx?raw';
 // Each petal keeps its own section id so it can host a different article later.
 // Import an MDX article and add a PETAL_SECTION_OVERRIDES entry to assign it
 // to a specific petal. Indices follow the GLB petal meshes sorted by name.
-export interface PetalSection {
+export interface PetalSection extends Article {
   petalIndex: number;
   id: string;
-  title: string;
-  Component: ComponentType;
 }
 
 interface Article {
   title: string;
+  /** Labels shown on the poem, from its frontmatter `tags`. */
+  tags: readonly string[];
+  published: boolean;
   Component: ComponentType;
 }
 
@@ -46,17 +48,35 @@ interface Article {
 const TITLE_PATTERN = /^#\s+(.+?)\s*$/m;
 
 export function _titleOf(source: string): string {
-  const title = TITLE_PATTERN.exec(source)?.[1];
+  const title = TITLE_PATTERN.exec(withoutFrontmatter(source))?.[1];
   if (!title) throw new Error('[petal-sections] a section file has no "# " title heading');
   return title;
 }
 
+const TAG_LABELS: Record<string, string> = {
+  'pre-ai': 'Pre-AI',
+};
+
+// Each poem's frontmatter says whether it is published (shown) or a draft
+// (`published: false`: no petal, not in the poem list), and carries its tags.
+// Comments in a poem file (`%% … %%`, `<!-- … -->`) never reach the page; the
+// strip-poem-comments loader removes them, and a draft's words, before the
+// source is read here.
 function article(Component: ComponentType, source: string): Article {
-  return { title: _titleOf(source), Component };
+  const frontmatter = frontmatterOf(source);
+  const published = isPublished(source);
+  return {
+    // A draft arrives as bare frontmatter (the loader drops its words).
+    title: published ? _titleOf(source) : '',
+    tags: parseList(frontmatter, 'tags').map((tag) => TAG_LABELS[tag] ?? tag),
+    published,
+    Component,
+  };
 }
 
 // Ballad of Programata: the linked notes, in index order. The dance note is
 // split into one article per poem, kept together after its opening poem.
+// Drafts are dropped here, so nothing downstream ever sees them.
 const ARTICLES: readonly Article[] = [
   article(Architecture, ArchitectureSource),
   article(History, HistorySource),
@@ -71,12 +91,13 @@ const ARTICLES: readonly Article[] = [
   article(PartnerDance, PartnerDanceSource),
   article(FlowState, FlowStateSource),
   article(Forging, ForgingSource),
-];
+].filter((a) => a.published);
+if (ARTICLES.length === 0) throw new Error('[petal-sections] every poem is a draft; publish at least one');
 const PETAL_COUNT = 46;
 const PETAL_SECTION_OVERRIDES: readonly PetalSection[] = [
   { petalIndex: 41, id: 'code-is-architecture', ...article(Architecture, ArchitectureSource) },
   { petalIndex: 43, id: 'history-in-cities', ...article(History, HistorySource) },
-];
+].filter((a) => a.published);
 
 export const PETAL_SECTIONS: readonly PetalSection[] = [
   ...Array.from({ length: PETAL_COUNT }, (_, petalIndex) => ({
@@ -123,6 +144,10 @@ export const POEM_COMPONENTS: Record<string, ComponentType> = Object.fromEntries
 
 export const SECTION_TITLES: Record<string, string> = Object.fromEntries(
   PETAL_SECTIONS.map((s) => [s.id, s.title])
+);
+
+export const SECTION_TAGS: Record<string, readonly string[]> = Object.fromEntries(
+  PETAL_SECTIONS.map((s) => [s.id, s.tags])
 );
 
 // The poems themselves, each once, in ARTICLES order — the poem list's view.

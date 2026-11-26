@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { FRONTMATTER_RE, isPublished } from './blog-posts';
+import { FRONTMATTER_RE, frontmatterOf, isPublished } from './frontmatter';
 
 /**
  * Build-time version history for published blog posts, read from git.
@@ -82,10 +82,6 @@ function contentAt(commit: Commit): string | undefined {
   } catch {
     return undefined; // the commit deleted the file
   }
-}
-
-function frontmatterOf(content: string): string {
-  return content.match(FRONTMATTER_RE)?.[1] ?? '';
 }
 
 /** Only the hunks; the `diff --git` / index / ---/+++ header is noise to a reader. */

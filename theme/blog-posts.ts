@@ -1,5 +1,6 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { frontmatterOf, isPublished, parseList, parseScalar } from './frontmatter';
 
 export type BlogTag =
   | 'spiritual'
@@ -123,42 +124,12 @@ export const TAG_CARDS: Record<BlogTag, { title: string; blurb: string }> = {
 };
 
 const BLOG_DIR = path.join(process.cwd(), 'docs', 'blog');
-export const FRONTMATTER_RE = /^---\n([\s\S]*?)\n---/;
 const FALLBACK_TITLES: Record<string, string> = {
   intro: 'Welcome',
 };
 
-export function parseScalar(frontmatter: string, key: string): string | undefined {
-  const match = frontmatter.match(new RegExp(`^${key}:\\s*(.+)$`, 'm'));
-  return match?.[1]?.trim().replace(/^['"]|['"]$/g, '');
-}
-
 function parseTags(frontmatter: string): BlogTag[] {
-  const inlineMatch = frontmatter.match(/^tags:\s*\[([^\]]*)\]\s*$/m);
-
-  if (inlineMatch) {
-    return inlineMatch[1]
-      .split(',')
-      .map((tag) => tag.trim().replace(/^['"]|['"]$/g, ''))
-      .filter((tag): tag is BlogTag => isBlogTag(tag));
-  }
-
-  const blockMatch = frontmatter.match(/^tags:\s*\n((?:\s+-\s+.+\n?)+)/m);
-
-  if (!blockMatch) {
-    return [];
-  }
-
-  return blockMatch[1]
-    .split('\n')
-    .map((line) => line.trim().replace(/^-\s+/, '').replace(/^['"]|['"]$/g, ''))
-    .filter((tag): tag is BlogTag => isBlogTag(tag));
-}
-
-/** A post exists on the site only while its frontmatter says `published: true`. */
-export function isPublished(content: string): boolean {
-  const frontmatter = content.match(FRONTMATTER_RE)?.[1] ?? '';
-  return parseScalar(frontmatter, 'published') === 'true';
+  return parseList(frontmatter, 'tags').filter(isBlogTag);
 }
 
 function isBlogTag(tag: string): tag is BlogTag {
@@ -179,7 +150,7 @@ function readBlogPosts(): BlogPost[] {
     .filter(([, content]) => isPublished(content))
     .map(([file, content]) => {
       const slugFromFile = file.replace(/\.(md|mdx)$/, '');
-      const frontmatter = content.match(FRONTMATTER_RE)?.[1] ?? '';
+      const frontmatter = frontmatterOf(content);
       // Rspress routes follow filenames; `slug` frontmatter does not rename them.
       const slug = slugFromFile;
       const title = parseScalar(frontmatter, 'title') ?? FALLBACK_TITLES[slug] ?? slug;

@@ -240,6 +240,29 @@ export default css`
     margin-bottom: 1rem;
   }
 
+  .content-body .poem-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0 0 1.25rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  .content-body .poem-tag {
+    margin: 0;
+    padding: 0.125rem 0.625rem;
+    border: 1px solid var(--color-primary-muted);
+    border-radius: 999px;
+    font-family: var(--font-body, 'DM Sans', system-ui, sans-serif);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    line-height: 1.6;
+    text-transform: uppercase;
+    color: var(--color-primary);
+  }
+
   .content-body h2 {
     margin-top: 1.75rem;
     margin-bottom: 0.75rem;

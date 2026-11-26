@@ -13,7 +13,8 @@ export default defineConfig({
   logo: '/serrano-heart.png',
   logoText: 'David Serrano',
   // Posts not in published mode are never built: no page, no sidebar entry.
-  route: { exclude: [...UNPUBLISHED_ROUTES] },
+  // The poems in docs/sections/ appear only inside the rose, never as pages of their own.
+  route: { exclude: [...UNPUBLISHED_ROUTES, 'sections/**'] },
   themeConfig: {
     nav: [
       { text: 'Engineering', link: '/engineering' },
@@ -77,6 +78,12 @@ export default defineConfig({
         config.module.rules.push({
           resourceQuery: rawQuery,
           type: 'asset/source',
+        });
+        // A poem's comments, and a draft poem's words, never reach the bundle.
+        config.module.rules.push({
+          test: /docs[\\/]sections[\\/][^\\/]+\.mdx$/,
+          enforce: 'pre',
+          use: [{ loader: path.join(__dirname, 'theme/loaders/strip-poem-comments.cjs') }],
         });
         return config;
       },
