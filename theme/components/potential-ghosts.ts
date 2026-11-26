@@ -20,13 +20,12 @@ const GHOSTS = [
   { x: -0.42, y: 0.1, scale: 1.06, tilt: 0.02, phase: 0.0 },
   { x: 0.38, y: 0.05, scale: 1.1, tilt: -0.025, phase: 0.41 },
   { x: 0.05, y: 0.2, scale: 1.14, tilt: 0.0, phase: 0.73 },
-  { x: -0.2, y: 0.17, scale: 1.03, tilt: -0.035, phase: 0.22 },
   { x: 0.24, y: 0.14, scale: 1.18, tilt: 0.03, phase: 0.58 },
 ];
 // How far apart they start (multiplying the directions above) and how close
 // they come once settled: never all the way, so the possibilities stay
 // visible around the word.
-const SPREAD = { far: 1.3, near: 0.38 };
+const SPREAD = { far: 1.1, near: 0.3 };
 // Seconds per breath of the settled halo.
 const BREATH = 5.2;
 
@@ -101,7 +100,7 @@ export function createPotentialGhosts(word: EffectWord): EffectOverlay {
         );
       });
       // Clearer while apart, a little fainter once settled; never gone.
-      material.opacity = THREE.MathUtils.lerp(0.42, 0.3, settle) * opacity * Math.min(1, t * 12);
+      material.opacity = THREE.MathUtils.lerp(0.36, 0.25, settle) * opacity * Math.min(1, t * 12);
       group.visible = opacity > 0.001 && t > 0;
     },
     dispose() {
