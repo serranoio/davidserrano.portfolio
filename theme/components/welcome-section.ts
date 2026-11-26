@@ -47,7 +47,6 @@ export class WelcomeSectionElement extends LitElement {
             You're alive, it's beautiful and it is enough to be content.
           </p>
           <p class="intro">Turn on the music and enjoy the experience with me.</p>
-          <p class="signoff">I'm David and I welcome you to my headspace.</p>
         </div>
         <figure class="photo-col">
           <div class="ember-glow" aria-hidden="true"></div>
@@ -64,6 +63,15 @@ export class WelcomeSectionElement extends LitElement {
           <canvas class="ember-canvas" data-testid="welcome-ember-canvas" aria-hidden="true"></canvas>
         </figure>
       </div>
+      <footer class="outro">
+        <a class="poetry-cue" href="#rose" data-testid="welcome-poetry-cue">
+          <span>Read my coding poetry</span>
+          <svg class="poetry-arrow" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 4v15M5.5 12.5 12 19l6.5-6.5" />
+          </svg>
+        </a>
+        <p class="signoff">I'm David and I welcome you to my headspace.</p>
+      </footer>
     `;
   }
 }

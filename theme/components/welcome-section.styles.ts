@@ -66,8 +66,73 @@ export default css`
     box-sizing: border-box;
   }
 
+  /* Sits directly under the hero: the cue down to the rose's poems, then
+     the sign-off. */
+  .outro {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2.5rem;
+    width: min(1120px, 88%);
+    margin: 0 auto;
+    padding: 0 0 clamp(3rem, 8vh, 6rem);
+    text-align: center;
+  }
+
+  .poetry-cue {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--color-gold-light);
+    font-family: var(--font-title, 'Cormorant Garamond', Georgia, serif);
+    font-size: clamp(1.3rem, 1.8vw, 1.6rem);
+    font-style: italic;
+    line-height: 1.4;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .poetry-cue:hover,
+  .poetry-cue:focus-visible {
+    color: var(--color-gold-primary);
+  }
+
+  .poetry-cue:focus-visible {
+    outline: 1px solid currentColor;
+    outline-offset: 0.5rem;
+    border-radius: 0.25rem;
+  }
+
+  .poetry-arrow {
+    width: 1.75rem;
+    height: 1.75rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .poetry-arrow {
+      animation: poetry-arrow-bob 2s ease-in-out infinite;
+    }
+  }
+
+  @keyframes poetry-arrow-bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(0.4rem);
+    }
+  }
+
   .signoff {
-    margin: 2rem 0 0;
+    margin: 0;
     font-size: 1rem;
     color: color-mix(in srgb, var(--color-text) 85%, transparent);
   }
