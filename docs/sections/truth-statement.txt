@@ -14,9 +14,9 @@ It was 8:11 am in a Summer in San Francisco in 2023. I had downloaded a personal
 
 [[star]]
 
-Every strike of the hammer, every drop of sweat, my mentor's +20 years of experience, of failing & learning, his entire soul had been {{poured}} into this codebase just as how the heart of the star had been {{poured}} into Stormbreaker's forge. Harnessing this amount of power has to be cultivated, learned.
+Every strike of the hammer, every drop of sweat, my mentor's +20 years of experience, of failing & learning, his entire soul had been {{pour:poured}} into this codebase just as how the heart of the star had been {{pour:poured}} into Stormbreaker's forge. Harnessing this amount of power has to be cultivated, learned.
 
-I could feel the passion in the code. There is no reason why someone would build such a beautiful masterpiece if it didn't have passion behind it.
+I could feel the {{beat:passion}} in the code. There is no reason why someone would build such a beautiful masterpiece if it didn't have {{beat:passion}} behind it.
 
 The axe is vacuum. The axe cuts, vacuum lints. Every part of the axe was consequentially made. The handle was created by Groot, which gives it an organic feel. To vacuum, this handle is the UX, the CLI, organic in its nature.
 

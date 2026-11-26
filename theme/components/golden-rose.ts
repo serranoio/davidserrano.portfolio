@@ -1183,8 +1183,7 @@ export class GoldenRoseElement extends LitElement {
         this.bloomCenter,
         readColorToken(this, COLOR_TOKEN.text),
         TRUTH_SLOT_SPANS,
-        readColorToken(this, COLOR_TOKEN.crimsonLight),
-        readColorToken(this, COLOR_TOKEN.goldPrimary)
+        readColorToken(this, COLOR_TOKEN.crimsonLight)
       );
       this.roseText.setMobileLayout(this.coarseQuery?.matches ?? false);
       this.scene.add(this.roseText.group);

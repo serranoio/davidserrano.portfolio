@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { getSelectionRects } from 'troika-three-text';
-import type { PourFrame, PourOverlay, PourWord } from './poured-word';
+import type { EffectFrame, EffectOverlay, EffectWord } from './word-effect';
 
 // Variant B's drips: the part of the pour that hangs outside the letters.
 // Once the letters (poured-effect.ts) are full they brim over: a few drips
@@ -38,7 +38,7 @@ function rand(seed: number, n: number): number {
 }
 
 // Where this word's drips hang (paragraph-local x) and how each grows.
-function placeDrips(word: PourWord): THREE.Vector4[] {
+function placeDrips(word: EffectWord): THREE.Vector4[] {
   const info = word.mesh.textRenderInfo;
   if (!info) return [];
   const text = word.mesh.text;
@@ -171,7 +171,7 @@ const fragmentShader = /* glsl */ `
 `;
 
 // One word's drips, on a plane from the word's line box to just below it.
-export function createPourDrips(word: PourWord): PourOverlay {
+export function createPourDrips(word: EffectWord): EffectOverlay {
   const fs = word.fontSize;
   const left = word.left - SIDE_MARGIN * fs;
   const right = word.right + SIDE_MARGIN * fs;
@@ -208,7 +208,7 @@ export function createPourDrips(word: PourWord): PourOverlay {
 
   return {
     object: mesh,
-    update({ t, time, opacity }: PourFrame) {
+    update({ t, time, opacity }: EffectFrame) {
       material.uniforms.uT.value = t;
       material.uniforms.uTime.value = time;
       material.uniforms.uOpacity.value = opacity;

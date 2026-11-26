@@ -1,13 +1,27 @@
-import type { PourEffect } from './poured-word';
+import type { WordEffect } from './word-effect';
 import { POUR_COLOR, POUR_SHARED_GLSL, createPourDrips } from './poured-drips';
 
-// How a `{{word}}` in the preface is poured (see poured-word.ts for the
-// contract). Variant B, pool and drips: the letters fill with gold from the
+// How a `{{pour:word}}` in the preface is poured (see word-effect.ts for
+// the contract). Variant B, pool and drips: the letters fill with gold from the
 // bottom up under a calm surface and are full and readable by t = 0.2. Then
 // they brim over: a soft light keeps settling down through the gold, and a
 // few drips (poured-drips.ts) slowly gather and lengthen beneath them.
-export const POUR_EFFECT: PourEffect = {
+// Where on its pass across the screen the word is poured. The pour is
+// written to be readable from t = READABLE_T; the pass is remapped so that
+// happens at `readable` of the way up the screen. Before `start` the pour
+// has not begun (t = 0); the pour itself then takes the same share of the
+// pass it was written for, and the rest of the pass runs on to t = 1.
+export const POUR_TIMING = { start: 0.2, readable: 0.4 };
+const READABLE_T = 0.2;
+
+export const POUR_EFFECT: WordEffect = {
   color: POUR_COLOR,
+  progress(pass) {
+    const { start, readable } = POUR_TIMING;
+    if (pass <= start) return 0;
+    if (pass <= readable) return (READABLE_T * (pass - start)) / (readable - start);
+    return READABLE_T + ((1 - READABLE_T) * (pass - readable)) / (1 - readable);
+  },
   glyphDefs: POUR_SHARED_GLSL,
   glyphShader: /* glsl */ `
     float aspect = size.x / size.y;
@@ -23,7 +37,7 @@ export const POUR_EFFECT: PourEffect = {
 
     // Pale gold at the surface, deepening gently toward the base.
     float depth = clamp((uv.y - surface) / 0.8, 0.0, 1.0);
-    vec3 gold = mix(mix(uPourColor, POUR_HOT, 0.3), uPourColor * vec3(0.9, 0.78, 0.55), depth);
+    vec3 gold = mix(mix(tint, POUR_HOT, 0.3), tint * vec3(0.9, 0.78, 0.55), depth);
     // A fine bright line at the surface while it rises.
     gold = mix(gold, POUR_HOT, exp(-pow((uv.y - surface) / 0.02, 2.0)) * filling * 0.7);
 
@@ -37,7 +51,7 @@ export const POUR_EFFECT: PourEffect = {
     // The empty mould: barely there.
     vec3 color = mix(base.rgb, gold, filled);
     float alpha = mix(0.06, 0.95, filled);
-    return vec4(color, edge * alpha * uPourOpacity);
+    return vec4(color, edge * alpha * uWordOpacity);
   `,
   createOverlay: createPourDrips,
 };

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { Text, getSelectionRects } from 'troika-three-text';
-import { POUR_MARKER, POUR_PASS, PouredWords, type PourSpan } from './poured-word';
+import { EFFECT_MARKER, EffectWords, WORD_PASS, type EffectSpan } from './word-effect';
+import type { WordEffectName } from './word-effects';
 // Troika parses fonts itself and cannot read woff2, so the scene text loads
 // the same face the page uses (Cormorant Garamond, light) as a .woff.
 import textFontUrl from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-300-normal.woff';
@@ -49,28 +50,28 @@ interface TextLink {
   href: string;
 }
 
-// Links and poured words (`{{word}}`, see poured-word.ts), in one pass so
-// each keeps its place in the words that are finally drawn.
-const MARKUP = new RegExp(`${LINK.source}|${POUR_MARKER.source}`, 'g');
+// Links and effect words (`{{pour:poured}}`, see word-effect.ts), in one
+// pass so each keeps its place in the words that are finally drawn.
+const MARKUP = new RegExp(`${LINK.source}|${EFFECT_MARKER.source}`, 'g');
 
-// The words to draw, and where in them each link and poured word sits.
-export function parseMarkup(paragraph: string): { text: string; links: TextLink[]; pours: PourSpan[] } {
+// The words to draw, and where in them each link and effect word sits.
+export function parseMarkup(paragraph: string): { text: string; links: TextLink[]; effects: EffectSpan[] } {
   const links: TextLink[] = [];
-  const pours: PourSpan[] = [];
+  const effects: EffectSpan[] = [];
   let text = '';
   let last = 0;
   for (const match of paragraph.matchAll(MARKUP)) {
     text += paragraph.slice(last, match.index);
-    const words = match[1] ?? match[3];
+    const words = match[1] ?? match[4];
     if (match[1] !== undefined) {
       links.push({ start: text.length, end: text.length + words.length, href: match[2] });
     } else {
-      pours.push({ start: text.length, end: text.length + words.length });
+      effects.push({ start: text.length, end: text.length + words.length, effect: match[3] as WordEffectName });
     }
     text += words;
     last = match.index + match[0].length;
   }
-  return { text: text + paragraph.slice(last), links, pours };
+  return { text: text + paragraph.slice(last), links, effects };
 }
 
 // Extra paragraph slots each named marker adds (unknown names add none).
@@ -92,9 +93,9 @@ export class RoseText {
   private readonly links: TextLink[][] = [];
   private readonly underlines: THREE.Mesh[][] = [];
   private readonly underlineMaterial: THREE.MeshBasicMaterial;
-  // Per paragraph: its poured words, or null when it has none.
-  private readonly pours: (PouredWords | null)[] = [];
-  private pourPass = POUR_PASS.wide;
+  // Per paragraph: its effect words, or null when it has none.
+  private readonly effects: (EffectWords | null)[] = [];
+  private wordPass = WORD_PASS.wide;
 
   // The text orbits the rose, always sitting on the opposite side of the
   // bloom center from the camera. Whole group orbits together so the stack
@@ -115,15 +116,13 @@ export class RoseText {
   // returns this field instead of round-tripping through Troika.
   private lastOpacity = 1;
 
-  // `color`, `linkColor` and `pourColor` are resolved colour tokens (any CSS
-  // colour string).
+  // `color` and `linkColor` are resolved colour tokens (any CSS colour string).
   constructor(
     body: string,
     bloomCenter: THREE.Vector3,
     color: string,
     slotSpans: SlotSpans = {},
-    linkColor: string = color,
-    pourColor: string = linkColor
+    linkColor: string = color
   ) {
     if (typeof body !== 'string') {
       throw new TypeError(
@@ -144,7 +143,7 @@ export class RoseText {
     });
 
     paragraphs.forEach((paragraph, index) => {
-      const { text: words, links, pours } = parseMarkup(paragraph);
+      const { text: words, links, effects } = parseMarkup(paragraph);
       const text = new Text();
       text.text = words;
       // Troika leaves characters before the first range uncoloured (black), so
@@ -174,7 +173,7 @@ export class RoseText {
         depthWrite: false,
       });
       text.frustumCulled = false;
-      this.pours.push(pours.length ? new PouredWords(text, pours, pourColor) : null);
+      this.effects.push(effects.length ? new EffectWords(text, effects) : null);
       // Stack each paragraph downward along local Y. Paragraph 0 sits at the
       // top of the stack so the first paragraph is what the user sees first.
       text.position.y = -this.layout.positions[index] * PARAGRAPH_SPACING;
@@ -219,11 +218,11 @@ export class RoseText {
     this.underlineMaterial.opacity = TEXT_OPACITY * opacity;
     this.lastOpacity = opacity;
 
-    // Each paragraph's height above the focal line drives its pours.
-    this.pours.forEach((pour, index) => {
-      if (!pour) return;
+    // Each paragraph's height above the focal line drives its effect words.
+    this.effects.forEach((words, index) => {
+      if (!words) return;
       const lift = this.scrollOffset - this.layout.positions[index] * this.paragraphSpacing;
-      pour.update(lift, this.pourPass, TEXT_OPACITY * opacity);
+      words.update(lift, this.wordPass, TEXT_OPACITY * opacity);
     });
   }
 
@@ -236,7 +235,7 @@ export class RoseText {
         line.geometry.dispose();
       }
       this.underlines[index] = [];
-      this.pours[index]?.relayout();
+      this.effects[index]?.relayout();
       const info = mesh.textRenderInfo;
       if (!info) return;
       for (const link of this.links[index]) {
@@ -287,7 +286,7 @@ export class RoseText {
     this.heightOffset = enabled ? MOBILE_HEIGHT_OFFSET : TEXT_OFFSET.y;
     this.radialDistance = enabled ? MOBILE_RADIAL_DISTANCE : Math.abs(TEXT_OFFSET.z);
     this.paragraphSpacing = enabled ? MOBILE_PARAGRAPH_SPACING : PARAGRAPH_SPACING;
-    this.pourPass = enabled ? POUR_PASS.narrow : POUR_PASS.wide;
+    this.wordPass = enabled ? WORD_PASS.narrow : WORD_PASS.wide;
     this.maxScrollOffset = this.layout.totalSlots * this.paragraphSpacing;
     this.scrollOffset = Math.max(0, Math.min(this.maxScrollOffset, this.scrollOffset));
 
@@ -395,9 +394,9 @@ export class RoseText {
     };
   }
 
-  // Pour progress (0–1) of every poured word, in reading order.
-  getPourProgress(): number[] {
-    return this.pours.flatMap((pour) => pour?.getProgress() ?? []);
+  // Progress (0–1) of every word with the named effect, in reading order.
+  getEffectProgress(effect: WordEffectName): number[] {
+    return this.effects.flatMap((words) => words?.getProgress(effect) ?? []);
   }
 
   getOpacity(): number {
@@ -418,7 +417,7 @@ export class RoseText {
       (mesh.material as THREE.Material).dispose();
     }
     for (const line of this.underlines.flat()) line.geometry.dispose();
-    for (const pour of this.pours) pour?.dispose();
+    for (const words of this.effects) words?.dispose();
     this.underlineMaterial.dispose();
     this.meshes.length = 0;
     if (this.group.parent) this.group.parent.remove(this.group);
