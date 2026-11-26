@@ -2,10 +2,9 @@ import type { WordEffect } from './word-effect';
 import { BEAT_COLOR, BEAT_SHARED_GLSL, createBeatBloom } from './beat-swell';
 
 // How a `{{beat:word}}` in the preface beats like a heart (see
-// word-effect.ts for the contract). Proposal A, lub-dub swell: on every
-// beat the letters swell and settle, the centre of the word moving a beat
-// before its ends like muscle contracting, and the crimson flushes bright
-// on the lub with a softer echo on the dub. Behind the word a faint warm
+// word-effect.ts for the contract). Proposal A, swell: on every beat the
+// letters swell and settle, the centre of the word moving a beat
+// before its ends like muscle contracting, and the crimson flushes bright. Behind the word a faint warm
 // bloom breathes with it (beat-swell.ts). Every beat word shares one heart,
 // so both "passion"s beat together.
 
@@ -19,7 +18,7 @@ export const BEAT_EFFECT: WordEffect = {
     // The same staggered beat the glyph's shape feels.
     float spread = abs(uv.x - 0.5) * 2.0;
     float pulse = beatPulse(time - spread * BEAT_SPREAD) * beatStrength(t);
-    // At rest a deep, calm crimson; the lub flushes it bright and warm.
+    // At rest a deep, calm crimson; each beat flushes it bright and warm.
     vec3 rest = tint * vec3(0.78, 0.62, 0.66);
     vec3 flush = mix(tint, vec3(1.0, 0.5, 0.56), 0.18) * 1.1;
     vec3 color = mix(rest, flush, pulse);

@@ -7,11 +7,11 @@ import type { EffectFrame, EffectOverlay, EffectWord } from './word-effect';
 // The night palette's crimson (--color-crimson-light).
 export const BEAT_COLOR = '#e83e62';
 
-// The heartbeat every beat effect shares: a resting heart, lub then dub.
+// The heartbeat every beat effect shares: a steady resting heart, one
+// even beat per period.
 export const BEAT_SHARED_GLSL = /* glsl */ `
-  // Seconds per beat (about 64 bpm), and how far into it the dub follows.
-  #define BEAT_PERIOD 0.94
-  #define BEAT_DUB 0.24
+  // Seconds per beat (60 bpm).
+  #define BEAT_PERIOD 1.0
   // How long (s) the swell takes to travel from the word's centre to its ends.
   #define BEAT_SPREAD 0.06
 
@@ -21,12 +21,10 @@ export const BEAT_SHARED_GLSL = /* glsl */ `
     float down = exp(-max(phase - rise, 0.0) / fall);
     return up * down;
   }
-  // 0 at rest, 1 at the peak of the lub; the dub is a softer echo.
+  // 0 at rest, 1 at the peak of the beat.
   float beatPulse(float time) {
     float phase = fract(time / BEAT_PERIOD) * BEAT_PERIOD;
-    float lub = beatThump(phase, 0.07, 0.11);
-    float dub = 0.55 * beatThump(phase - BEAT_DUB, 0.06, 0.13) * step(BEAT_DUB, phase);
-    return max(lub, dub);
+    return beatThump(phase, 0.08, 0.14);
   }
   // The beat is strongest as the word crosses the middle of the screen and
   // quieter as it enters or leaves.
