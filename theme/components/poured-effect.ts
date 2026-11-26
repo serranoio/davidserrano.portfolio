@@ -11,7 +11,7 @@ import { POUR_COLOR, POUR_SHARED_GLSL, createPourDrips } from './poured-drips';
 // happens at `readable` of the way up the screen. Before `start` the pour
 // has not begun (t = 0); the pour itself then takes the same share of the
 // pass it was written for, and the rest of the pass runs on to t = 1.
-export const POUR_TIMING = { start: 0.2, readable: 0.4 };
+export const POUR_TIMING = { start: 0.5, readable: 0.7 };
 const READABLE_T = 0.2;
 
 export const POUR_EFFECT: WordEffect = {

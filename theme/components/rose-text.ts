@@ -36,6 +36,15 @@ const MOBILE_RADIAL_DISTANCE = 1.35;
 // between two paragraphs. It is never drawn.
 const SLOT_MARKER = /^\[\[([\w-]+)\]\]$/;
 
+// How far (world units) the last paragraph rises above the focal line by
+// the end of the section: its centre then sits just under the site header
+// (about 86% of the way up the screen). Measured in the browser at the
+// default camera per layout, like WORD_PASS.
+const END_LIFT = { wide: 1.97, narrow: 2.15 };
+
+// A whole line that starts with `//` (after any indentation) is a comment.
+const COMMENT_LINE = /^[ \t]*\/\/.*$/gm;
+
 // A markdown link, `[words](https://…)`, draws as just its words, in the link
 // colour and underlined, and opens its URL when clicked.
 const LINK = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g;
@@ -185,7 +194,7 @@ export class RoseText {
     this.bloomCenter = bloomCenter.clone();
     this.heightOffset = TEXT_OFFSET.y;
     this.radialDistance = Math.abs(TEXT_OFFSET.z);
-    this.maxScrollOffset = this.layout.totalSlots * PARAGRAPH_SPACING;
+    this.maxScrollOffset = RoseText.scrollLength(this.layout, false);
 
     // Seed initial position; overwritten each frame by update().
     this.group.position.copy(this.bloomCenter).add(TEXT_OFFSET);
@@ -287,7 +296,7 @@ export class RoseText {
     this.radialDistance = enabled ? MOBILE_RADIAL_DISTANCE : Math.abs(TEXT_OFFSET.z);
     this.paragraphSpacing = enabled ? MOBILE_PARAGRAPH_SPACING : PARAGRAPH_SPACING;
     this.wordPass = enabled ? WORD_PASS.narrow : WORD_PASS.wide;
-    this.maxScrollOffset = this.layout.totalSlots * this.paragraphSpacing;
+    this.maxScrollOffset = RoseText.scrollLength(this.layout, enabled);
     this.scrollOffset = Math.max(0, Math.min(this.maxScrollOffset, this.scrollOffset));
 
     this.meshes.forEach((mesh, index) => {
@@ -333,8 +342,8 @@ export class RoseText {
 
   // Each paragraph's place on the poem's scroll timeline (0–1).
   getParagraphProgresses(): number[] {
-    const total = this.layout.totalSlots;
-    return this.layout.positions.map((position) => (total > 0 ? position / total : 0));
+    const total = this.maxScrollOffset;
+    return this.layout.positions.map((position) => (total > 0 ? (position * this.paragraphSpacing) / total : 0));
   }
 
   // 0 while the paragraph before the named slot is in focus, 1 once the
@@ -452,8 +461,24 @@ export class RoseText {
     return { paragraphs, positions, slots, totalSlots: cursor + pending };
   }
 
+  // How far (world units) the text travels over the section's scroll: until
+  // the last paragraph is in focus, then on until it reaches the top of the
+  // screen, so the preface ends on its last words up by the header.
+  static scrollLength(layout: TruthLayout, narrow: boolean): number {
+    const spacing = narrow ? MOBILE_PARAGRAPH_SPACING : PARAGRAPH_SPACING;
+    return layout.totalSlots * spacing + (narrow ? END_LIFT.narrow : END_LIFT.wide);
+  }
+
+  // The same, in paragraph slots of that layout.
+  static scrollSlots(body: string, slotSpans: SlotSpans, narrow: boolean): number {
+    return RoseText.scrollLength(RoseText.layout(body, slotSpans), narrow) / (narrow ? MOBILE_PARAGRAPH_SPACING : PARAGRAPH_SPACING);
+  }
+
   static parseParagraphs(body: string): string[] {
     return body
+      // A line starting with `//` is a note to self: never drawn, and it
+      // takes no room in the stack.
+      .replace(COMMENT_LINE, '')
       .split(/\n\s*\n+/)
       .map((p) => p.trim())
       .filter((p) => p.length > 0);

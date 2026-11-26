@@ -291,8 +291,7 @@ export class GoldenRoseElement extends LitElement {
     // Reserve the reading distance before the model loads so loading cannot
     // move the writing section. Stable viewport units avoid toolbar-driven
     // changes to the poem's scroll distance on mobile.
-    const steps = RoseText.layout(truthStatement, TRUTH_SLOT_SPANS).totalSlots;
-    this.style.setProperty('--poem-scroll-distance', `${steps * SCROLL_SVH_PER_SLOT}svh`);
+    this.reserveScrollDistance(window.matchMedia('(pointer: coarse)').matches);
     // Storage can be unavailable (private mode, blocked site data); the hint
     // then simply shows again next time.
     try {
@@ -540,6 +539,13 @@ export class GoldenRoseElement extends LitElement {
     canvas.addEventListener('click', this.handleCanvasClick);
   }
 
+  // The section's scroll length: every paragraph in turn, then the last one
+  // rising to the top of the screen (see RoseText.scrollLength).
+  private reserveScrollDistance(narrow: boolean) {
+    const steps = RoseText.scrollSlots(truthStatement, TRUTH_SLOT_SPANS, narrow);
+    this.style.setProperty('--poem-scroll-distance', `${steps * SCROLL_SVH_PER_SLOT}svh`);
+  }
+
   private applyTouchConfig = () => {
     if (!this.controls || !this.coarseQuery) return;
     const isCoarse = this.coarseQuery.matches;
@@ -549,6 +555,7 @@ export class GoldenRoseElement extends LitElement {
     this.controls.touches.ONE = null;
     this.controls.touches.TWO = THREE.TOUCH.DOLLY_ROTATE;
     this.roseText?.setMobileLayout(isCoarse);
+    this.reserveScrollDistance(isCoarse);
     this.starForge?.setLayout(isCoarse ? 'narrow' : 'wide');
     this.camera.fov = isCoarse ? CAMERA.coarseFov : CAMERA.fov;
     this.camera.updateProjectionMatrix();
