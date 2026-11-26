@@ -123,6 +123,26 @@ export const TAG_CARDS: Record<BlogTag, { title: string; blurb: string }> = {
   },
 };
 
+export type TagGroupId = 'heart' | 'mind' | 'wings';
+
+export interface TagGroup {
+  id: TagGroupId;
+  label: string;
+  tags: readonly BlogTag[];
+}
+
+/**
+ * The phoenix's three parts, in the order its fire travels: the heart is what
+ * you nurture, the mind is what you maintain, the wings are what you create.
+ * `spiritual` belongs to none of them: it is the phoenix itself, on nearly
+ * every piece, so it is not offered as a filter.
+ */
+export const TAG_GROUPS: readonly TagGroup[] = [
+  { id: 'heart', label: 'Heart', tags: ['self-love', 'gratitude', 'poetry', 'personal'] },
+  { id: 'mind', label: 'Mind', tags: ['meditation', 'yoga', 'self-mastery', 'myth'] },
+  { id: 'wings', label: 'Wings', tags: ['dance', 'tech', 'work', 'strategy'] },
+];
+
 const BLOG_DIR = path.join(process.cwd(), 'docs', 'blog');
 const FALLBACK_TITLES: Record<string, string> = {
   intro: 'Welcome',

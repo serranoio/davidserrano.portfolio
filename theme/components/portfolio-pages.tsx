@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode, type Ref } from 'react';
-import type { BlogPost, BlogTag } from '../blog-posts';
+import type { BlogPost, BlogTag, TagGroupId } from '../blog-posts';
 import { engineeringProfile, type PhoenixPath, type PhoenixPathId } from '../engineering-profile';
 import { ArcanaCard } from './arcana-card';
 import { PHOENIX_WRITTEN_AT, type PhoenixPoint } from './phoenix-drawing';
@@ -10,8 +10,11 @@ import './portfolio-pages.css';
 
 declare const __WRITING_CATALOG__: {
   posts: readonly BlogPost[];
-  tags: readonly { id: BlogTag; label: string }[];
+  groups: readonly WritingGroup[];
 };
+
+interface WritingTag { id: BlogTag; label: string }
+interface WritingGroup { id: TagGroupId; label: string; tags: readonly WritingTag[] }
 
 const writingCatalog = __WRITING_CATALOG__;
 const WRITING_TAG_PARAM = 'tag';
@@ -155,13 +158,17 @@ export function WritingPage() {
   // A link may arrive already filtered, e.g. /writing.html?tag=tech.
   useEffect(() => {
     const asked = new URLSearchParams(window.location.search).get(WRITING_TAG_PARAM);
-    if (writingCatalog.tags.some((tag) => tag.id === asked)) setSelectedTag(asked as BlogTag);
+    if (tags.some((tag) => tag.id === asked)) setSelectedTag(asked as BlogTag);
   }, []);
   const posts = writingCatalog.posts
     .filter((post) => !selectedTag || post.tags.includes(selectedTag))
     .slice().sort((a, b) => a.title.localeCompare(b.title));
-  const tags = writingCatalog.tags.filter((tag) =>
-    writingCatalog.posts.some((post) => post.tags.includes(tag.id)));
+  // PLACEHOLDER LOOK: the groups arrive here, but are still shown as one flat row.
+  const groups: readonly WritingGroup[] = writingCatalog.groups
+    .map((group) => ({ ...group, tags: group.tags.filter((tag) =>
+      writingCatalog.posts.some((post) => post.tags.includes(tag.id))) }))
+    .filter((group) => group.tags.length > 0);
+  const tags = groups.flatMap((group) => group.tags);
   return (
     <PortfolioPage>
       <div className="writing-backdrop" aria-hidden="true"><PhoenixFigure /></div>

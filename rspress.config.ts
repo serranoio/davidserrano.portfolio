@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 import { defineConfig } from '@rspress/core';
-import { BLOG_POSTS, TAG_ORDER, TAG_LABELS, UNPUBLISHED_ROUTES, postsByTag } from './theme/blog-posts';
+import { BLOG_POSTS, TAG_GROUPS, TAG_ORDER, TAG_LABELS, UNPUBLISHED_ROUTES, postsByTag } from './theme/blog-posts';
 import { buildDocHistory } from './theme/doc-history';
 
 // Writes docs/blog/history/** (one page per version) before routes are scanned.
@@ -56,7 +56,11 @@ export default defineConfig({
         __DOC_HISTORY__: JSON.stringify(DOC_HISTORY),
         __WRITING_CATALOG__: JSON.stringify({
           posts: BLOG_POSTS.filter((post) => post.slug !== 'intro'),
-          tags: TAG_ORDER.map((id) => ({ id, label: TAG_LABELS[id] })),
+          groups: TAG_GROUPS.map((group) => ({
+            id: group.id,
+            label: group.label,
+            tags: group.tags.map((id) => ({ id, label: TAG_LABELS[id] })),
+          })),
         }),
       },
     },
