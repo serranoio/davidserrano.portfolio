@@ -1,25 +1,13 @@
 import type { WordEffect } from './word-effect';
+import { BEAT_COLOR, BEAT_SHARED_GLSL, createBeatBloom } from './beat-swell';
 
 // How a `{{beat:word}}` in the preface beats like a heart (see
-// word-effect.ts for the contract). Base: the word swells on each
-// lub-dub and flushes crimson.
-
-// The night palette's crimson (--color-crimson-light).
-export const BEAT_COLOR = '#e83e62';
-
-// The heartbeat every beat effect shares: a resting heart, lub then dub.
-export const BEAT_SHARED_GLSL = /* glsl */ `
-  // Seconds per beat (about 66 bpm), and when in it the dub follows the lub.
-  #define BEAT_PERIOD 0.9
-  #define BEAT_DUB 0.2
-  // 0 at rest, 1 at the peak of the lub; the dub is a softer echo.
-  float beatPulse(float time, float seed) {
-    float phase = fract(time / BEAT_PERIOD + seed * 0.37);
-    float lub = exp(-pow((phase - 0.04) / 0.045, 2.0));
-    float dub = 0.6 * exp(-pow((phase - 0.04 - BEAT_DUB) / 0.05, 2.0));
-    return max(lub, dub);
-  }
-`;
+// word-effect.ts for the contract). Proposal A, lub-dub swell: on every
+// beat the letters swell and settle, the centre of the word moving a beat
+// before its ends like muscle contracting, and the crimson flushes bright
+// on the lub with a softer echo on the dub. Behind the word a faint warm
+// bloom breathes with it (beat-swell.ts). Every beat word shares one heart,
+// so both "passion"s beat together.
 
 export const BEAT_EFFECT: WordEffect = {
   color: BEAT_COLOR,
@@ -28,13 +16,28 @@ export const BEAT_EFFECT: WordEffect = {
   glyphDefs: BEAT_SHARED_GLSL,
   glyphShader: /* glsl */ `
     float edge = 1.0 - smoothstep(-aa, aa, dist);
-    float pulse = beatPulse(time, seed);
-    vec3 color = mix(base.rgb, tint, 0.55 + 0.45 * pulse);
-    return vec4(color, edge * 0.95 * uWordOpacity);
+    // The same staggered beat the glyph's shape feels.
+    float spread = abs(uv.x - 0.5) * 2.0;
+    float pulse = beatPulse(time - spread * BEAT_SPREAD) * beatStrength(t);
+    // At rest a deep, calm crimson; the lub flushes it bright and warm.
+    vec3 rest = tint * vec3(0.78, 0.62, 0.66);
+    vec3 flush = mix(tint, vec3(1.0, 0.5, 0.56), 0.18) * 1.1;
+    vec3 color = mix(rest, flush, pulse);
+    // A touch more light toward the letters' cores than their edges.
+    color *= 1.0 + 0.12 * pulse * smoothstep(0.0, -aa * 3.0, dist);
+    return vec4(color, edge * mix(0.9, 1.0, pulse) * uWordOpacity);
   `,
   vertexDefs: BEAT_SHARED_GLSL,
   vertexShader: /* glsl */ `
     vec2 centre = (rect.xy + rect.zw) * 0.5;
-    return centre + (corner - centre) * (1.0 + 0.08 * beatPulse(time, seed));
+    float halfWidth = max((rect.z - rect.x) * 0.5, 1e-5);
+    float spread = clamp(abs(glyph.x - centre.x) / halfWidth, 0.0, 1.0);
+    float pulse = beatPulse(time - spread * BEAT_SPREAD) * beatStrength(t);
+    // Each glyph swells about its own centre and is carried outward a
+    // little with the whole word, so the letters never crowd each other.
+    vec2 fromWord = glyph - centre;
+    vec2 moved = centre + fromWord * (1.0 + 0.04 * pulse);
+    return moved + (corner - glyph) * (1.0 + 0.085 * pulse);
   `,
+  createOverlay: createBeatBloom,
 };
