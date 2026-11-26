@@ -23,6 +23,21 @@ export const POUR_PASS = {
   narrow: { enter: -0.79, exit: 2.57 },
 };
 
+// Where on its pass across the screen the word is poured. Effects are
+// written to be readable from t = EFFECT_READABLE; the pass is remapped so
+// that happens at `readable` of the way up the screen. Before `start` the
+// pour has not begun (t = 0); the pour itself then takes the same share of
+// the pass it was written for, and the rest of the pass runs on to t = 1.
+export const POUR_TIMING = { start: 0.2, readable: 0.4 };
+const EFFECT_READABLE = 0.2;
+
+function pourTime(pass: number): number {
+  const { start, readable } = POUR_TIMING;
+  if (pass <= start) return 0;
+  if (pass <= readable) return (EFFECT_READABLE * (pass - start)) / (readable - start);
+  return EFFECT_READABLE + ((1 - EFFECT_READABLE) * (pass - readable)) / (1 - readable);
+}
+
 // Glyphs can overhang their characters' selection rects a little; this much
 // extra (as a fraction of font size) on each side still counts as the word.
 const RECT_PAD = 0.12;
@@ -247,7 +262,7 @@ export class PouredWords {
     this.uniforms.uPourOpacity.value = opacity;
     this.words.forEach((word, index) => {
       const height = lift + (word.top + word.bottom) / 2;
-      const t = THREE.MathUtils.clamp((height - pass.enter) / (pass.exit - pass.enter), 0, 1);
+      const t = pourTime(THREE.MathUtils.clamp((height - pass.enter) / (pass.exit - pass.enter), 0, 1));
       this.uniforms.uPourProgress.value[index] = t;
       this.overlays[index]?.update({ t, time, opacity });
     });
