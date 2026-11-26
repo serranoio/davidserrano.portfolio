@@ -1,4 +1,5 @@
 ---
+published: true
 slug: everything-in-moderation-is-unsufficient
 title: Everything In Moderation is a False Notion
 tags: [spiritual, self-mastery]

@@ -1,4 +1,5 @@
 ---
+published: true
 slug: the-forge
 title: The Forge
 date: 05/31/25

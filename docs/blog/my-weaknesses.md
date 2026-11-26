@@ -1,4 +1,5 @@
 ---
+published: true
 slug: my-weaknesses
 title: My Weaknesses
 date: 04/01/2025

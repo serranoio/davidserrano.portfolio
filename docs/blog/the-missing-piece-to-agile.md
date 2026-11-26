@@ -1,4 +1,5 @@
 ---
+published: true
 slug: the-missing-piece-to-agile
 title: The Missing Piece to Agile
 date: 11/21/2024

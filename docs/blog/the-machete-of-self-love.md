@@ -1,4 +1,5 @@
 ---
+published: true
 slug: the-machete-of-self-love
 title: The Machete of Self Love
 tags: [spiritual, self-love]

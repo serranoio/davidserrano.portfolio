@@ -1,4 +1,5 @@
 ---
+published: true
 slug: thankgiving
 title: The Greatest Thing to be Thankful For
 date: 11/28/2024

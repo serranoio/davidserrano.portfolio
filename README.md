@@ -39,3 +39,10 @@ npm run preview
 - The writing collection and blog sidebar use `theme/blog-posts.ts` to read
   titles and tags from `docs/blog/`. Routes follow filenames. Rebuild (or restart
   the dev server) after changing the collection's metadata.
+- A blog post is built only while its frontmatter has `published: true`; without
+  it the post has no page, sidebar entry or writing card. Each published post
+  shows a version history from git (`theme/doc-history.ts`): every commit since
+  the latest one that switched it to published, each rendered as it was at
+  `/blog/history/<slug>/<commit>` with that commit's diff. The history pages are
+  generated into `docs/blog/history/` (gitignored) on every dev start and build,
+  so commits show up after a restart.

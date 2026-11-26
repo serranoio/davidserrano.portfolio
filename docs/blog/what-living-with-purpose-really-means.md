@@ -1,4 +1,5 @@
 ---
+published: true
 slug: what-living-with-purpose-really-means
 title: What Living with Purpose Really Means
 date: 01/15/2025

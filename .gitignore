@@ -36,3 +36,6 @@ feedback_*.md
 
 # Blender autosave backups
 *.blend1
+
+# Generated at build from git history (theme/doc-history.ts)
+docs/blog/history/

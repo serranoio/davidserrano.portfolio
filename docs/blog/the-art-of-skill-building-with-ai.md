@@ -1,4 +1,5 @@
 ---
+published: true
 slug: the-art-of-skill-building-with-ai
 title: How To Build New Skills From 0-1 With AI
 date: 11/15/26

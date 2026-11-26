@@ -1,4 +1,5 @@
 ---
+published: true
 sidebar_position: 1
 slug: intro
 title: Welcome

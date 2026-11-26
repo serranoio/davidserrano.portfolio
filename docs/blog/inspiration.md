@@ -1,4 +1,5 @@
 ---
+published: true
 slug: inspiration
 title: You Inspire Yourself
 tags: [spiritual, self-love, yoga]

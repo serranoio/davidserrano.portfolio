@@ -1,4 +1,5 @@
 ---
+published: true
 slug: the-story-of-christ
 title: What the Story of Christ's Crucifixion Really Means
 date: 11/26/2024

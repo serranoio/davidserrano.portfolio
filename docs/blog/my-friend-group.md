@@ -1,4 +1,5 @@
 ---
+published: true
 slug: my-friend
 title: My Friends
 date: 11/11/26

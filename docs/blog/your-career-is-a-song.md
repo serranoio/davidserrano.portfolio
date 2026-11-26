@@ -1,4 +1,5 @@
 ---
+published: true
 slug: your-career-is-a-song
 title: Your Career Is a Song
 tags: [spiritual, tech, work]

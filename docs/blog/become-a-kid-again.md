@@ -1,4 +1,5 @@
 ---
+published: true
 slug: become-a-kid-again
 title: Become a Kid Again
 tags: [spiritual, self-love]

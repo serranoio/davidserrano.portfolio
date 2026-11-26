@@ -1,4 +1,5 @@
 ---
+published: true
 slug: you-are-limitless
 title: You are limitless
 tags: [spiritual, self-love]

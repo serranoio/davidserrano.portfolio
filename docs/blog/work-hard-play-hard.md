@@ -1,4 +1,5 @@
 ---
+published: true
 slug: work-hard-play-hard
 title: Work Hard Play Hard Sucks A**
 date: 02/26/2025

@@ -8,6 +8,7 @@ import './components/music-player';
 import { createElement, useEffect } from 'react';
 import { Layout as OriginalLayout, type LayoutProps } from '@rspress/core/theme-original';
 import { useSocialPreviewHead } from './social-preview-head';
+import { VersionHistoryBanner, VersionHistoryPanel } from './components/version-history';
 
 // Music player lives at the body level so it survives rspress page nav and
 // keeps playing across routes. Mount exactly one instance.
@@ -28,9 +29,14 @@ if (typeof document !== 'undefined') {
 export * from '@rspress/core/theme-original';
 
 // Every page's head gets its link preview tags (social-preview.ts).
+// Published blog posts get their git version history (doc-history.ts).
 export function Layout(props: LayoutProps) {
   useSocialPreviewHead();
-  return createElement(OriginalLayout, props);
+  return createElement(OriginalLayout, {
+    beforeDocContent: createElement(VersionHistoryBanner),
+    afterOutline: createElement(VersionHistoryPanel),
+    ...props,
+  });
 }
 
 // Home page composes top-level sections vertically. Each section is its

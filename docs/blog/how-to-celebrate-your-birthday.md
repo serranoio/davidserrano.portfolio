@@ -1,4 +1,5 @@
 ---
+published: true
 slug: how-to-celebrate-your-birthday
 title: How To Celebrate Your Birthday
 date: 12/31/2024

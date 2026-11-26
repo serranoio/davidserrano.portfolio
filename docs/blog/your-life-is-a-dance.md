@@ -1,4 +1,5 @@
 ---
+published: true
 slug: your-life-is-a-dance
 title: The Dance of Life
 date: 01/04/2025

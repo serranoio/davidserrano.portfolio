@@ -1,4 +1,5 @@
 ---
+published: true
 slug: how-to-build-fast-in-the-age-of-ai
 title: How To Build From 0-1 in the age of AI
 date: 11/13/26

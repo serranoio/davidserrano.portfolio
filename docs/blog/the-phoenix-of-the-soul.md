@@ -1,4 +1,5 @@
 ---
+published: true
 slug: the-phoenix-of-the-soul
 title: The Phoenix Of The Soul - A Guided Meditation
 tags: [spiritual, meditation]

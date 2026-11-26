@@ -155,17 +155,30 @@ function parseTags(frontmatter: string): BlogTag[] {
     .filter((tag): tag is BlogTag => isBlogTag(tag));
 }
 
+/** A post exists on the site only while its frontmatter says `published: true`. */
+export function isPublished(content: string): boolean {
+  const frontmatter = content.match(FRONTMATTER_RE)?.[1] ?? '';
+  return parseScalar(frontmatter, 'published') === 'true';
+}
+
 function isBlogTag(tag: string): tag is BlogTag {
   return TAG_ORDER.includes(tag as BlogTag);
 }
 
+const BLOG_FILES = fs.readdirSync(BLOG_DIR).filter((file) => /\.(md|mdx)$/.test(file));
+const readBlogFile = (file: string) => fs.readFileSync(path.join(BLOG_DIR, file), 'utf8');
+
+/** Route globs (relative to docs/) for posts not in published mode; they are never built. */
+export const UNPUBLISHED_ROUTES: readonly string[] = BLOG_FILES
+  .filter((file) => !isPublished(readBlogFile(file)))
+  .map((file) => `blog/${file}`);
+
 function readBlogPosts(): BlogPost[] {
-  return fs
-    .readdirSync(BLOG_DIR)
-    .filter((file) => /\.(md|mdx)$/.test(file))
-    .map((file) => {
+  return BLOG_FILES
+    .map((file) => [file, readBlogFile(file)] as const)
+    .filter(([, content]) => isPublished(content))
+    .map(([file, content]) => {
       const slugFromFile = file.replace(/\.(md|mdx)$/, '');
-      const content = fs.readFileSync(path.join(BLOG_DIR, file), 'utf8');
       const frontmatter = content.match(FRONTMATTER_RE)?.[1] ?? '';
       // Rspress routes follow filenames; `slug` frontmatter does not rename them.
       const slug = slugFromFile;

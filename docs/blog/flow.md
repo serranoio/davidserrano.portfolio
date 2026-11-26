@@ -1,4 +1,5 @@
 ---
+published: true
 slug: flow
 title: The Flow State
 date: 12/15/2024

@@ -1,4 +1,5 @@
 ---
+published: true
 slug: imagine-a-world
 title: Imagine A World
 date: 09/14/2025

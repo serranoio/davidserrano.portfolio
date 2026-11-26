@@ -1,4 +1,5 @@
 ---
+published: true
 slug: the-lifelong-conflict
 title: The Lifelong Conflict
 date: 10/27/2024

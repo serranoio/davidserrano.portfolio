@@ -1,4 +1,5 @@
 ---
+published: true
 slug: daily-affirmation
 title: Daily Affirmation
 date: 11/05/2025

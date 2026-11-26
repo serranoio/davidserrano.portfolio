@@ -1,4 +1,5 @@
 ---
+published: true
 slug: the-shield-of-aeneas
 title: The Shield of Aeneas
 date: 11/01/2025

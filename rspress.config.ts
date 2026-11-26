@@ -1,6 +1,10 @@
 import * as path from 'node:path';
 import { defineConfig } from '@rspress/core';
-import { BLOG_POSTS, TAG_ORDER, TAG_LABELS, postsByTag } from './theme/blog-posts';
+import { BLOG_POSTS, TAG_ORDER, TAG_LABELS, UNPUBLISHED_ROUTES, postsByTag } from './theme/blog-posts';
+import { buildDocHistory } from './theme/doc-history';
+
+// Writes docs/blog/history/** (one page per version) before routes are scanned.
+const DOC_HISTORY = buildDocHistory();
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
@@ -8,6 +12,8 @@ export default defineConfig({
   icon: '/serrano-heart.png',
   logo: '/serrano-heart.png',
   logoText: 'David Serrano',
+  // Posts not in published mode are never built: no page, no sidebar entry.
+  route: { exclude: [...UNPUBLISHED_ROUTES] },
   themeConfig: {
     nav: [
       { text: 'Engineering', link: '/engineering' },
@@ -46,6 +52,7 @@ export default defineConfig({
     },
     source: {
       define: {
+        __DOC_HISTORY__: JSON.stringify(DOC_HISTORY),
         __WRITING_CATALOG__: JSON.stringify({
           posts: BLOG_POSTS.filter((post) => post.slug !== 'intro'),
           tags: TAG_ORDER.map((id) => ({ id, label: TAG_LABELS[id] })),
