@@ -620,6 +620,12 @@ export class GoldenRoseElement extends LitElement {
       this.unhighlightPetal(this.hoveredPetalIndex);
       this.hoveredPetalIndex = null;
     }
+
+    // Petals come first; off them, a link in the preface takes the pointer.
+    if (this.hoveredPetalIndex === null && this.renderer) {
+      const overLink = !!this.roseText?.linkAt(this.raycaster);
+      this.renderer.domElement.style.cursor = overLink ? 'pointer' : 'default';
+    }
   }
 
   private setGold(index: number, level: number) {
@@ -972,7 +978,11 @@ export class GoldenRoseElement extends LitElement {
     if (intersects.length > 0) {
       const hitPetal = intersects[0].object as THREE.Mesh;
       this.handlePetalClick(hitPetal.userData.index);
+      return;
     }
+
+    const href = this.roseText?.linkAt(this.raycaster);
+    if (href) window.open(href, '_blank', 'noopener,noreferrer');
   };
 
   private handleTruthNav(direction: 1 | -1) {
@@ -1172,7 +1182,8 @@ export class GoldenRoseElement extends LitElement {
         truthStatement,
         this.bloomCenter,
         readColorToken(this, COLOR_TOKEN.text),
-        TRUTH_SLOT_SPANS
+        TRUTH_SLOT_SPANS,
+        readColorToken(this, COLOR_TOKEN.crimsonLight)
       );
       this.roseText.setMobileLayout(this.coarseQuery?.matches ?? false);
       this.scene.add(this.roseText.group);

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { Text } from 'troika-three-text';
+import { Text, getSelectionRects } from 'troika-three-text';
 // Troika parses fonts itself and cannot read woff2, so the scene text loads
 // the same face the page uses (Cormorant Garamond, light) as a .woff.
 import textFontUrl from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-300-normal.woff';
@@ -34,6 +34,34 @@ const MOBILE_RADIAL_DISTANCE = 1.35;
 // between two paragraphs. It is never drawn.
 const SLOT_MARKER = /^\[\[([\w-]+)\]\]$/;
 
+// A markdown link, `[words](https://…)`, draws as just its words, in the link
+// colour and underlined, and opens its URL when clicked.
+const LINK = /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g;
+// Underline thickness, and its height above the descender line (a selection
+// rect's bottom), as fractions of font size: just under the baseline.
+const UNDERLINE_THICKNESS = 0.05;
+const UNDERLINE_RISE = 0.14;
+
+interface TextLink {
+  start: number;
+  end: number;
+  href: string;
+}
+
+// The words to draw, and where in them each link sits.
+export function parseLinks(paragraph: string): { text: string; links: TextLink[] } {
+  const links: TextLink[] = [];
+  let text = '';
+  let last = 0;
+  for (const match of paragraph.matchAll(LINK)) {
+    text += paragraph.slice(last, match.index);
+    links.push({ start: text.length, end: text.length + match[1].length, href: match[2] });
+    text += match[1];
+    last = match.index + match[0].length;
+  }
+  return { text: text + paragraph.slice(last), links };
+}
+
 // Extra paragraph slots each named marker adds (unknown names add none).
 export type SlotSpans = Readonly<Record<string, number>>;
 
@@ -50,6 +78,9 @@ export interface TruthLayout {
 export class RoseText {
   readonly group: THREE.Group;
   readonly meshes: Text[] = [];
+  private readonly links: TextLink[][] = [];
+  private readonly underlines: THREE.Mesh[][] = [];
+  private readonly underlineMaterial: THREE.MeshBasicMaterial;
 
   // The text orbits the rose, always sitting on the opposite side of the
   // bloom center from the camera. Whole group orbits together so the stack
@@ -70,8 +101,14 @@ export class RoseText {
   // returns this field instead of round-tripping through Troika.
   private lastOpacity = 1;
 
-  // `color` is the resolved text colour token (any CSS colour string).
-  constructor(body: string, bloomCenter: THREE.Vector3, color: string, slotSpans: SlotSpans = {}) {
+  // `color` and `linkColor` are resolved colour tokens (any CSS colour string).
+  constructor(
+    body: string,
+    bloomCenter: THREE.Vector3,
+    color: string,
+    slotSpans: SlotSpans = {},
+    linkColor: string = color
+  ) {
     if (typeof body !== 'string') {
       throw new TypeError(
         `RoseText requires a string body, got ${typeof body}. ` +
@@ -82,10 +119,28 @@ export class RoseText {
     this.layout = RoseText.layout(body, slotSpans);
     const { paragraphs } = this.layout;
     this.group = new THREE.Group();
+    this.underlineMaterial = new THREE.MeshBasicMaterial({
+      color: linkColor,
+      transparent: true,
+      opacity: TEXT_OPACITY,
+      toneMapped: false,
+      depthWrite: false,
+    });
 
     paragraphs.forEach((paragraph, index) => {
+      const { text: words, links } = parseLinks(paragraph);
       const text = new Text();
-      text.text = paragraph;
+      text.text = words;
+      // Troika leaves characters before the first range uncoloured (black), so
+      // the ranges must start at 0 in the text colour.
+      text.colorRanges = links.length
+        ? Object.fromEntries([
+            [0, color],
+            ...links.flatMap((link) => [[link.start, linkColor], [link.end, color]]),
+          ])
+        : null;
+      this.links.push(links);
+      this.underlines.push([]);
       text.fontSize = TEXT_FONT_SIZE;
       text.lineHeight = TEXT_LINE_HEIGHT;
       text.maxWidth = TEXT_MAX_WIDTH;
@@ -106,8 +161,8 @@ export class RoseText {
       // Stack each paragraph downward along local Y. Paragraph 0 sits at the
       // top of the stack so the first paragraph is what the user sees first.
       text.position.y = -this.layout.positions[index] * PARAGRAPH_SPACING;
-      text.sync();
       this.meshes.push(text);
+      this.syncMesh(index);
       this.group.add(text);
     });
 
@@ -144,7 +199,59 @@ export class RoseText {
       material.opacity = TEXT_OPACITY * opacity;
       mesh.visible = opacity > 0.001;
     }
+    this.underlineMaterial.opacity = TEXT_OPACITY * opacity;
     this.lastOpacity = opacity;
+  }
+
+  // Lays the paragraph out again, then redraws its link underlines to match.
+  private syncMesh(index: number) {
+    const mesh = this.meshes[index];
+    mesh.sync(() => {
+      for (const line of this.underlines[index]) {
+        mesh.remove(line);
+        line.geometry.dispose();
+      }
+      this.underlines[index] = [];
+      const info = mesh.textRenderInfo;
+      if (!info) return;
+      for (const link of this.links[index]) {
+        for (const rect of getSelectionRects(info, link.start, link.end)) {
+          const thickness = mesh.fontSize * UNDERLINE_THICKNESS;
+          const line = new THREE.Mesh(
+            new THREE.PlaneGeometry(rect.right - rect.left, thickness),
+            this.underlineMaterial
+          );
+          line.position.set((rect.left + rect.right) / 2, rect.bottom + mesh.fontSize * UNDERLINE_RISE, 0);
+          line.frustumCulled = false;
+          // Never in the way of a click: the link is hit-tested on the text itself.
+          line.raycast = () => {};
+          mesh.add(line);
+          this.underlines[index].push(line);
+        }
+      }
+    });
+  }
+
+  // The URL of the link under the ray, or null. Only while the words are showing.
+  linkAt(raycaster: THREE.Raycaster): string | null {
+    if (this.lastOpacity <= 0.001) return null;
+    const local = new THREE.Vector3();
+    for (let index = 0; index < this.meshes.length; index++) {
+      const links = this.links[index];
+      const mesh = this.meshes[index];
+      const info = mesh.textRenderInfo;
+      if (links.length === 0 || !info) continue;
+      const hit = raycaster.intersectObject(mesh, false)[0];
+      if (!hit) continue;
+      mesh.worldToLocal(local.copy(hit.point));
+      for (const link of links) {
+        const inside = getSelectionRects(info, link.start, link.end).some(
+          (rect) => local.x >= rect.left && local.x <= rect.right && local.y >= rect.bottom && local.y <= rect.top
+        );
+        if (inside) return link.href;
+      }
+    }
+    return null;
   }
 
   setScrollProgress(progress: number) {
@@ -163,7 +270,7 @@ export class RoseText {
       mesh.lineHeight = enabled ? MOBILE_TEXT_LINE_HEIGHT : TEXT_LINE_HEIGHT;
       mesh.maxWidth = enabled ? MOBILE_TEXT_MAX_WIDTH : TEXT_MAX_WIDTH;
       mesh.position.y = -this.layout.positions[index] * this.paragraphSpacing;
-      mesh.sync();
+      this.syncMesh(index);
     });
   }
 
@@ -279,6 +386,8 @@ export class RoseText {
       mesh.dispose();
       (mesh.material as THREE.Material).dispose();
     }
+    for (const line of this.underlines.flat()) line.geometry.dispose();
+    this.underlineMaterial.dispose();
     this.meshes.length = 0;
     if (this.group.parent) this.group.parent.remove(this.group);
   }

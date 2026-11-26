@@ -44,9 +44,23 @@ declare module 'troika-three-text' {
     outlineWidth: number | string;
     outlineColor: ColorRepresentation;
     outlineOpacity: number;
+    /** Character index → colour from that character on. */
+    colorRanges: Record<number, ColorRepresentation> | null;
+    readonly textRenderInfo: TextRenderInfo | null;
     sync(callback?: () => void): void;
     dispose(): void;
   }
+  export interface TextRenderInfo {
+    blockBounds: [number, number, number, number];
+  }
+  export interface SelectionRect {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+  }
+  /** The rects covering characters [start, end), in the mesh's local space. */
+  export function getSelectionRects(info: TextRenderInfo, start: number, end: number): SelectionRect[];
 }
 
 interface ImportMetaEnv {
