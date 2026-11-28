@@ -2,7 +2,7 @@
 published: true
 slug: inspiration
 title: You Inspire Yourself
-tags: [spiritual, self-love, yoga]
+tags: [spiritual, self-love, yoga, intentin]
 ---
 
 My manager told me that there's a new rule in place.
